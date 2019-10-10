@@ -50,14 +50,6 @@ class WFPlayer extends Emitter {
         this.options = {};
         this.setOptions(options);
 
-        if (typeof this.options.container === 'string') {
-            this.options.container = document.querySelector(this.options.container);
-        }
-
-        if (this.options.mediaElement && typeof this.options.mediaElement === 'string') {
-            this.options.mediaElement = document.querySelector(this.options.mediaElement);
-        }
-
         this.events = new Events(this);
         this.drawer = new Drawer(this);
 
@@ -67,6 +59,14 @@ class WFPlayer extends Emitter {
     }
 
     setOptions(options) {
+        if (typeof options.container === 'string') {
+            options.container = document.querySelector(options.container);
+        }
+
+        if (options.mediaElement === 'string') {
+            options.mediaElement = document.querySelector(options.mediaElement);
+        }
+
         this.options = validator(
             {
                 ...WFPlayer.default,
@@ -81,10 +81,12 @@ class WFPlayer extends Emitter {
 
     seek(time) {
         this.drawer.seek(time);
+        return this;
     }
 
     destroy() {
         this.events.destroy();
+        return this;
     }
 }
 
