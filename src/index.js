@@ -1,6 +1,7 @@
 import validator from 'option-validator';
 import Emitter from './emitter';
 import Events from './events';
+import Template from './template';
 import Drawer from './drawer';
 
 let id = 0;
@@ -51,6 +52,7 @@ class WFPlayer extends Emitter {
         this.setOptions(options);
 
         this.events = new Events(this);
+        this.template = new Template(this);
         this.drawer = new Drawer(this);
 
         id += 1;
