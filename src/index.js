@@ -31,6 +31,9 @@ class WFPlayer extends Emitter {
             ruler: true,
             rulerColor: '#fff',
             pixelRatio: window.devicePixelRatio,
+            withCredentials: false,
+            cors: false,
+            headers: {},
         };
     }
 
@@ -49,6 +52,9 @@ class WFPlayer extends Emitter {
             ruler: 'boolean',
             rulerColor: 'string',
             pixelRatio: 'number',
+            withCredentials: 'boolean',
+            cors: 'boolean',
+            headers: 'object',
         };
     }
 
@@ -94,10 +100,10 @@ class WFPlayer extends Emitter {
     load(target) {
         if (target instanceof HTMLVideoElement || target instanceof HTMLAudioElement) {
             this.options.mediaElement = target;
-            this.loader.load(target.src);
-        } else {
-            this.loader.load(target);
+            target = target.src;
         }
+
+        this.loader.load(target);
         return this;
     }
 

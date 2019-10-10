@@ -363,6 +363,9 @@
 
     return condition;
   }
+  function checkReadableStream() {
+    return typeof window.ReadableStream === 'function' && typeof window.Response === 'function' && Object.prototype.hasOwnProperty.call(window.Response.prototype, 'body');
+  }
 
   var Template =
   /*#__PURE__*/
@@ -489,11 +492,133 @@
     this.wf = wf;
   };
 
-  var Request = function Request(wf) {
-    classCallCheck(this, Request);
+  var Loader =
+  /*#__PURE__*/
+  function () {
+    function Loader(wf) {
+      classCallCheck(this, Loader);
 
-    this.wf = wf;
-  };
+      this.wf = wf;
+      this.fileSize = 0;
+      this.reader = null;
+    }
+
+    createClass(Loader, [{
+      key: "load",
+      value: function load(target) {
+        this.destroy();
+        var targetType = optionValidator.kindOf(target);
+
+        if (targetType === 'string') {
+          if (checkReadableStream()) {
+            this.loadFromSteam(target);
+          } else {
+            this.loadFromUrl(target);
+          }
+        } else if (targetType === 'Blob' || targetType === 'File') {
+          this.loadFromFile(target);
+        } else {
+          errorHandle(false, "This format is not supported: ".concat(targetType));
+        }
+      }
+    }, {
+      key: "loadFromSteam",
+      value: function loadFromSteam(url) {
+        var _this$wf$options = this.wf.options,
+            withCredentials = _this$wf$options.withCredentials,
+            cors = _this$wf$options.cors,
+            headers = _this$wf$options.headers;
+        var self = this;
+        this.wf.emit('loadStart');
+        return fetch(url, {
+          credentials: withCredentials ? 'include' : 'omit',
+          mode: cors ? 'cors' : 'no-cors',
+          headers: headers
+        }).then(function (response) {
+          self.reader = response.body.getReader();
+          return function read() {
+            return self.reader.read().then(function (_ref) {
+              var done = _ref.done,
+                  value = _ref.value;
+
+              if (done) {
+                self.wf.emit('loadEnd');
+                return self.reader;
+              }
+
+              var uint8 = new Uint8Array(value);
+              self.fileSize += uint8.byteLength;
+              self.wf.emit('loading', uint8);
+              return read();
+            });
+          }();
+        });
+      }
+    }, {
+      key: "loadFromUrl",
+      value: function loadFromUrl(url) {
+        var _this = this;
+
+        this.reader = new AbortController();
+        var _this$wf$options2 = this.wf.options,
+            withCredentials = _this$wf$options2.withCredentials,
+            cors = _this$wf$options2.cors,
+            headers = _this$wf$options2.headers;
+        this.wf.emit('loadStart');
+        return fetch(url, {
+          credentials: withCredentials ? 'include' : 'omit',
+          mode: cors ? 'cors' : 'no-cors',
+          headers: headers,
+          signal: this.reader.signal
+        }).then(function (response) {
+          return response.arrayBuffer();
+        }).then(function (arrayBuffer) {
+          _this.fileSize = arrayBuffer.byteLength;
+
+          _this.wf.emit('loading', new Uint8Array(arrayBuffer));
+
+          _this.wf.emit('loadEnd');
+        });
+      }
+    }, {
+      key: "loadFromFile",
+      value: function loadFromFile(file) {
+        var _this2 = this;
+
+        var proxy = this.wf.events.proxy;
+        this.reader = new FileReader();
+        proxy(this.reader, 'load', function (e) {
+          var uint8 = new Uint8Array(e.target.result);
+          _this2.fileSize = uint8.byteLength;
+
+          _this2.wf.emit('loading', uint8);
+
+          _this2.wf.emit('loadEnd');
+        });
+        this.wf.emit('loadStart');
+        this.reader.readAsArrayBuffer(file);
+      }
+    }, {
+      key: "destroy",
+      value: function destroy() {
+        this.fileSize = 0;
+
+        if (this.reader) {
+          if (this.reader.cancel) {
+            this.reader.cancel();
+          }
+
+          if (this.reader.abort) {
+            this.reader.abort();
+          }
+
+          this.reader = null;
+        }
+      }
+    }]);
+
+    return Loader;
+  }();
 
   function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
@@ -531,7 +656,10 @@
           gridColor: '#fff',
           ruler: true,
           rulerColor: '#fff',
-          pixelRatio: window.devicePixelRatio
+          pixelRatio: window.devicePixelRatio,
+          withCredentials: false,
+          cors: false,
+          headers: {}
         };
       }
     }, {
@@ -550,7 +678,10 @@
           gridColor: 'string',
           ruler: 'boolean',
           rulerColor: 'string',
-          pixelRatio: 'number'
+          pixelRatio: 'number',
+          withCredentials: 'boolean',
+          cors: 'boolean',
+          headers: 'object'
         };
       }
     }]);
@@ -572,7 +703,7 @@
       _this.template = new Template(assertThisInitialized(_this));
       _this.drawer = new Drawer(assertThisInitialized(_this));
       _this.decoder = new Decoder(assertThisInitialized(_this));
-      _this.loader = new Request(assertThisInitialized(_this));
+      _this.loader = new Loader(assertThisInitialized(_this));
       id += 1;
       _this.id = id;
       WFPlayer.instances.push(assertThisInitialized(_this));
@@ -598,11 +729,10 @@
       value: function load(target) {
         if (target instanceof HTMLVideoElement || target instanceof HTMLAudioElement) {
           this.options.mediaElement = target;
-          this.loader.load(target.src);
-        } else {
-          this.loader.load(target);
+          target = target.src;
         }
 
+        this.loader.load(target);
         return this;
       }
     }, {
