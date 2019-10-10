@@ -3,6 +3,8 @@ import Emitter from './emitter';
 import Events from './events';
 import Template from './template';
 import Drawer from './drawer';
+import Decoder from './decoder';
+import Loader from './loader';
 
 let id = 0;
 class WFPlayer extends Emitter {
@@ -26,13 +28,15 @@ class WFPlayer extends Emitter {
             progressColor: '#fff',
             grid: true,
             gridColor: '#fff',
+            ruler: true,
+            rulerColor: '#fff',
             pixelRatio: window.devicePixelRatio,
         };
     }
 
     static get scheme() {
         return {
-            container: 'string|HTMLDivElement',
+            container: 'string|htmlelement',
             mediaElement: 'string|HTMLVideoElement|HTMLAudioElement',
             waveColor: 'string',
             backgroundColor: 'string',
@@ -42,18 +46,24 @@ class WFPlayer extends Emitter {
             progressColor: 'string',
             grid: 'boolean',
             gridColor: 'string',
+            ruler: 'boolean',
+            rulerColor: 'string',
             pixelRatio: 'number',
         };
     }
 
     constructor(options = {}) {
         super();
+
+        this.destroy = false;
         this.options = {};
         this.setOptions(options);
 
         this.events = new Events(this);
         this.template = new Template(this);
         this.drawer = new Drawer(this);
+        this.decoder = new Decoder(this);
+        this.loader = new Loader(this);
 
         id += 1;
         this.id = id;
@@ -81,18 +91,31 @@ class WFPlayer extends Emitter {
         return this;
     }
 
+    load(target) {
+        if (target instanceof HTMLVideoElement || target instanceof HTMLAudioElement) {
+            this.options.mediaElement = target;
+            this.loader.load(target.src);
+        } else {
+            this.loader.load(target);
+        }
+        return this;
+    }
+
     seek(time) {
         this.drawer.seek(time);
         return this;
     }
 
-    zoom(scale) {
-        this.drawer.zoom(scale);
+    zoom(scale, startTime) {
+        this.drawer.zoom(scale, startTime);
         return this;
     }
 
     destroy() {
+        this.destroy = true;
+        this.template.destroy();
         this.events.destroy();
+        this.loader.destroy();
         return this;
     }
 }
