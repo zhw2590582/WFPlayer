@@ -86,6 +86,11 @@ class WFPlayer extends Emitter {
         return this;
     }
 
+    zoom(scale) {
+        this.drawer.zoom(scale);
+        return this;
+    }
+
     destroy() {
         this.events.destroy();
         return this;
