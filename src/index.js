@@ -4,17 +4,6 @@ import Events from './events';
 
 let id = 0;
 class WFPlayer extends Emitter {
-    constructor(options = {}) {
-        super();
-        this.setOptions(options);
-
-        this.events = new Events(this);
-
-        id += 1;
-        this.id = id;
-        WFPlayer.instances.push(this);
-    }
-
     static get version() {
         return '__VERSION__';
     }
@@ -31,6 +20,17 @@ class WFPlayer extends Emitter {
         return {};
     }
 
+    constructor(options = {}) {
+        super();
+        this.setOptions(options);
+
+        this.events = new Events(this);
+
+        id += 1;
+        this.id = id;
+        WFPlayer.instances.push(this);
+    }
+
     setOptions(options) {
         this.options = validator(
             {
@@ -39,6 +39,8 @@ class WFPlayer extends Emitter {
             },
             WFPlayer.scheme,
         );
+
+        return this;
     }
 
     destroy() {
