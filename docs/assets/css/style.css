@@ -1,0 +1,54 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body,
+.container {
+    height: 100%;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    color: #ccc;
+    background: rgb(28, 32, 26);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 50px;
+    border-bottom: 1px solid rgb(10, 10, 10);
+    background-color: rgb(28, 32, 34);
+}
+
+.main {
+    display: flex;
+    flex: 1;
+}
+
+.main .left {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    border-right: 1px solid rgb(10, 10, 10);
+}
+
+.main .right {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.waveform {
+    position: relative;
+    display: flex;
+    height: 200px;
+    background-color: rgb(28, 32, 34);
+    border-top: 1px solid rgb(10, 10, 10);
+}

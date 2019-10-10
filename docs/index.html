@@ -3,13 +3,48 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>WFPlayer.js</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="WFPlayer.js is an audio waveform generator" />
+    <meta name="keywords" content="WFPlayer, audio, waveform, generator" />
+    <link rel="shortcut icon" href="./assets/img/favicon.ico" />
+    <link rel="stylesheet" href="./assets/css/normalize.css" />
+    <link rel="stylesheet" href="./assets/css/style.css" />
 </head>
 
 <body>
+    <div class="container">
+        <header class="header">
 
+        </header>
+        <section class="main">
+            <div class="left"></div>
+            <div class="right"></div>
+        </section>
+        <footer class="waveform">
+
+        </footer>
+    </div>
+    <script src="./uncompiled/wfplayer.js"></script>
+    <script src="./assets/js/index.js"></script>
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var isLocalhost = Boolean(
+                window.location.hostname === 'localhost' ||
+                window.location.hostname === '[::1]' ||
+                window.location.hostname.match(
+                    /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/
+                )
+            );
+            if (!isLocalhost) {
+                var hm = document.createElement('script');
+                hm.src = 'https://hm.baidu.com/hm.js?b6c9b8bafbf5fe7225160101dafbbc7d';
+                var s = document.getElementsByTagName('script')[0];
+                s.parentNode.insertBefore(hm, s);
+            }
+        })();
+    </script>
 </body>
 
 </html>
