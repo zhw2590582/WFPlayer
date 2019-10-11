@@ -78,9 +78,9 @@ class WFPlayer extends Emitter {
 
         this.events = new Events(this);
         this.template = new Template(this);
+        this.decoder = new Decoder(this);
         this.drawer = new Drawer(this);
         this.controller = new Controller(this);
-        this.decoder = new Decoder(this);
         this.loader = new Loader(this);
 
         id += 1;

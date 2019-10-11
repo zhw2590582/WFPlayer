@@ -3,9 +3,8 @@ import { throttle } from './utils';
 export default class Decoder {
     constructor(wf) {
         this.wf = wf;
-        this.ready = false;
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        this.throttleDecodeAudioData = throttle(this.decodeAudioData, 1000);
+        this.throttleDecodeAudioData = throttle(this.decodeAudioData, 100);
         this.audiobuffer = this.audioCtx.createBuffer(2, 22050, 44100);
         this.channelData = new Float32Array();
 
@@ -19,7 +18,6 @@ export default class Decoder {
         this.audioCtx.decodeAudioData(uint8.buffer, audiobuffer => {
             this.audiobuffer = audiobuffer;
             this.channelData = audiobuffer.getChannelData(channel);
-            this.ready = true;
             this.wf.emit('channelData', this.channelData);
         });
     }

@@ -8,6 +8,10 @@ export default class Drawer {
         this.wf.on('options', () => {
             this.update();
         });
+
+        this.wf.on('channelData', () => {
+            this.update();
+        });
     }
 
     update() {
@@ -22,9 +26,7 @@ export default class Drawer {
         if (ruler) {
             this.updateRuler(ctx);
         }
-        if (this.wf.decoder && this.wf.decoder.ready) {
-            this.updateWave(ctx);
-        }
+        this.updateWave(ctx);
         if (cursor) {
             this.updateCursor(ctx);
         }
@@ -53,7 +55,7 @@ export default class Drawer {
             let min = 1.0;
             let max = -1.0;
             for (let j = startIndex; j < step; j += 1) {
-                const datum = channelData[i * step + j];
+                const datum = channelData[i * step + j] || 0;
                 if (datum < min) {
                     min = datum;
                 } else if (datum > max) {
@@ -114,9 +116,5 @@ export default class Drawer {
             pixelRatio,
             ctx.canvas.height,
         );
-    }
-
-    updateProgress(ctx) {
-        const { progressColor } = this.wf.options;
     }
 }

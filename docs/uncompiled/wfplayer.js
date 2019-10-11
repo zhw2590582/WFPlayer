@@ -516,6 +516,9 @@
       this.wf.on('options', function () {
         _this.update();
       });
+      this.wf.on('channelData', function () {
+        _this.update();
+      });
     }
 
     createClass(Drawer, [{
@@ -538,9 +541,7 @@
           this.updateRuler(ctx);
         }
 
-        if (this.wf.decoder && this.wf.decoder.ready) {
-          this.updateWave(ctx);
-        }
+        this.updateWave(ctx);
 
         if (cursor) {
           this.updateCursor(ctx);
@@ -578,7 +579,7 @@
           var max = -1.0;
 
           for (var j = startIndex; j < step; j += 1) {
-            var datum = channelData[i * step + j];
+            var datum = channelData[i * step + j] || 0;
 
             if (datum < min) {
               min = datum;
@@ -652,11 +653,6 @@
         var beginTime = Math.floor(this.wf.currentTime / perDuration) * 10;
         ctx.fillRect(padding * gridGap + (this.wf.currentTime - beginTime) * gridGap * 10, 0, pixelRatio, ctx.canvas.height);
       }
-    }, {
-      key: "updateProgress",
-      value: function updateProgress(ctx) {
-        var progressColor = this.wf.options.progressColor;
-      }
     }]);
 
     return Drawer;
@@ -671,9 +667,8 @@
       classCallCheck(this, Decoder);
 
       this.wf = wf;
-      this.ready = false;
       this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      this.throttleDecodeAudioData = throttle(this.decodeAudioData, 1000);
+      this.throttleDecodeAudioData = throttle(this.decodeAudioData, 100);
       this.audiobuffer = this.audioCtx.createBuffer(2, 22050, 44100);
       this.channelData = new Float32Array();
       this.wf.on('loading', function (uint8) {
@@ -690,7 +685,6 @@
         this.audioCtx.decodeAudioData(uint8.buffer, function (audiobuffer) {
           _this2.audiobuffer = audiobuffer;
           _this2.channelData = audiobuffer.getChannelData(channel);
-          _this2.ready = true;
 
           _this2.wf.emit('channelData', _this2.channelData);
         });
@@ -1035,9 +1029,9 @@
 
       _this.events = new Events(assertThisInitialized(_this));
       _this.template = new Template(assertThisInitialized(_this));
+      _this.decoder = new Decoder(assertThisInitialized(_this));
       _this.drawer = new Drawer(assertThisInitialized(_this));
       _this.controller = new Controller(assertThisInitialized(_this));
-      _this.decoder = new Decoder(assertThisInitialized(_this));
       _this.loader = new Loader(assertThisInitialized(_this));
       id += 1;
       _this.id = id;
