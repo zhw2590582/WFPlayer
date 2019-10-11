@@ -339,6 +339,50 @@
   module.exports = _wrapNativeSuper;
   });
 
+  var durationTimeConversion = createCommonjsModule(function (module, exports) {
+  (function(global, factory) {
+     (module.exports = factory())
+      ;
+  })(commonjsGlobal, function() {
+    function checkTime(time) {
+      return /^(\d+):([0-5][0-9]):([0-5][0-9])(\.\d{3})?$/.test(time);
+    }
+
+    function checkDuration(duration) {
+      duration = String(duration);
+      return /^(\d+)(\.\d{1,3})?$/.test(duration);
+    }
+
+    return {
+      d2t: function(duration) {
+        if (checkDuration(duration)) {
+          var date = new Date(null);
+          var arr = String(duration).split(".");
+          var s = arr[0];
+          var ms = arr[1] ? arr[1].padEnd(3, 0) : 0;
+          date.setSeconds(Number(s));
+          date.setMilliseconds(Number(ms));
+          return date.toISOString().substr(11, 12);
+        } else {
+          throw new Error("The format of the duration is incorrect: " + duration);
+        }
+      },
+      t2d: function(time) {
+        if (checkTime(time)) {
+          var arr = time.split(".")[0].split(":");
+          var ms = Number(time.split(".")[1] || 0) / 1000;
+          var h = Number(arr[0]) * 3600;
+          var m = Number(arr[1]) * 60;
+          var s = Number(arr[2]);
+          return h + m + s + ms;
+        } else {
+          throw new Error("The format of the time is incorrect: " + time);
+        }
+      }
+    };
+  });
+  });
+
   var WFPlayerError =
   /*#__PURE__*/
   function (_Error) {
@@ -362,6 +406,10 @@
     }
 
     return condition;
+  }
+  function durationToTime() {
+    var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    return durationTimeConversion.d2t(duration.toFixed(3));
   }
   function checkReadableStream() {
     return typeof window.ReadableStream === 'function' && typeof window.Response === 'function' && Object.prototype.hasOwnProperty.call(window.Response.prototype, 'body');
@@ -453,14 +501,10 @@
   /*#__PURE__*/
   function () {
     function Drawer(wf) {
-      var _this = this;
-
       classCallCheck(this, Drawer);
 
       this.wf = wf;
-      this.wf.on('peaks', function (peaks) {
-        _this.update(peaks);
-      });
+      this.update();
     }
 
     createClass(Drawer, [{
@@ -483,33 +527,60 @@
         if (ruler) {
           this.updateRuler(ctx);
         }
-
-        this.updateWave(ctx);
-
-        if (progress) {
-          this.updateProgress(ctx);
-        }
-
-        if (cursor) {
-          this.updateCursor(ctx);
-        }
       }
     }, {
       key: "updateBackground",
       value: function updateBackground(ctx) {
         var backgroundColor = this.wf.options.backgroundColor;
         ctx.fillStyle = backgroundColor;
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.width);
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       }
     }, {
       key: "updateGrid",
       value: function updateGrid(ctx) {
-        var gridColor = this.wf.options.gridColor;
+        var _this$wf$options2 = this.wf.options,
+            gridColor = _this$wf$options2.gridColor,
+            perDuration = _this$wf$options2.perDuration,
+            pixelRatio = _this$wf$options2.pixelRatio,
+            padding = _this$wf$options2.padding;
+        ctx.fillStyle = gridColor;
+        var gridNum = perDuration * 10 + padding * 2;
+        var gridGap = ctx.canvas.width / gridNum;
+
+        for (var index = 0; index < gridNum; index += 1) {
+          ctx.fillRect(gridGap * index, 0, pixelRatio, ctx.canvas.height);
+        }
+
+        for (var _index = 0; _index < ctx.canvas.height / gridGap; _index += 1) {
+          ctx.fillRect(0, gridGap * _index, ctx.canvas.width, pixelRatio);
+        }
       }
     }, {
       key: "updateRuler",
       value: function updateRuler(ctx) {
-        var rulerColor = this.wf.options.rulerColor;
+        var _this$wf$options3 = this.wf.options,
+            rulerColor = _this$wf$options3.rulerColor,
+            perDuration = _this$wf$options3.perDuration,
+            pixelRatio = _this$wf$options3.pixelRatio,
+            padding = _this$wf$options3.padding,
+            rulerAtTop = _this$wf$options3.rulerAtTop;
+        var ruler = -1;
+        ctx.font = "".concat(11 * pixelRatio, "px Arial");
+        ctx.fillStyle = rulerColor;
+        var gridNum = perDuration * 10 + padding * 2;
+        var gridGap = ctx.canvas.width / gridNum;
+        var beginTime = Math.floor(this.wf.currentTime / perDuration) * 10;
+        var height = ctx.canvas.height;
+
+        for (var index = 0; index < gridNum; index += 1) {
+          if ((index - padding) % 10 === 0) {
+            ruler += 1;
+            ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - gridGap, pixelRatio, gridGap);
+            ctx.fillText(durationToTime(beginTime + ruler).split('.')[0], gridGap * index - 22 * pixelRatio, rulerAtTop ? gridGap * 2 : height - gridGap * 2 + 11);
+          } else if ((index - padding) % 5 === 0) {
+            ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - gridGap / 2, pixelRatio, gridGap / 2);
+          }
+        }
       }
     }, {
       key: "updateProgress",
@@ -721,6 +792,12 @@
     return Loader;
   }();
 
+  var Controller = function Controller(wf) {
+    classCallCheck(this, Controller);
+
+    this.wf = wf;
+  };
+
   function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
   function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -748,21 +825,24 @@
           container: '#wfplayer',
           mediaElement: '',
           waveColor: '#fff',
-          backgroundColor: '#000',
+          backgroundColor: 'rgb(28, 32, 34)',
           cursor: true,
           cursorColor: '#fff',
           progress: true,
           progressColor: '#fff',
           grid: true,
-          gridColor: '#fff',
+          gridColor: 'rgba(255, 255, 255, 0.05)',
           ruler: true,
-          rulerColor: '#fff',
+          rulerColor: 'rgba(255, 255, 255, 0.5)',
+          rulerAtTop: true,
           pixelRatio: window.devicePixelRatio,
           zoom: 1,
           withCredentials: false,
           cors: false,
           headers: {},
-          channel: 0
+          channel: 0,
+          perDuration: 10,
+          padding: 5
         };
       }
     }, {
@@ -781,12 +861,15 @@
           gridColor: 'string',
           ruler: 'boolean',
           rulerColor: 'string',
+          rulerAtTop: 'boolean',
           pixelRatio: 'number',
           zoom: 'number',
           withCredentials: 'boolean',
           cors: 'boolean',
           headers: 'object',
-          channel: 'number'
+          channel: 'number',
+          perDuration: 'number',
+          padding: 'number'
         };
       }
     }]);
@@ -807,6 +890,7 @@
       _this.events = new Events(assertThisInitialized(_this));
       _this.template = new Template(assertThisInitialized(_this));
       _this.drawer = new Drawer(assertThisInitialized(_this));
+      _this.controller = new Controller(assertThisInitialized(_this));
       _this.decoder = new Decoder(assertThisInitialized(_this));
       _this.loader = new Loader(assertThisInitialized(_this));
       id += 1;
@@ -827,6 +911,7 @@
         }
 
         this.options = optionValidator(_objectSpread({}, WFPlayer.default, {}, this.options, {}, options), WFPlayer.scheme);
+        this.emit('options', this.options);
         return this;
       }
     }, {
@@ -865,9 +950,15 @@
         this.events.destroy();
         this.template.destroy();
         this.drawer.destroy();
+        this.controller.destroy();
         this.decoder.destroy();
         this.loader.destroy();
         WFPlayer.instances.splice(WFPlayer.instances.indexOf(this), 1);
+      }
+    }, {
+      key: "currentTime",
+      get: function get() {
+        return this.options.mediaElement ? this.options.mediaElement.currentTime : 0;
       }
     }]);
 

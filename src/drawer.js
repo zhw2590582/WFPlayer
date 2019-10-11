@@ -1,9 +1,9 @@
+import { durationToTime } from './utils';
+
 export default class Drawer {
     constructor(wf) {
         this.wf = wf;
-        this.wf.on('peaks', peaks => {
-            this.update(peaks);
-        });
+        this.update();
     }
 
     update() {
@@ -18,27 +18,49 @@ export default class Drawer {
         if (ruler) {
             this.updateRuler(ctx);
         }
-        this.updateWave(ctx);
-        if (progress) {
-            this.updateProgress(ctx);
-        }
-        if (cursor) {
-            this.updateCursor(ctx);
-        }
     }
 
     updateBackground(ctx) {
         const { backgroundColor } = this.wf.options;
         ctx.fillStyle = backgroundColor;
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.width);
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     }
 
     updateGrid(ctx) {
-        const { gridColor } = this.wf.options;
+        const { gridColor, perDuration, pixelRatio, padding } = this.wf.options;
+        ctx.fillStyle = gridColor;
+        const gridNum = perDuration * 10 + padding * 2;
+        const gridGap = ctx.canvas.width / gridNum;
+        for (let index = 0; index < gridNum; index += 1) {
+            ctx.fillRect(gridGap * index, 0, pixelRatio, ctx.canvas.height);
+        }
+        for (let index = 0; index < ctx.canvas.height / gridGap; index += 1) {
+            ctx.fillRect(0, gridGap * index, ctx.canvas.width, pixelRatio);
+        }
     }
 
     updateRuler(ctx) {
-        const { rulerColor } = this.wf.options;
+        const { rulerColor, perDuration, pixelRatio, padding, rulerAtTop } = this.wf.options;
+        let ruler = -1;
+        ctx.font = `${11 * pixelRatio}px Arial`;
+        ctx.fillStyle = rulerColor;
+        const gridNum = perDuration * 10 + padding * 2;
+        const gridGap = ctx.canvas.width / gridNum;
+        const beginTime = Math.floor(this.wf.currentTime / perDuration) * 10;
+        const { height } = ctx.canvas;
+        for (let index = 0; index < gridNum; index += 1) {
+            if ((index - padding) % 10 === 0) {
+                ruler += 1;
+                ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - gridGap, pixelRatio, gridGap);
+                ctx.fillText(
+                    durationToTime(beginTime + ruler).split('.')[0],
+                    gridGap * index - 22 * pixelRatio,
+                    rulerAtTop ? gridGap * 2 : height - gridGap * 2 + 11,
+                );
+            } else if ((index - padding) % 5 === 0) {
+                ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - gridGap / 2, pixelRatio, gridGap / 2);
+            }
+        }
     }
 
     updateProgress(ctx) {

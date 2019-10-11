@@ -1,3 +1,5 @@
+import DT from 'duration-time-conversion';
+
 export class WFPlayerError extends Error {
     constructor(message) {
         super(message);
@@ -10,6 +12,14 @@ export function errorHandle(condition, msg) {
         throw new WFPlayerError(msg);
     }
     return condition;
+}
+
+export function durationToTime(duration = 0) {
+    return DT.d2t(duration.toFixed(3));
+}
+
+export function timeToDuration(time) {
+    return DT.t2d(time);
 }
 
 export function checkReadableStream() {

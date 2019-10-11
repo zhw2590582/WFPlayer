@@ -5,6 +5,7 @@ import Template from './template';
 import Drawer from './drawer';
 import Decoder from './decoder';
 import Loader from './loader';
+import Controller from './controller';
 
 let id = 0;
 class WFPlayer extends Emitter {
@@ -21,21 +22,24 @@ class WFPlayer extends Emitter {
             container: '#wfplayer',
             mediaElement: '',
             waveColor: '#fff',
-            backgroundColor: '#000',
+            backgroundColor: 'rgb(28, 32, 34)',
             cursor: true,
             cursorColor: '#fff',
             progress: true,
             progressColor: '#fff',
             grid: true,
-            gridColor: '#fff',
+            gridColor: 'rgba(255, 255, 255, 0.05)',
             ruler: true,
-            rulerColor: '#fff',
+            rulerColor: 'rgba(255, 255, 255, 0.5)',
+            rulerAtTop: true,
             pixelRatio: window.devicePixelRatio,
             zoom: 1,
             withCredentials: false,
             cors: false,
             headers: {},
             channel: 0,
+            perDuration: 10,
+            padding: 5,
         };
     }
 
@@ -53,12 +57,15 @@ class WFPlayer extends Emitter {
             gridColor: 'string',
             ruler: 'boolean',
             rulerColor: 'string',
+            rulerAtTop: 'boolean',
             pixelRatio: 'number',
             zoom: 'number',
             withCredentials: 'boolean',
             cors: 'boolean',
             headers: 'object',
             channel: 'number',
+            perDuration: 'number',
+            padding: 'number',
         };
     }
 
@@ -72,12 +79,17 @@ class WFPlayer extends Emitter {
         this.events = new Events(this);
         this.template = new Template(this);
         this.drawer = new Drawer(this);
+        this.controller = new Controller(this);
         this.decoder = new Decoder(this);
         this.loader = new Loader(this);
 
         id += 1;
         this.id = id;
         WFPlayer.instances.push(this);
+    }
+
+    get currentTime() {
+        return this.options.mediaElement ? this.options.mediaElement.currentTime : 0;
     }
 
     setOptions(options) {
@@ -98,6 +110,7 @@ class WFPlayer extends Emitter {
             WFPlayer.scheme,
         );
 
+        this.emit('options', this.options);
         return this;
     }
 
@@ -131,6 +144,7 @@ class WFPlayer extends Emitter {
         this.events.destroy();
         this.template.destroy();
         this.drawer.destroy();
+        this.controller.destroy();
         this.decoder.destroy();
         this.loader.destroy();
         WFPlayer.instances.splice(WFPlayer.instances.indexOf(this), 1);

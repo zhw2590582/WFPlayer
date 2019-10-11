@@ -48,6 +48,7 @@
         "servor": "^2.2.1"
     },
     "dependencies": {
+        "duration-time-conversion": "^1.0.1",
         "option-validator": "^2.0.4"
     }
 }
