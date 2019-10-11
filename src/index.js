@@ -31,9 +31,11 @@ class WFPlayer extends Emitter {
             ruler: true,
             rulerColor: '#fff',
             pixelRatio: window.devicePixelRatio,
+            zoom: 1,
             withCredentials: false,
             cors: false,
             headers: {},
+            channel: 0,
         };
     }
 
@@ -52,9 +54,11 @@ class WFPlayer extends Emitter {
             ruler: 'boolean',
             rulerColor: 'string',
             pixelRatio: 'number',
+            zoom: 'number',
             withCredentials: 'boolean',
             cors: 'boolean',
             headers: 'object',
+            channel: 'number',
         };
     }
 
@@ -81,7 +85,7 @@ class WFPlayer extends Emitter {
             options.container = document.querySelector(options.container);
         }
 
-        if (options.mediaElement === 'string') {
+        if (typeof options.mediaElement === 'string') {
             options.mediaElement = document.querySelector(options.mediaElement);
         }
 
@@ -117,12 +121,19 @@ class WFPlayer extends Emitter {
         return this;
     }
 
+    exportImage() {
+        this.template.exportImage();
+        return this;
+    }
+
     destroy() {
         this.destroy = true;
-        this.template.destroy();
         this.events.destroy();
+        this.template.destroy();
+        this.drawer.destroy();
+        this.decoder.destroy();
         this.loader.destroy();
-        return this;
+        WFPlayer.instances.splice(WFPlayer.instances.indexOf(this), 1);
     }
 }
 

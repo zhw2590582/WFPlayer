@@ -366,6 +366,47 @@
   function checkReadableStream() {
     return typeof window.ReadableStream === 'function' && typeof window.Response === 'function' && Object.prototype.hasOwnProperty.call(window.Response.prototype, 'body');
   }
+  function mergeBuffer() {
+    for (var _len = arguments.length, buffers = new Array(_len), _key = 0; _key < _len; _key++) {
+      buffers[_key] = arguments[_key];
+    }
+
+    var Cons = buffers[0].constructor;
+    return buffers.reduce(function (pre, val) {
+      var merge = new Cons((pre.byteLength | 0) + (val.byteLength | 0));
+      merge.set(pre, 0);
+      merge.set(val, pre.byteLength | 0);
+      return merge;
+    }, new Cons());
+  }
+  function throttle(callback, delay) {
+    var isThrottled = false;
+    var args;
+    var context;
+    return function fn() {
+      for (var _len3 = arguments.length, args2 = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        args2[_key3] = arguments[_key3];
+      }
+
+      if (isThrottled) {
+        args = args2;
+        context = this;
+        return;
+      }
+
+      isThrottled = true;
+      callback.apply(this, args2);
+      setTimeout(function () {
+        isThrottled = false;
+
+        if (args) {
+          fn.apply(context, args);
+          args = null;
+          context = null;
+        }
+      }, delay);
+    };
+  }
 
   var Template =
   /*#__PURE__*/
@@ -393,6 +434,10 @@
         this.canvas.style.width = '100%';
         this.canvas.style.height = '100%';
         container.appendChild(this.canvas);
+      }
+    }, {
+      key: "exportImage",
+      value: function exportImage() {//
       }
     }, {
       key: "destroy",
@@ -486,11 +531,47 @@
     return Drawer;
   }();
 
-  var Decoder = function Decoder(wf) {
-    classCallCheck(this, Decoder);
+  var Decoder =
+  /*#__PURE__*/
+  function () {
+    function Decoder(wf) {
+      var _this = this;
 
-    this.wf = wf;
-  };
+      classCallCheck(this, Decoder);
+
+      this.wf = wf;
+      this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      this.throttleGetChannelData = throttle(this.getChannelData, 100);
+      this.audiobuffer = this.audioCtx.createBuffer(2, 22050, 44100);
+      this.channelData = new Float32Array();
+      this.wf.on('loading', function (uint8) {
+        _this.audioCtx.decodeAudioData(uint8.buffer, function (audiobuffer) {
+          _this.audiobuffer = audiobuffer;
+
+          _this.wf.emit('audiobuffer', _this.audiobuffer);
+
+          _this.throttleGetChannelData(audiobuffer);
+        });
+      });
+    }
+
+    createClass(Decoder, [{
+      key: "getChannelData",
+      value: function getChannelData(audiobuffer) {
+        var channel = this.wf.options.channel;
+        this.channelData = audiobuffer.getChannelData(channel);
+        this.wf.emit('channelData', this.channelData);
+      }
+    }, {
+      key: "destroy",
+      value: function destroy() {
+        this.audiobuffer = this.audioCtx.createBuffer(2, 22050, 44100);
+        this.channelData = new Float32Array();
+      }
+    }]);
+
+    return Decoder;
+  }();
 
   var Loader =
   /*#__PURE__*/
@@ -500,6 +581,8 @@
 
       this.wf = wf;
       this.fileSize = 0;
+      this.loadSize = 0;
+      this.data = new Uint8Array();
       this.reader = null;
     }
 
@@ -524,40 +607,53 @@
     }, {
       key: "loadFromSteam",
       value: function loadFromSteam(url) {
+        var _this = this;
+
         var _this$wf$options = this.wf.options,
             withCredentials = _this$wf$options.withCredentials,
             cors = _this$wf$options.cors,
             headers = _this$wf$options.headers;
-        var self = this;
         this.wf.emit('loadStart');
         return fetch(url, {
           credentials: withCredentials ? 'include' : 'omit',
           mode: cors ? 'cors' : 'no-cors',
           headers: headers
         }).then(function (response) {
-          self.reader = response.body.getReader();
-          return function read() {
-            return self.reader.read().then(function (_ref) {
-              var done = _ref.done,
-                  value = _ref.value;
+          if (response.body && response.body.getReader) {
+            _this.fileSize = Number(response.headers.get('content-length'));
+            _this.reader = response.body.getReader();
+            return function read() {
+              var _this2 = this;
 
-              if (done) {
-                self.wf.emit('loadEnd');
-                return self.reader;
-              }
+              return this.reader.read().then(function (_ref) {
+                var done = _ref.done,
+                    value = _ref.value;
 
-              var uint8 = new Uint8Array(value);
-              self.fileSize += uint8.byteLength;
-              self.wf.emit('loading', uint8);
-              return read();
-            });
-          }();
+                if (done) {
+                  _this2.wf.emit('loadEnd');
+
+                  return _this2.reader;
+                }
+
+                _this2.fileSize += value.byteLength;
+                _this2.data = mergeBuffer(_this2.data, value);
+
+                _this2.wf.emit('loading', _this2.data.slice());
+
+                return read.call(_this2);
+              });
+            }.call(_this);
+          }
+
+          _this.destroy();
+
+          return _this.loadFromUrl(url);
         });
       }
     }, {
       key: "loadFromUrl",
       value: function loadFromUrl(url) {
-        var _this = this;
+        var _this3 = this;
 
         this.reader = new AbortController();
         var _this$wf$options2 = this.wf.options,
@@ -571,29 +667,32 @@
           headers: headers,
           signal: this.reader.signal
         }).then(function (response) {
+          _this3.fileSize = Number(response.headers.get('content-length'));
           return response.arrayBuffer();
         }).then(function (arrayBuffer) {
-          _this.fileSize = arrayBuffer.byteLength;
+          var uint8 = new Uint8Array(arrayBuffer);
+          _this3.loadSize = uint8.byteLength;
 
-          _this.wf.emit('loading', new Uint8Array(arrayBuffer));
+          _this3.wf.emit('loading', uint8);
 
-          _this.wf.emit('loadEnd');
+          _this3.wf.emit('loadEnd');
         });
       }
     }, {
       key: "loadFromFile",
       value: function loadFromFile(file) {
-        var _this2 = this;
+        var _this4 = this;
 
         var proxy = this.wf.events.proxy;
         this.reader = new FileReader();
         proxy(this.reader, 'load', function (e) {
           var uint8 = new Uint8Array(e.target.result);
-          _this2.fileSize = uint8.byteLength;
+          _this4.fileSize = uint8.byteLength;
+          _this4.loadSize = uint8.byteLength;
 
-          _this2.wf.emit('loading', uint8);
+          _this4.wf.emit('loading', uint8);
 
-          _this2.wf.emit('loadEnd');
+          _this4.wf.emit('loadEnd');
         });
         this.wf.emit('loadStart');
         this.reader.readAsArrayBuffer(file);
@@ -602,6 +701,8 @@
       key: "destroy",
       value: function destroy() {
         this.fileSize = 0;
+        this.loadSize = 0;
+        this.data = new Uint8Array();
 
         if (this.reader) {
           if (this.reader.cancel) {
@@ -657,9 +758,11 @@
           ruler: true,
           rulerColor: '#fff',
           pixelRatio: window.devicePixelRatio,
+          zoom: 1,
           withCredentials: false,
           cors: false,
-          headers: {}
+          headers: {},
+          channel: 0
         };
       }
     }, {
@@ -679,9 +782,11 @@
           ruler: 'boolean',
           rulerColor: 'string',
           pixelRatio: 'number',
+          zoom: 'number',
           withCredentials: 'boolean',
           cors: 'boolean',
-          headers: 'object'
+          headers: 'object',
+          channel: 'number'
         };
       }
     }]);
@@ -717,7 +822,7 @@
           options.container = document.querySelector(options.container);
         }
 
-        if (options.mediaElement === 'string') {
+        if (typeof options.mediaElement === 'string') {
           options.mediaElement = document.querySelector(options.mediaElement);
         }
 
@@ -748,13 +853,21 @@
         return this;
       }
     }, {
+      key: "exportImage",
+      value: function exportImage() {
+        this.template.exportImage();
+        return this;
+      }
+    }, {
       key: "destroy",
       value: function destroy() {
         this.destroy = true;
-        this.template.destroy();
         this.events.destroy();
+        this.template.destroy();
+        this.drawer.destroy();
+        this.decoder.destroy();
         this.loader.destroy();
-        return this;
+        WFPlayer.instances.splice(WFPlayer.instances.indexOf(this), 1);
       }
     }]);
 

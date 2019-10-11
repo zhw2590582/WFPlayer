@@ -1,10 +1,12 @@
 import validator from 'option-validator';
-import { errorHandle, checkReadableStream } from './utils';
+import { errorHandle, checkReadableStream, mergeBuffer } from './utils';
 
 export default class Loader {
     constructor(wf) {
         this.wf = wf;
         this.fileSize = 0;
+        this.loadSize = 0;
+        this.data = new Uint8Array();
         this.reader = null;
     }
 
@@ -26,27 +28,32 @@ export default class Loader {
 
     loadFromSteam(url) {
         const { withCredentials, cors, headers } = this.wf.options;
-        const self = this;
         this.wf.emit('loadStart');
         return fetch(url, {
             credentials: withCredentials ? 'include' : 'omit',
             mode: cors ? 'cors' : 'no-cors',
             headers,
         }).then(response => {
-            self.reader = response.body.getReader();
-            return (function read() {
-                return self.reader.read().then(({ done, value }) => {
-                    if (done) {
-                        self.wf.emit('loadEnd');
-                        return self.reader;
-                    }
+            if (response.body && response.body.getReader) {
+                this.fileSize = Number(response.headers.get('content-length'));
+                this.reader = response.body.getReader();
+                return function read() {
+                    return this.reader.read().then(({ done, value }) => {
+                        if (done) {
+                            this.wf.emit('loadEnd');
+                            return this.reader;
+                        }
 
-                    const uint8 = new Uint8Array(value);
-                    self.fileSize += uint8.byteLength;
-                    self.wf.emit('loading', uint8);
-                    return read();
-                });
-            })();
+                        this.fileSize += value.byteLength;
+                        this.data = mergeBuffer(this.data, value);
+                        this.wf.emit('loading', this.data.slice());
+                        return read.call(this);
+                    });
+                }.call(this);
+            }
+
+            this.destroy();
+            return this.loadFromUrl(url);
         });
     }
 
@@ -60,10 +67,14 @@ export default class Loader {
             headers,
             signal: this.reader.signal,
         })
-            .then(response => response.arrayBuffer())
+            .then(response => {
+                this.fileSize = Number(response.headers.get('content-length'));
+                return response.arrayBuffer();
+            })
             .then(arrayBuffer => {
-                this.fileSize = arrayBuffer.byteLength;
-                this.wf.emit('loading', new Uint8Array(arrayBuffer));
+                const uint8 = new Uint8Array(arrayBuffer);
+                this.loadSize = uint8.byteLength;
+                this.wf.emit('loading', uint8);
                 this.wf.emit('loadEnd');
             });
     }
@@ -75,6 +86,7 @@ export default class Loader {
         proxy(this.reader, 'load', e => {
             const uint8 = new Uint8Array(e.target.result);
             this.fileSize = uint8.byteLength;
+            this.loadSize = uint8.byteLength;
             this.wf.emit('loading', uint8);
             this.wf.emit('loadEnd');
         });
@@ -85,6 +97,8 @@ export default class Loader {
 
     destroy() {
         this.fileSize = 0;
+        this.loadSize = 0;
+        this.data = new Uint8Array();
         if (this.reader) {
             if (this.reader.cancel) {
                 this.reader.cancel();

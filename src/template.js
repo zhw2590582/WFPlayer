@@ -20,6 +20,10 @@ export default class Template {
         container.appendChild(this.canvas);
     }
 
+    exportImage() {
+        //
+    }
+
     destroy() {
         this.wf.options.container.innerHTML = '';
     }
