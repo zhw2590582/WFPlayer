@@ -21,7 +21,7 @@ class WFPlayer extends Emitter {
         return {
             container: '#wfplayer',
             mediaElement: '',
-            waveColor: '#fff',
+            waveColor: 'rgba(255, 255, 255, 0.1)',
             backgroundColor: 'rgb(28, 32, 34)',
             cursor: true,
             cursorColor: '#ff0000',

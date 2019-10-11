@@ -476,9 +476,6 @@
         var _this$wf$options = this.wf.options,
             container = _this$wf$options.container,
             pixelRatio = _this$wf$options.pixelRatio;
-        errorHandle(this.wf.constructor.instances.every(function (wf) {
-          return wf.options.container !== container;
-        }), 'Cannot mount multiple instances on the same dom element');
         var containerWidth = container.clientWidth;
         var containerHeight = container.clientHeight;
 
@@ -495,10 +492,6 @@
           this.canvas.style.height = '100%';
           container.appendChild(this.canvas);
         }
-      }
-    }, {
-      key: "exportImage",
-      value: function exportImage() {//
       }
     }, {
       key: "destroy",
@@ -531,7 +524,6 @@
         var canvas = this.wf.template.canvas;
         var _this$wf$options = this.wf.options,
             cursor = _this$wf$options.cursor,
-            progress = _this$wf$options.progress,
             grid = _this$wf$options.grid,
             ruler = _this$wf$options.ruler;
         var ctx = canvas.getContext('2d');
@@ -546,6 +538,10 @@
           this.updateRuler(ctx);
         }
 
+        if (this.wf.decoder && this.wf.decoder.ready) {
+          this.updateWave(ctx);
+        }
+
         if (cursor) {
           this.updateCursor(ctx);
         }
@@ -558,13 +554,50 @@
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       }
     }, {
-      key: "updateGrid",
-      value: function updateGrid(ctx) {
+      key: "updateWave",
+      value: function updateWave(ctx) {
+        var channelData = this.wf.decoder.channelData;
+        var sampleRate = this.wf.decoder.audiobuffer.sampleRate;
         var _this$wf$options2 = this.wf.options,
-            gridColor = _this$wf$options2.gridColor,
+            waveColor = _this$wf$options2.waveColor,
             perDuration = _this$wf$options2.perDuration,
             pixelRatio = _this$wf$options2.pixelRatio,
             padding = _this$wf$options2.padding;
+        ctx.fillStyle = waveColor;
+        var gridNum = perDuration * 10 + padding * 2;
+        var gridGap = ctx.canvas.width / gridNum;
+        var beginTime = Math.floor(this.wf.currentTime / perDuration) * 10;
+        var startIndex = clamp(beginTime * sampleRate, 0, channelData.length - 1);
+        var endIndex = clamp((beginTime + perDuration) * sampleRate, startIndex, channelData.length - 1);
+        var middle = ctx.canvas.height / 2;
+        var width = ctx.canvas.width - gridGap * padding * 2;
+        var step = Math.ceil((endIndex - startIndex) / width);
+
+        for (var i = 0; i < width; i += 1) {
+          var min = 1.0;
+          var max = -1.0;
+
+          for (var j = startIndex; j < step; j += 1) {
+            var datum = channelData[i * step + j];
+
+            if (datum < min) {
+              min = datum;
+            } else if (datum > max) {
+              max = datum;
+            }
+          }
+
+          ctx.fillRect(gridGap * padding + i, (1 + min) * middle, pixelRatio, Math.max(1, (max - min) * middle));
+        }
+      }
+    }, {
+      key: "updateGrid",
+      value: function updateGrid(ctx) {
+        var _this$wf$options3 = this.wf.options,
+            gridColor = _this$wf$options3.gridColor,
+            perDuration = _this$wf$options3.perDuration,
+            pixelRatio = _this$wf$options3.pixelRatio,
+            padding = _this$wf$options3.padding;
         ctx.fillStyle = gridColor;
         var gridNum = perDuration * 10 + padding * 2;
         var gridGap = ctx.canvas.width / gridNum;
@@ -580,12 +613,12 @@
     }, {
       key: "updateRuler",
       value: function updateRuler(ctx) {
-        var _this$wf$options3 = this.wf.options,
-            rulerColor = _this$wf$options3.rulerColor,
-            perDuration = _this$wf$options3.perDuration,
-            pixelRatio = _this$wf$options3.pixelRatio,
-            padding = _this$wf$options3.padding,
-            rulerAtTop = _this$wf$options3.rulerAtTop;
+        var _this$wf$options4 = this.wf.options,
+            rulerColor = _this$wf$options4.rulerColor,
+            perDuration = _this$wf$options4.perDuration,
+            pixelRatio = _this$wf$options4.pixelRatio,
+            padding = _this$wf$options4.padding,
+            rulerAtTop = _this$wf$options4.rulerAtTop;
         var ruler = -1;
         var fontSize = 11;
         ctx.font = "".concat(fontSize * pixelRatio, "px Arial");
@@ -608,11 +641,11 @@
     }, {
       key: "updateCursor",
       value: function updateCursor(ctx) {
-        var _this$wf$options4 = this.wf.options,
-            cursorColor = _this$wf$options4.cursorColor,
-            perDuration = _this$wf$options4.perDuration,
-            pixelRatio = _this$wf$options4.pixelRatio,
-            padding = _this$wf$options4.padding;
+        var _this$wf$options5 = this.wf.options,
+            cursorColor = _this$wf$options5.cursorColor,
+            perDuration = _this$wf$options5.perDuration,
+            pixelRatio = _this$wf$options5.pixelRatio,
+            padding = _this$wf$options5.padding;
         ctx.fillStyle = cursorColor;
         var gridNum = perDuration * 10 + padding * 2;
         var gridGap = ctx.canvas.width / gridNum;
@@ -623,11 +656,6 @@
       key: "updateProgress",
       value: function updateProgress(ctx) {
         var progressColor = this.wf.options.progressColor;
-      }
-    }, {
-      key: "updateWave",
-      value: function updateWave(ctx) {
-        var waveColor = this.wf.options.waveColor;
       }
     }]);
 
@@ -643,27 +671,29 @@
       classCallCheck(this, Decoder);
 
       this.wf = wf;
+      this.ready = false;
       this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      this.throttleGetChannelData = throttle(this.getChannelData, 100);
+      this.throttleDecodeAudioData = throttle(this.decodeAudioData, 1000);
       this.audiobuffer = this.audioCtx.createBuffer(2, 22050, 44100);
       this.channelData = new Float32Array();
       this.wf.on('loading', function (uint8) {
-        _this.audioCtx.decodeAudioData(uint8.buffer, function (audiobuffer) {
-          _this.audiobuffer = audiobuffer;
-
-          _this.wf.emit('audiobuffer', _this.audiobuffer);
-
-          _this.throttleGetChannelData(audiobuffer);
-        });
+        _this.throttleDecodeAudioData(uint8);
       });
     }
 
     createClass(Decoder, [{
-      key: "getChannelData",
-      value: function getChannelData(audiobuffer) {
+      key: "decodeAudioData",
+      value: function decodeAudioData(uint8) {
+        var _this2 = this;
+
         var channel = this.wf.options.channel;
-        this.channelData = audiobuffer.getChannelData(channel);
-        this.wf.emit('channelData', this.channelData);
+        this.audioCtx.decodeAudioData(uint8.buffer, function (audiobuffer) {
+          _this2.audiobuffer = audiobuffer;
+          _this2.channelData = audiobuffer.getChannelData(channel);
+          _this2.ready = true;
+
+          _this2.wf.emit('channelData', _this2.channelData);
+        });
       }
     }, {
       key: "destroy",
@@ -940,7 +970,7 @@
         return {
           container: '#wfplayer',
           mediaElement: '',
-          waveColor: '#fff',
+          waveColor: 'rgba(255, 255, 255, 0.1)',
           backgroundColor: 'rgb(28, 32, 34)',
           cursor: true,
           cursorColor: '#ff0000',

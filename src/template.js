@@ -9,12 +9,6 @@ export default class Template {
 
     update() {
         const { container, pixelRatio } = this.wf.options;
-
-        errorHandle(
-            this.wf.constructor.instances.every(wf => wf.options.container !== container),
-            'Cannot mount multiple instances on the same dom element',
-        );
-
         const containerWidth = container.clientWidth;
         const containerHeight = container.clientHeight;
         if (this.canvas) {
@@ -30,10 +24,6 @@ export default class Template {
             this.canvas.style.height = '100%';
             container.appendChild(this.canvas);
         }
-    }
-
-    exportImage() {
-        //
     }
 
     destroy() {
