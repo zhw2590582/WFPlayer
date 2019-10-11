@@ -847,7 +847,7 @@
 
         var canvas = this.wf.template.canvas;
         var proxy = this.wf.events.proxy;
-        proxy(canvas, 'click', function (event) {
+        proxy(canvas, ['click', 'contextmenu'], function (event) {
           var _this2$wf$options = _this2.wf.options,
               perDuration = _this2$wf$options.perDuration,
               padding = _this2$wf$options.padding,
@@ -858,7 +858,7 @@
           var beginTime = Math.floor(_this2.wf.currentTime / perDuration) * 10;
           var currentTime = clamp(left / gridGap / 10 + beginTime, beginTime, beginTime + perDuration);
 
-          _this2.wf.emit('click', currentTime, event);
+          _this2.wf.emit(event.type, currentTime, event);
         });
       }
     }, {
@@ -870,9 +870,11 @@
           _this3.wf.template.update();
 
           _this3.wf.drawer.update();
+
+          _this3.wf.emit('resize');
         }, 500);
         var proxy = this.wf.events.proxy;
-        proxy(window, 'resize', function () {
+        proxy(window, ['resize', 'orientationchange'], function () {
           throttleResize();
         });
       }
@@ -1071,6 +1073,11 @@
       key: "currentTime",
       get: function get() {
         return this.options.mediaElement ? this.options.mediaElement.currentTime : 0;
+      }
+    }, {
+      key: "duration",
+      get: function get() {
+        return this.options.mediaElement ? this.options.mediaElement.duration : 0;
       }
     }]);
 

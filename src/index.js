@@ -92,6 +92,10 @@ class WFPlayer extends Emitter {
         return this.options.mediaElement ? this.options.mediaElement.currentTime : 0;
     }
 
+    get duration() {
+        return this.options.mediaElement ? this.options.mediaElement.duration : 0;
+    }
+
     setOptions(options) {
         if (typeof options.container === 'string') {
             options.container = document.querySelector(options.container);

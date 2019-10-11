@@ -14,14 +14,14 @@ export default class Controller {
     clickInit() {
         const { canvas } = this.wf.template;
         const { proxy } = this.wf.events;
-        proxy(canvas, 'click', event => {
+        proxy(canvas, ['click', 'contextmenu'], event => {
             const { perDuration, padding, container } = this.wf.options;
             const gridNum = perDuration * 10 + padding * 2;
             const gridGap = canvas.width / gridNum;
             const left = clamp(event.pageX - container.offsetLeft - padding * gridGap, 0, Infinity);
             const beginTime = Math.floor(this.wf.currentTime / perDuration) * 10;
             const currentTime = clamp(left / gridGap / 10 + beginTime, beginTime, beginTime + perDuration);
-            this.wf.emit('click', currentTime, event);
+            this.wf.emit(event.type, currentTime, event);
         });
     }
 
@@ -29,10 +29,11 @@ export default class Controller {
         const throttleResize = throttle(() => {
             this.wf.template.update();
             this.wf.drawer.update();
+            this.wf.emit('resize');
         }, 500);
 
         const { proxy } = this.wf.events;
-        proxy(window, 'resize', () => {
+        proxy(window, ['resize', 'orientationchange'], () => {
             throttleResize();
         });
     }
