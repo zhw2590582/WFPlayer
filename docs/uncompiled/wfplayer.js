@@ -527,6 +527,10 @@
         if (ruler) {
           this.updateRuler(ctx);
         }
+
+        if (cursor) {
+          this.updateCursor(ctx);
+        }
       }
     }, {
       key: "updateBackground",
@@ -583,14 +587,23 @@
         }
       }
     }, {
+      key: "updateCursor",
+      value: function updateCursor(ctx) {
+        var _this$wf$options4 = this.wf.options,
+            cursorColor = _this$wf$options4.cursorColor,
+            perDuration = _this$wf$options4.perDuration,
+            pixelRatio = _this$wf$options4.pixelRatio,
+            padding = _this$wf$options4.padding;
+        ctx.fillStyle = cursorColor;
+        var gridNum = perDuration * 10 + padding * 2;
+        var gridGap = ctx.canvas.width / gridNum;
+        var beginTime = Math.floor(this.wf.currentTime / perDuration) * 10;
+        ctx.fillRect(padding * gridGap + (this.wf.currentTime - beginTime) * gridGap * 10, 0, pixelRatio, ctx.canvas.height);
+      }
+    }, {
       key: "updateProgress",
       value: function updateProgress(ctx) {
         var progressColor = this.wf.options.progressColor;
-      }
-    }, {
-      key: "updateCursor",
-      value: function updateCursor(ctx) {
-        var cursorColor = this.wf.options.cursorColor;
       }
     }, {
       key: "updateWave",
@@ -827,7 +840,7 @@
           waveColor: '#fff',
           backgroundColor: 'rgb(28, 32, 34)',
           cursor: true,
-          cursorColor: '#fff',
+          cursorColor: '#ff0000',
           progress: true,
           progressColor: '#fff',
           grid: true,

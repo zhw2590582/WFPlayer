@@ -24,7 +24,7 @@ class WFPlayer extends Emitter {
             waveColor: '#fff',
             backgroundColor: 'rgb(28, 32, 34)',
             cursor: true,
-            cursorColor: '#fff',
+            cursorColor: '#ff0000',
             progress: true,
             progressColor: '#fff',
             grid: true,

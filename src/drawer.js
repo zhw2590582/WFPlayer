@@ -18,6 +18,9 @@ export default class Drawer {
         if (ruler) {
             this.updateRuler(ctx);
         }
+        if (cursor) {
+            this.updateCursor(ctx);
+        }
     }
 
     updateBackground(ctx) {
@@ -63,12 +66,22 @@ export default class Drawer {
         }
     }
 
-    updateProgress(ctx) {
-        const { progressColor } = this.wf.options;
+    updateCursor(ctx) {
+        const { cursorColor, perDuration, pixelRatio, padding } = this.wf.options;
+        ctx.fillStyle = cursorColor;
+        const gridNum = perDuration * 10 + padding * 2;
+        const gridGap = ctx.canvas.width / gridNum;
+        const beginTime = Math.floor(this.wf.currentTime / perDuration) * 10;
+        ctx.fillRect(
+            padding * gridGap + (this.wf.currentTime - beginTime) * gridGap * 10,
+            0,
+            pixelRatio,
+            ctx.canvas.height,
+        );
     }
 
-    updateCursor(ctx) {
-        const { cursorColor } = this.wf.options;
+    updateProgress(ctx) {
+        const { progressColor } = this.wf.options;
     }
 
     updateWave(ctx) {
