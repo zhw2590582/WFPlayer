@@ -476,6 +476,9 @@
         var _this$wf$options = this.wf.options,
             container = _this$wf$options.container,
             pixelRatio = _this$wf$options.pixelRatio;
+        errorHandle(this.wf.constructor.instances.every(function (wf) {
+          return wf.options.container !== container;
+        }), 'Cannot mount multiple instances on the same dom element');
         var containerWidth = container.clientWidth;
         var containerHeight = container.clientHeight;
 
@@ -1014,7 +1017,9 @@
 
     createClass(WFPlayer, [{
       key: "setOptions",
-      value: function setOptions(options) {
+      value: function setOptions() {
+        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
         if (typeof options.container === 'string') {
           options.container = document.querySelector(options.container);
         }
