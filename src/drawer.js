@@ -4,6 +4,9 @@ export default class Drawer {
     constructor(wf) {
         this.wf = wf;
         this.update();
+        this.wf.on('options', () => {
+            this.update();
+        });
     }
 
     update() {
@@ -45,7 +48,8 @@ export default class Drawer {
     updateRuler(ctx) {
         const { rulerColor, perDuration, pixelRatio, padding, rulerAtTop } = this.wf.options;
         let ruler = -1;
-        ctx.font = `${11 * pixelRatio}px Arial`;
+        const fontSize = 11;
+        ctx.font = `${fontSize * pixelRatio}px Arial`;
         ctx.fillStyle = rulerColor;
         const gridNum = perDuration * 10 + padding * 2;
         const gridGap = ctx.canvas.width / gridNum;
@@ -57,8 +61,8 @@ export default class Drawer {
                 ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - gridGap, pixelRatio, gridGap);
                 ctx.fillText(
                     durationToTime(beginTime + ruler).split('.')[0],
-                    gridGap * index - 22 * pixelRatio,
-                    rulerAtTop ? gridGap * 2 : height - gridGap * 2 + 11,
+                    gridGap * index - fontSize * pixelRatio * 2,
+                    rulerAtTop ? gridGap * 2 : height - gridGap * 2 + fontSize,
                 );
             } else if ((index - padding) % 5 === 0 && index) {
                 ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - gridGap / 2, pixelRatio, gridGap / 2);

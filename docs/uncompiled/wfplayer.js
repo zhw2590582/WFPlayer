@@ -466,6 +466,7 @@
       classCallCheck(this, Template);
 
       this.wf = wf;
+      this.canvas = null;
       this.update();
     }
 
@@ -475,16 +476,22 @@
         var _this$wf$options = this.wf.options,
             container = _this$wf$options.container,
             pixelRatio = _this$wf$options.pixelRatio;
-        container.innerHTML = '';
         var containerWidth = container.clientWidth;
         var containerHeight = container.clientHeight;
-        errorHandle(containerWidth && containerHeight, 'The width and height of the container cannot be 0');
-        this.canvas = document.createElement('canvas');
-        this.canvas.width = containerWidth * pixelRatio;
-        this.canvas.height = containerHeight * pixelRatio;
-        this.canvas.style.width = '100%';
-        this.canvas.style.height = '100%';
-        container.appendChild(this.canvas);
+
+        if (this.canvas) {
+          this.canvas.width = containerWidth * pixelRatio;
+          this.canvas.height = containerHeight * pixelRatio;
+        } else {
+          container.innerHTML = '';
+          errorHandle(containerWidth && containerHeight, 'The width and height of the container cannot be 0');
+          this.canvas = document.createElement('canvas');
+          this.canvas.width = containerWidth * pixelRatio;
+          this.canvas.height = containerHeight * pixelRatio;
+          this.canvas.style.width = '100%';
+          this.canvas.style.height = '100%';
+          container.appendChild(this.canvas);
+        }
       }
     }, {
       key: "exportImage",
@@ -504,10 +511,15 @@
   /*#__PURE__*/
   function () {
     function Drawer(wf) {
+      var _this = this;
+
       classCallCheck(this, Drawer);
 
       this.wf = wf;
       this.update();
+      this.wf.on('options', function () {
+        _this.update();
+      });
     }
 
     createClass(Drawer, [{
@@ -572,7 +584,8 @@
             padding = _this$wf$options3.padding,
             rulerAtTop = _this$wf$options3.rulerAtTop;
         var ruler = -1;
-        ctx.font = "".concat(11 * pixelRatio, "px Arial");
+        var fontSize = 11;
+        ctx.font = "".concat(fontSize * pixelRatio, "px Arial");
         ctx.fillStyle = rulerColor;
         var gridNum = perDuration * 10 + padding * 2;
         var gridGap = ctx.canvas.width / gridNum;
@@ -583,7 +596,7 @@
           if ((index - padding) % 10 === 0) {
             ruler += 1;
             ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - gridGap, pixelRatio, gridGap);
-            ctx.fillText(durationToTime(beginTime + ruler).split('.')[0], gridGap * index - 22 * pixelRatio, rulerAtTop ? gridGap * 2 : height - gridGap * 2 + 11);
+            ctx.fillText(durationToTime(beginTime + ruler).split('.')[0], gridGap * index - fontSize * pixelRatio * 2, rulerAtTop ? gridGap * 2 : height - gridGap * 2 + fontSize);
           } else if ((index - padding) % 5 === 0 && index) {
             ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - gridGap / 2, pixelRatio, gridGap / 2);
           }
@@ -821,6 +834,8 @@
       this.wf.on('load', function () {
         _this.clickInit();
 
+        _this.resizeInit();
+
         _this.playInit();
       });
     }
@@ -847,24 +862,39 @@
         });
       }
     }, {
+      key: "resizeInit",
+      value: function resizeInit() {
+        var _this3 = this;
+
+        var throttleResize = throttle(function () {
+          _this3.wf.template.update();
+
+          _this3.wf.drawer.update();
+        }, 500);
+        var proxy = this.wf.events.proxy;
+        proxy(window, 'resize', function () {
+          throttleResize();
+        });
+      }
+    }, {
       key: "playInit",
       value: function playInit() {
         var mediaElement = this.wf.options.mediaElement;
         if (!mediaElement) return;
         (function loop() {
-          var _this3 = this;
+          var _this4 = this;
 
           this.timer = requestAnimationFrame(function () {
             var playing = !!(mediaElement.currentTime > 0 && !mediaElement.paused && !mediaElement.ended && mediaElement.readyState > 2);
 
             if (playing) {
-              _this3.wf.drawer.update();
+              _this4.wf.drawer.update();
 
-              _this3.wf.emit('play', mediaElement.currentTime);
+              _this4.wf.emit('play', mediaElement.currentTime);
             }
 
-            if (!_this3.wf.destroy) {
-              loop.call(_this3);
+            if (!_this4.wf.destroy) {
+              loop.call(_this4);
             }
           });
         }).call(this);

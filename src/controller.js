@@ -1,12 +1,12 @@
-import { clamp } from './utils';
+import { clamp, throttle } from './utils';
 
 export default class Controller {
     constructor(wf) {
         this.wf = wf;
         this.timer = null;
-
         this.wf.on('load', () => {
             this.clickInit();
+            this.resizeInit();
             this.playInit();
         });
     }
@@ -22,6 +22,18 @@ export default class Controller {
             const beginTime = Math.floor(this.wf.currentTime / perDuration) * 10;
             const currentTime = clamp(left / gridGap / 10 + beginTime, beginTime, beginTime + perDuration);
             this.wf.emit('click', currentTime, event);
+        });
+    }
+
+    resizeInit() {
+        const throttleResize = throttle(() => {
+            this.wf.template.update();
+            this.wf.drawer.update();
+        }, 500);
+
+        const { proxy } = this.wf.events;
+        proxy(window, 'resize', () => {
+            throttleResize();
         });
     }
 
