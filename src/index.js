@@ -121,6 +121,7 @@ class WFPlayer extends Emitter {
         }
 
         this.loader.load(target);
+        this.emit('load', target);
         return this;
     }
 

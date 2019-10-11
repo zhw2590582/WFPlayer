@@ -60,7 +60,7 @@ export default class Drawer {
                     gridGap * index - 22 * pixelRatio,
                     rulerAtTop ? gridGap * 2 : height - gridGap * 2 + 11,
                 );
-            } else if ((index - padding) % 5 === 0) {
+            } else if ((index - padding) % 5 === 0 && index) {
                 ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - gridGap / 2, pixelRatio, gridGap / 2);
             }
         }

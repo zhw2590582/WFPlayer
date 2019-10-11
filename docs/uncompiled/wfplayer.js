@@ -427,6 +427,9 @@
       return merge;
     }, new Cons());
   }
+  function clamp(num, a, b) {
+    return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
+  }
   function throttle(callback, delay) {
     var isThrottled = false;
     var args;
@@ -581,7 +584,7 @@
             ruler += 1;
             ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - gridGap, pixelRatio, gridGap);
             ctx.fillText(durationToTime(beginTime + ruler).split('.')[0], gridGap * index - 22 * pixelRatio, rulerAtTop ? gridGap * 2 : height - gridGap * 2 + 11);
-          } else if ((index - padding) % 5 === 0) {
+          } else if ((index - padding) % 5 === 0 && index) {
             ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - gridGap / 2, pixelRatio, gridGap / 2);
           }
         }
@@ -805,11 +808,76 @@
     return Loader;
   }();
 
-  var Controller = function Controller(wf) {
-    classCallCheck(this, Controller);
+  var Controller =
+  /*#__PURE__*/
+  function () {
+    function Controller(wf) {
+      var _this = this;
 
-    this.wf = wf;
-  };
+      classCallCheck(this, Controller);
+
+      this.wf = wf;
+      this.timer = null;
+      this.wf.on('load', function () {
+        _this.clickInit();
+
+        _this.playInit();
+      });
+    }
+
+    createClass(Controller, [{
+      key: "clickInit",
+      value: function clickInit() {
+        var _this2 = this;
+
+        var canvas = this.wf.template.canvas;
+        var proxy = this.wf.events.proxy;
+        proxy(canvas, 'click', function (event) {
+          var _this2$wf$options = _this2.wf.options,
+              perDuration = _this2$wf$options.perDuration,
+              padding = _this2$wf$options.padding,
+              container = _this2$wf$options.container;
+          var gridNum = perDuration * 10 + padding * 2;
+          var gridGap = canvas.width / gridNum;
+          var left = clamp(event.pageX - container.offsetLeft - padding * gridGap, 0, Infinity);
+          var beginTime = Math.floor(_this2.wf.currentTime / perDuration) * 10;
+          var currentTime = clamp(left / gridGap / 10 + beginTime, beginTime, beginTime + perDuration);
+
+          _this2.wf.emit('click', currentTime, event);
+        });
+      }
+    }, {
+      key: "playInit",
+      value: function playInit() {
+        var mediaElement = this.wf.options.mediaElement;
+        if (!mediaElement) return;
+        (function loop() {
+          var _this3 = this;
+
+          this.timer = requestAnimationFrame(function () {
+            var playing = !!(mediaElement.currentTime > 0 && !mediaElement.paused && !mediaElement.ended && mediaElement.readyState > 2);
+
+            if (playing) {
+              _this3.wf.drawer.update();
+
+              _this3.wf.emit('play', mediaElement.currentTime);
+            }
+
+            if (!_this3.wf.destroy) {
+              loop.call(_this3);
+            }
+          });
+        }).call(this);
+      }
+    }, {
+      key: "destroy",
+      value: function destroy() {
+        cancelAnimationFrame(this.timer);
+      }
+    }]);
+
+    return Controller;
+  }();
 
   function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
@@ -936,6 +1004,7 @@
         }
 
         this.loader.load(target);
+        this.emit('load', target);
         return this;
       }
     }, {
