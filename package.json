@@ -49,6 +49,7 @@
     },
     "dependencies": {
         "duration-time-conversion": "^1.0.1",
+        "lodash": "^4.17.15",
         "option-validator": "^2.0.4"
     }
 }

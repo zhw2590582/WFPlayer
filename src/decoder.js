@@ -1,10 +1,10 @@
-import { throttle } from './utils';
+import throttle from 'lodash/throttle';
 
 export default class Decoder {
     constructor(wf) {
         this.wf = wf;
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        this.throttleDecodeAudioData = throttle(this.decodeAudioData, 100);
+        this.throttleDecodeAudioData = throttle(this.decodeAudioData, 500);
         this.audiobuffer = this.audioCtx.createBuffer(2, 22050, 44100);
         this.channelData = new Float32Array();
 

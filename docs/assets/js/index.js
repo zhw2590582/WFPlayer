@@ -2,6 +2,7 @@ var art = new Artplayer({
     container: '.artplayer',
     url: './your-name.mp4',
     autoSize: true,
+    loop: true,
     moreVideoAttr: {
         crossOrigin: 'anonymous',
     },

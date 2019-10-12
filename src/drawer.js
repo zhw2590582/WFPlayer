@@ -52,12 +52,12 @@ export default class Drawer {
 
     updateWave() {
         const {
-            channelData,
-            audiobuffer: { sampleRate },
-        } = this.wf.decoder;
-        const {
             currentTime,
             options: { progress, waveColor, progressColor, perDuration, pixelRatio, padding },
+            decoder: {
+                channelData,
+                audiobuffer: { sampleRate },
+            },
         } = this.wf;
         const { width, height } = this.canvas;
         const middle = height / 2;

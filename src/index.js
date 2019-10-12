@@ -6,6 +6,7 @@ import Drawer from './drawer';
 import Decoder from './decoder';
 import Loader from './loader';
 import Controller from './controller';
+import { timeToDuration, clamp, errorHandle } from './utils';
 
 let id = 0;
 const instances = [];
@@ -25,7 +26,7 @@ export default class WFPlayer extends Emitter {
     static get default() {
         return {
             container: '#wfplayer',
-            mediaElement: '',
+            mediaElement: null,
             waveColor: 'rgba(255, 255, 255, 0.1)',
             backgroundColor: 'rgb(28, 32, 34)',
             cursor: true,
@@ -37,11 +38,10 @@ export default class WFPlayer extends Emitter {
             ruler: true,
             rulerColor: 'rgba(255, 255, 255, 0.5)',
             rulerAtTop: true,
-            pixelRatio: window.devicePixelRatio,
-            zoom: 1,
             withCredentials: false,
             cors: false,
             headers: {},
+            pixelRatio: window.devicePixelRatio,
             channel: 0,
             perDuration: 10,
             padding: 5,
@@ -50,8 +50,8 @@ export default class WFPlayer extends Emitter {
 
     static get scheme() {
         return {
-            container: 'string|htmlelement',
-            mediaElement: 'string|HTMLVideoElement|HTMLAudioElement',
+            container: 'htmlelement',
+            mediaElement: 'null|htmlvideoelement|htmlaudioelement',
             waveColor: 'string',
             backgroundColor: 'string',
             cursor: 'boolean',
@@ -63,20 +63,32 @@ export default class WFPlayer extends Emitter {
             ruler: 'boolean',
             rulerColor: 'string',
             rulerAtTop: 'boolean',
-            pixelRatio: 'number',
-            zoom: 'number',
             withCredentials: 'boolean',
             cors: 'boolean',
             headers: 'object',
-            channel: 'number',
-            perDuration: 'number',
-            padding: 'number',
+            pixelRatio: (value, type) => {
+                errorHandle(type === 'number', 'pixelRatio is not a number');
+                return value >= 1 && Number.isInteger(value);
+            },
+            channel: (value, type) => {
+                errorHandle(type === 'number', 'channel is not a number');
+                return value >= 0 && Number.isInteger(value);
+            },
+            perDuration: (value, type) => {
+                errorHandle(type === 'number', 'perDuration is not a number');
+                return value >= 1 && Number.isInteger(value);
+            },
+            padding: (value, type) => {
+                errorHandle(type === 'number', 'padding is not a number');
+                return value >= 0 && Number.isInteger(value);
+            },
         };
     }
 
     constructor(options = {}) {
         super();
 
+        this._zoom = 1;
         this._currentTime = 0;
         this.destroy = false;
         this.options = {};
@@ -98,7 +110,13 @@ export default class WFPlayer extends Emitter {
         return this.options.mediaElement ? this.options.mediaElement.currentTime : this._currentTime;
     }
 
+    get duration() {
+        return this.options.mediaElement ? this.options.mediaElement.duration : timeToDuration('99:59:59.999');
+    }
+
     setOptions(options = {}) {
+        errorHandle(validator.kindOf(options) === 'object', 'setOptions expects to receive object as a parameter');
+
         if (typeof options.container === 'string') {
             options.container = document.querySelector(options.container);
         }
@@ -125,19 +143,32 @@ export default class WFPlayer extends Emitter {
             this.options.mediaElement = target;
             target = target.src;
         }
-
+        errorHandle(
+            typeof target === 'string',
+            `The load target is not a string. If you are loading a mediaElement, make sure the mediaElement.src is not empty.`,
+        );
         this.loader.load(target);
-        this.emit('load', target);
+        this.emit('load');
         return this;
     }
 
     seek(time) {
-        this.drawer.seek(time);
+        errorHandle(
+            !this.options.mediaElement,
+            `If you have used mediaElement, you can't use the seek method, please use the mediaElement.currentTime property.`,
+        );
+        this._currentTime = clamp(time, 0, this.duration);
+        this.drawer.update();
         return this;
     }
 
-    zoom(scale, startTime) {
-        this.drawer.zoom(scale, startTime);
+    zoom(zoom) {
+        errorHandle(
+            zoom >= 1 && Number.isInteger(zoom),
+            `The zoom method only accepts positive integers greater than or equal to 1.`,
+        );
+        this._zoom = clamp(zoom, 1, 10);
+        this.drawer.update();
         return this;
     }
 

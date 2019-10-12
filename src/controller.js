@@ -1,9 +1,10 @@
-import { clamp, throttle } from './utils';
+import throttle from 'lodash/throttle';
+import { clamp } from './utils';
 
 export default class Controller {
     constructor(wf) {
         this.wf = wf;
-        this.timer = null;
+        this.playTimer = null;
         this.wf.on('load', () => {
             this.clickInit();
             this.resizeInit();
@@ -12,37 +13,48 @@ export default class Controller {
     }
 
     clickInit() {
-        const { canvas } = this.wf.template;
-        const { proxy } = this.wf.events;
+        const {
+            template: { canvas },
+            events: { proxy },
+        } = this.wf;
         proxy(canvas, ['click', 'contextmenu'], event => {
-            const { perDuration, padding, container } = this.wf.options;
+            const {
+                currentTime,
+                options: { perDuration, padding, container },
+            } = this.wf;
             const gridNum = perDuration * 10 + padding * 2;
             const gridGap = canvas.width / gridNum;
             const left = clamp(event.pageX - container.offsetLeft - padding * gridGap, 0, Infinity);
-            const beginTime = Math.floor(this.wf.currentTime / perDuration) * 10;
-            const currentTime = clamp(left / gridGap / 10 + beginTime, beginTime, beginTime + perDuration);
-            this.wf.emit(event.type, currentTime, event);
+            const beginTime = Math.floor(currentTime / perDuration) * 10;
+            const time = clamp(left / gridGap / 10 + beginTime, beginTime, beginTime + perDuration);
+            this.wf.emit(event.type, time, event);
         });
     }
 
     resizeInit() {
+        const {
+            template,
+            drawer,
+            events: { proxy },
+        } = this.wf;
         const throttleResize = throttle(() => {
-            this.wf.template.update();
-            this.wf.drawer.update();
+            template.update();
+            drawer.update();
             this.wf.emit('resize');
         }, 500);
-
-        const { proxy } = this.wf.events;
         proxy(window, ['resize', 'orientationchange'], () => {
             throttleResize();
         });
     }
 
     playInit() {
-        const { mediaElement } = this.wf.options;
+        const {
+            drawer,
+            options: { mediaElement },
+        } = this.wf;
         if (!mediaElement) return;
         (function loop() {
-            this.timer = requestAnimationFrame(() => {
+            this.playTimer = requestAnimationFrame(() => {
                 const playing = !!(
                     mediaElement.currentTime > 0 &&
                     !mediaElement.paused &&
@@ -51,7 +63,7 @@ export default class Controller {
                 );
 
                 if (playing) {
-                    this.wf.drawer.update();
+                    drawer.update();
                     this.wf.emit('play', mediaElement.currentTime);
                 }
 
@@ -63,6 +75,6 @@ export default class Controller {
     }
 
     destroy() {
-        cancelAnimationFrame(this.timer);
+        cancelAnimationFrame(this.playTimer);
     }
 }
