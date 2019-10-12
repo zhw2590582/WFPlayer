@@ -103,7 +103,7 @@ export default class Drawer {
         this.ctx.fillStyle = rulerColor;
         let second = -1;
         for (let index = 0; index < this.gridNum; index += 1) {
-            if ((index - padding) % 10 === 0 && index) {
+            if (index && index >= padding && index <= this.gridNum - padding && (index - padding) % 10 === 0) {
                 second += 1;
                 this.ctx.fillRect(
                     this.gridGap * index,
@@ -116,7 +116,7 @@ export default class Drawer {
                     this.gridGap * index - fontSize * pixelRatio * 2 + pixelRatio,
                     rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize,
                 );
-            } else if ((index - padding) % 5 === 0 && index) {
+            } else if (index && (index - padding) % 5 === 0) {
                 this.ctx.fillRect(
                     this.gridGap * index,
                     rulerAtTop ? 0 : height - (fontHeight / 2) * pixelRatio,
