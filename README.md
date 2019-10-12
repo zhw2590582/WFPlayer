@@ -13,7 +13,16 @@
 
 [Checkout the demo](https://wfplayer.js.org/) from Github Pages
 
-## Install player
+## Features
+
+-   Create waveforms without loading the entire media file
+-   Customize cursor, progress, grid, ruler display and color
+-   Support for loading media urls and loading media dom elements (video tags and audio tags)
+-   Support for real-time change options like color or width etc
+-   Listen to the playback state of media elements for playback animation
+-   And more...
+
+## Install
 
 Install with `npm`
 
