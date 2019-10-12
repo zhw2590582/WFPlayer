@@ -49,6 +49,15 @@ export default class WFPlayer extends Emitter {
     }
 
     static get scheme() {
+        const checkNum = (name, min) => (value, type) => {
+            errorHandle(type === 'number', `${name} expects to receive object as a parameter.`);
+            errorHandle(
+                value >= min && Number.isInteger(value),
+                `${name} expect a positive integer greater than or equal to ${min}, but got ${value}.`,
+            );
+            return true;
+        };
+
         return {
             container: 'htmlelement',
             mediaElement: 'null|htmlvideoelement|htmlaudioelement',
@@ -66,10 +75,10 @@ export default class WFPlayer extends Emitter {
             withCredentials: 'boolean',
             cors: 'boolean',
             headers: 'object',
-            pixelRatio: 'number',
-            channel: 'number',
-            duration: 'number',
-            padding: 'number',
+            pixelRatio: checkNum('pixelRatio', 1),
+            channel: checkNum('channel', 0),
+            duration: checkNum('duration', 1),
+            padding: checkNum('padding', 1),
         };
     }
 
@@ -115,7 +124,7 @@ export default class WFPlayer extends Emitter {
     }
 
     setOptions(options = {}) {
-        errorHandle(validator.kindOf(options) === 'object', 'setOptions expects to receive object as a parameter');
+        errorHandle(validator.kindOf(options) === 'object', 'setOptions expects to receive object as a parameter.');
 
         if (typeof options.container === 'string') {
             options.container = document.querySelector(options.container);
@@ -153,7 +162,7 @@ export default class WFPlayer extends Emitter {
     }
 
     seek(second) {
-        errorHandle(typeof second === 'number', 'seek expects to receive number as a parameter');
+        errorHandle(typeof second === 'number', 'seek expects to receive number as a parameter.');
         this._currentTime = clamp(second, 0, this.duration);
         this.drawer.update();
         return this;

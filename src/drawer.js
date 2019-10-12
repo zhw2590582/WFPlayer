@@ -52,7 +52,7 @@ export default class Drawer {
     updateWave() {
         const {
             currentTime,
-            options: { progress, waveColor, progressColor, duration, pixelRatio, padding },
+            options: { progress, waveColor, progressColor, duration, padding },
             decoder: {
                 channelData,
                 audiobuffer: { sampleRate },
@@ -76,7 +76,7 @@ export default class Drawer {
                 const [min, max] = getMinAndMax(arr);
                 const waveX = this.gridGap * padding + index;
                 this.ctx.fillStyle = progress && cursorX >= waveX ? progressColor : waveColor;
-                this.ctx.fillRect(waveX, (1 + min) * middle, pixelRatio, Math.max(1, (max - min) * middle));
+                this.ctx.fillRect(waveX, (1 + min) * middle, 1, Math.max(1, (max - min) * middle));
                 arr.length = 0;
             }
         }
@@ -115,7 +115,7 @@ export default class Drawer {
                 this.ctx.fillText(
                     durationToTime(this.beginTime + second).split('.')[0],
                     this.gridGap * index - fontSize * pixelRatio * 2 + pixelRatio,
-                    rulerAtTop ? fontTop : height - fontTop + fontSize,
+                    rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize,
                 );
             } else if ((index - padding) % 5 === 0 && index) {
                 this.ctx.fillRect(

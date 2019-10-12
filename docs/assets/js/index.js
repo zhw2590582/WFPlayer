@@ -3,6 +3,8 @@ var $download = document.querySelector('.download');
 var $filesize = document.querySelector('.filesize');
 var $downloading = document.querySelector('.downloading');
 var $decodeing = document.querySelector('.decodeing');
+var $pickers = Array.from(document.querySelectorAll('.color-picker'));
+var $range = Array.from(document.querySelectorAll('.range input'));
 
 var art = new Artplayer({
     container: '.artplayer',
@@ -15,10 +17,12 @@ var art = new Artplayer({
     },
 });
 
-var wf = new WFPlayer({
+var options = {
     container: '.waveform',
     cors: true,
-});
+};
+
+var wf = new WFPlayer(options);
 
 wf.on('fileSize', function(fileSize) {
     $filesize.innerHTML = (fileSize / 1024 / 1024).toFixed(3) + ' M';
@@ -51,10 +55,7 @@ $open.addEventListener('change', function() {
             var url = URL.createObjectURL(file);
             art.player.switchUrl(url, file.name).then(() => {
                 wf.destroy();
-                wf = new WFPlayer({
-                    container: '.waveform',
-                    cors: true,
-                });
+                wf = new WFPlayer(options);
                 wf.load(art.template.$video);
             });
         } else {
@@ -67,12 +68,12 @@ $download.addEventListener('click', function() {
     wf.exportImage();
 });
 
-Array.from(document.querySelectorAll('.color-picker')).forEach(function($el) {
+$pickers.forEach(function($el) {
     var name = $el.getAttribute('name');
     var pickr = Pickr.create({
         el: $el,
         theme: 'classic',
-        default: 'rgb(33, 150, 243)',
+        default: wf.options[name],
         swatches: [
             'rgba(244, 67, 54, 1)',
             'rgba(233, 30, 99, 0.95)',
@@ -97,7 +98,6 @@ Array.from(document.querySelectorAll('.color-picker')).forEach(function($el) {
                 hex: true,
                 rgba: true,
                 input: true,
-                clear: true,
                 save: true,
             },
         },
@@ -116,11 +116,13 @@ Array.from(document.querySelectorAll('.color-picker')).forEach(function($el) {
         });
 });
 
-Array.from(document.querySelectorAll('.range')).forEach(function($el) {
+$range.forEach(function($el) {
     var name = $el.getAttribute('name');
-    $el.addEventListener('change', function() {
+    new Powerange($el, { min: 1, max: 20, start: $el.value, step: 1, hideRange: true });
+    $el.onchange = function() {
+        $el.previousElementSibling.innerHTML = $el.value;
         wf.setOptions({
             [name]: Number($el.value),
         });
-    });
+    };
 });

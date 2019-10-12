@@ -115,7 +115,7 @@ body,
 
 .main .left .item {
     display: flex;
-    height: 50px;
+    height: 45px;
     border-bottom: 1px solid rgb(53, 53, 53);
     align-items: center;
     padding: 0 20px;
@@ -130,10 +130,13 @@ body,
     flex: 1;
     display: flex;
     align-items: center;
+    height: 100%;
+    padding-right: 50px;
 }
 
-.main .left .item .range {
-    width: 50%;
+.main .left .item .range .value {
+    width: 50px;
+    text-align: center;
 }
 
 .main .right {

@@ -1,5 +1,5 @@
 /*!
- * WFPlayer.js v1.1.3
+ * WFPlayer.js v1.0.1
  * Github: https://github.com/zhw2590582/WFPlayer#readme
  * (c) 2017-2019 Harvey Zack
  * Released under the MIT License.
@@ -629,7 +629,6 @@
             waveColor = _this$wf2$options.waveColor,
             progressColor = _this$wf2$options.progressColor,
             duration = _this$wf2$options.duration,
-            pixelRatio = _this$wf2$options.pixelRatio,
             padding = _this$wf2$options.padding,
             _this$wf2$decoder = _this$wf2.decoder,
             channelData = _this$wf2$decoder.channelData,
@@ -660,7 +659,7 @@
 
             var waveX = this.gridGap * padding + index;
             this.ctx.fillStyle = progress && cursorX >= waveX ? progressColor : waveColor;
-            this.ctx.fillRect(waveX, (1 + min) * middle, pixelRatio, Math.max(1, (max - min) * middle));
+            this.ctx.fillRect(waveX, (1 + min) * middle, 1, Math.max(1, (max - min) * middle));
             arr.length = 0;
           }
         }
@@ -704,7 +703,7 @@
           if ((index - padding) % 10 === 0) {
             second += 1;
             this.ctx.fillRect(this.gridGap * index, rulerAtTop ? 0 : height - fontHeight * pixelRatio, pixelRatio, fontHeight * pixelRatio);
-            this.ctx.fillText(durationToTime(this.beginTime + second).split('.')[0], this.gridGap * index - fontSize * pixelRatio * 2 + pixelRatio, rulerAtTop ? fontTop : height - fontTop + fontSize);
+            this.ctx.fillText(durationToTime(this.beginTime + second).split('.')[0], this.gridGap * index - fontSize * pixelRatio * 2 + pixelRatio, rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize);
           } else if ((index - padding) % 5 === 0 && index) {
             this.ctx.fillRect(this.gridGap * index, rulerAtTop ? 0 : height - fontHeight / 2 * pixelRatio, pixelRatio, fontHeight / 2 * pixelRatio);
           }
@@ -1333,23 +1332,10 @@
 
     createClass(Loader, [{
       key: "load",
-      value: function load(target) {
-        this.destroy();
-        var targetType = optionValidator.kindOf(target);
-
-        if (targetType === 'string') {
-          this.loadFromUrl(target);
-        } else if (targetType === 'blob' || targetType === 'file') {
-          this.loadFromFile(target);
-        } else {
-          errorHandle(false, "This format is not supported: ".concat(targetType));
-        }
-      }
-    }, {
-      key: "loadFromUrl",
-      value: function loadFromUrl(url) {
+      value: function load(url) {
         var _this = this;
 
+        this.destroy();
         this.abortController = new AbortController();
         var _this$wf$options = this.wf.options,
             withCredentials = _this$wf$options.withCredentials,
@@ -1359,8 +1345,8 @@
         return fetch(url, {
           credentials: withCredentials ? 'include' : 'omit',
           mode: cors ? 'cors' : 'no-cors',
-          headers: headers,
-          signal: this.abortController.signal
+          signal: this.abortController.signal,
+          headers: headers
         }).then(function (response) {
           if (response.body && typeof response.body.getReader === 'function') {
             _this.fileSize = Number(response.headers.get('content-length'));
@@ -1404,36 +1390,13 @@
 
             _this.loadSize = uint8.byteLength;
 
+            _this.wf.emit('downloading', _this.loadSize / _this.fileSize);
+
             _this.wf.emit('loading', uint8);
 
             _this.wf.emit('loadEnd');
           }
         });
-      }
-    }, {
-      key: "loadFromFile",
-      value: function loadFromFile(file) {
-        var _this3 = this;
-
-        this.reader = new FileReader();
-
-        this.reader.onload = function (e) {
-          var uint8 = new Uint8Array(e.target.result);
-          _this3.fileSize = uint8.byteLength;
-
-          _this3.wf.emit('fileSize', _this3.fileSize);
-
-          _this3.loadSize = uint8.byteLength;
-
-          _this3.wf.emit('loading', uint8);
-
-          _this3.wf.emit('loadEnd');
-
-          _this3.reader.onload = null;
-        };
-
-        this.wf.emit('loadStart');
-        this.reader.readAsArrayBuffer(file);
       }
     }, {
       key: "destroy",
@@ -1571,7 +1534,7 @@
     }, {
       key: "version",
       get: function get() {
-        return '1.1.3';
+        return '1.0.1';
       }
     }, {
       key: "env",
@@ -1607,6 +1570,14 @@
     }, {
       key: "scheme",
       get: function get() {
+        var checkNum = function checkNum(name, min) {
+          return function (value, type) {
+            errorHandle(type === 'number', "".concat(name, " expects to receive object as a parameter."));
+            errorHandle(value >= min && Number.isInteger(value), "".concat(name, " expect a positive integer greater than or equal to ").concat(min, ", but got ").concat(value, "."));
+            return true;
+          };
+        };
+
         return {
           container: 'htmlelement',
           mediaElement: 'null|htmlvideoelement|htmlaudioelement',
@@ -1624,10 +1595,10 @@
           withCredentials: 'boolean',
           cors: 'boolean',
           headers: 'object',
-          pixelRatio: 'number',
-          channel: 'number',
-          duration: 'number',
-          padding: 'number'
+          pixelRatio: checkNum('pixelRatio', 1),
+          channel: checkNum('channel', 0),
+          duration: checkNum('duration', 1),
+          padding: checkNum('padding', 1)
         };
       }
     }]);
@@ -1662,7 +1633,7 @@
       key: "setOptions",
       value: function setOptions() {
         var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        errorHandle(optionValidator.kindOf(options) === 'object', 'setOptions expects to receive object as a parameter');
+        errorHandle(optionValidator.kindOf(options) === 'object', 'setOptions expects to receive object as a parameter.');
 
         if (typeof options.container === 'string') {
           options.container = document.querySelector(options.container);
@@ -1692,7 +1663,7 @@
     }, {
       key: "seek",
       value: function seek(second) {
-        errorHandle(typeof second === 'number', 'seek expects to receive number as a parameter');
+        errorHandle(typeof second === 'number', 'seek expects to receive number as a parameter.');
         this._currentTime = clamp(second, 0, this.duration);
         this.drawer.update();
         return this;
