@@ -1,6 +1,6 @@
 var art = new Artplayer({
     container: '.artplayer',
-    url: './fullmetal-alchemist-again.mp4',
+    url: './your-name.mp4',
     autoSize: true,
     moreVideoAttr: {
         crossOrigin: 'anonymous',

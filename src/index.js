@@ -8,7 +8,12 @@ import Loader from './loader';
 import Controller from './controller';
 
 let id = 0;
-class WFPlayer extends Emitter {
+const instances = [];
+export default class WFPlayer extends Emitter {
+    static get instances() {
+        return instances;
+    }
+
     static get version() {
         return '__VERSION__';
     }
@@ -26,7 +31,7 @@ class WFPlayer extends Emitter {
             cursor: true,
             cursorColor: '#ff0000',
             progress: true,
-            progressColor: '#fff',
+            progressColor: 'rgba(255, 255, 255, 0.5)',
             grid: true,
             gridColor: 'rgba(255, 255, 255, 0.05)',
             ruler: true,
@@ -72,6 +77,7 @@ class WFPlayer extends Emitter {
     constructor(options = {}) {
         super();
 
+        this._currentTime = 0;
         this.destroy = false;
         this.options = {};
         this.setOptions(options);
@@ -85,15 +91,11 @@ class WFPlayer extends Emitter {
 
         id += 1;
         this.id = id;
-        WFPlayer.instances.push(this);
+        instances.push(this);
     }
 
     get currentTime() {
-        return this.options.mediaElement ? this.options.mediaElement.currentTime : 0;
-    }
-
-    get duration() {
-        return this.options.mediaElement ? this.options.mediaElement.duration : 0;
+        return this.options.mediaElement ? this.options.mediaElement.currentTime : this._currentTime;
     }
 
     setOptions(options = {}) {
@@ -152,12 +154,6 @@ class WFPlayer extends Emitter {
         this.controller.destroy();
         this.decoder.destroy();
         this.loader.destroy();
-        WFPlayer.instances.splice(WFPlayer.instances.indexOf(this), 1);
+        instances.splice(instances.indexOf(this), 1);
     }
 }
-
-Object.defineProperty(WFPlayer, 'instances', {
-    value: [],
-});
-
-export default WFPlayer;

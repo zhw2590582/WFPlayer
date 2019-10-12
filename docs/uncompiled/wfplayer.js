@@ -427,6 +427,22 @@
       return merge;
     }, new Cons());
   }
+  function getMinAndMax(arr) {
+    var min = 1;
+    var max = -1;
+
+    for (var i = 0; i < arr.length; i += 1) {
+      var item = arr[i];
+
+      if (item < min) {
+        min = item;
+      } else if (item > max) {
+        max = item;
+      }
+    }
+
+    return [min, max];
+  }
   function clamp(num, a, b) {
     return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
   }
@@ -503,6 +519,56 @@
     return Template;
   }();
 
+  function _arrayWithHoles(arr) {
+    if (Array.isArray(arr)) return arr;
+  }
+
+  var arrayWithHoles = _arrayWithHoles;
+
+  function _iterableToArrayLimit(arr, i) {
+    if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
+      return;
+    }
+
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"] != null) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  var iterableToArrayLimit = _iterableToArrayLimit;
+
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance");
+  }
+
+  var nonIterableRest = _nonIterableRest;
+
+  function _slicedToArray(arr, i) {
+    return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || nonIterableRest();
+  }
+
+  var slicedToArray = _slicedToArray;
+
   var Drawer =
   /*#__PURE__*/
   function () {
@@ -512,11 +578,17 @@
       classCallCheck(this, Drawer);
 
       this.wf = wf;
+      this.canvas = wf.template.canvas;
+      this.ctx = this.canvas.getContext('2d');
+      this.gridNum = 0;
+      this.gridGap = 0;
+      this.fontSize = 11;
+      this.beginTime = 0;
       this.update();
-      this.wf.on('options', function () {
+      wf.on('options', function () {
         _this.update();
       });
-      this.wf.on('channelData', function () {
+      wf.on('channelData', function () {
         _this.update();
       });
     }
@@ -524,134 +596,144 @@
     createClass(Drawer, [{
       key: "update",
       value: function update() {
-        var canvas = this.wf.template.canvas;
-        var _this$wf$options = this.wf.options,
+        var _this$wf = this.wf,
+            currentTime = _this$wf.currentTime,
+            _this$wf$options = _this$wf.options,
             cursor = _this$wf$options.cursor,
             grid = _this$wf$options.grid,
-            ruler = _this$wf$options.ruler;
-        var ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        this.updateBackground(ctx);
+            ruler = _this$wf$options.ruler,
+            perDuration = _this$wf$options.perDuration,
+            padding = _this$wf$options.padding;
+        this.gridNum = perDuration * 10 + padding * 2;
+        this.gridGap = this.canvas.width / this.gridNum;
+        this.beginTime = Math.floor(currentTime / perDuration) * 10;
+        this.updateBackground();
 
         if (grid) {
-          this.updateGrid(ctx);
+          this.updateGrid();
         }
 
         if (ruler) {
-          this.updateRuler(ctx);
+          this.updateRuler();
         }
 
-        this.updateWave(ctx);
+        this.updateWave();
 
         if (cursor) {
-          this.updateCursor(ctx);
+          this.updateCursor();
         }
       }
     }, {
       key: "updateBackground",
-      value: function updateBackground(ctx) {
+      value: function updateBackground() {
         var backgroundColor = this.wf.options.backgroundColor;
-        ctx.fillStyle = backgroundColor;
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        var _this$canvas = this.canvas,
+            width = _this$canvas.width,
+            height = _this$canvas.height;
+        this.ctx.clearRect(0, 0, width, height);
+        this.ctx.fillStyle = backgroundColor;
+        this.ctx.fillRect(0, 0, width, height);
       }
     }, {
       key: "updateWave",
-      value: function updateWave(ctx) {
-        var channelData = this.wf.decoder.channelData;
-        var sampleRate = this.wf.decoder.audiobuffer.sampleRate;
-        var _this$wf$options2 = this.wf.options,
-            waveColor = _this$wf$options2.waveColor,
-            perDuration = _this$wf$options2.perDuration,
-            pixelRatio = _this$wf$options2.pixelRatio,
-            padding = _this$wf$options2.padding;
-        ctx.fillStyle = waveColor;
-        var gridNum = perDuration * 10 + padding * 2;
-        var gridGap = ctx.canvas.width / gridNum;
-        var beginTime = Math.floor(this.wf.currentTime / perDuration) * 10;
-        var startIndex = clamp(beginTime * sampleRate, 0, channelData.length - 1);
-        var endIndex = clamp((beginTime + perDuration) * sampleRate, startIndex, channelData.length - 1);
-        var middle = ctx.canvas.height / 2;
-        var width = ctx.canvas.width - gridGap * padding * 2;
-        var step = Math.ceil((endIndex - startIndex) / width);
+      value: function updateWave() {
+        var _this$wf$decoder = this.wf.decoder,
+            channelData = _this$wf$decoder.channelData,
+            sampleRate = _this$wf$decoder.audiobuffer.sampleRate;
+        var _this$wf2 = this.wf,
+            currentTime = _this$wf2.currentTime,
+            _this$wf2$options = _this$wf2.options,
+            progress = _this$wf2$options.progress,
+            waveColor = _this$wf2$options.waveColor,
+            progressColor = _this$wf2$options.progressColor,
+            perDuration = _this$wf2$options.perDuration,
+            pixelRatio = _this$wf2$options.pixelRatio,
+            padding = _this$wf2$options.padding;
+        var _this$canvas2 = this.canvas,
+            width = _this$canvas2.width,
+            height = _this$canvas2.height;
+        var middle = height / 2;
+        var waveWidth = width - this.gridGap * padding * 2;
+        var startIndex = clamp(this.beginTime * sampleRate, 0, channelData.length);
+        var endIndex = clamp((this.beginTime + perDuration) * sampleRate, startIndex, channelData.length);
+        if (endIndex <= startIndex || channelData.length - 1 < endIndex) return;
+        var step = Math.floor((endIndex - startIndex) / waveWidth);
+        var cursorX = padding * this.gridGap + (currentTime - this.beginTime) * this.gridGap * 10;
+        var index = -1;
+        var arr = [];
 
-        for (var i = 0; i < width; i += 1) {
-          var min = 1.0;
-          var max = -1.0;
+        for (var i = startIndex; i < endIndex; i += 1) {
+          arr.push(channelData[i] || 0);
 
-          for (var j = startIndex; j < step; j += 1) {
-            var datum = channelData[i * step + j] || 0;
+          if (arr.length >= step && index < waveWidth) {
+            index += 1;
 
-            if (datum < min) {
-              min = datum;
-            } else if (datum > max) {
-              max = datum;
-            }
+            var _getMinAndMax = getMinAndMax(arr),
+                _getMinAndMax2 = slicedToArray(_getMinAndMax, 2),
+                min = _getMinAndMax2[0],
+                max = _getMinAndMax2[1];
+
+            var waveX = this.gridGap * padding + index;
+            this.ctx.fillStyle = progress && cursorX >= waveX ? progressColor : waveColor;
+            this.ctx.fillRect(waveX, (1 + min) * middle, pixelRatio, Math.max(1, (max - min) * middle));
+            arr.length = 0;
           }
-
-          ctx.fillRect(gridGap * padding + i, (1 + min) * middle, pixelRatio, Math.max(1, (max - min) * middle));
         }
       }
     }, {
       key: "updateGrid",
-      value: function updateGrid(ctx) {
-        var _this$wf$options3 = this.wf.options,
-            gridColor = _this$wf$options3.gridColor,
-            perDuration = _this$wf$options3.perDuration,
-            pixelRatio = _this$wf$options3.pixelRatio,
-            padding = _this$wf$options3.padding;
-        ctx.fillStyle = gridColor;
-        var gridNum = perDuration * 10 + padding * 2;
-        var gridGap = ctx.canvas.width / gridNum;
+      value: function updateGrid() {
+        var _this$wf$options2 = this.wf.options,
+            gridColor = _this$wf$options2.gridColor,
+            pixelRatio = _this$wf$options2.pixelRatio;
+        var _this$canvas3 = this.canvas,
+            width = _this$canvas3.width,
+            height = _this$canvas3.height;
+        this.ctx.fillStyle = gridColor;
 
-        for (var index = 0; index < gridNum; index += 1) {
-          ctx.fillRect(gridGap * index, 0, pixelRatio, ctx.canvas.height);
+        for (var index = 0; index < this.gridNum; index += 1) {
+          this.ctx.fillRect(this.gridGap * index, 0, pixelRatio, height);
         }
 
-        for (var _index = 0; _index < ctx.canvas.height / gridGap; _index += 1) {
-          ctx.fillRect(0, gridGap * _index, ctx.canvas.width, pixelRatio);
+        for (var _index = 0; _index < height / this.gridGap; _index += 1) {
+          this.ctx.fillRect(0, this.gridGap * _index, width, pixelRatio);
         }
       }
     }, {
       key: "updateRuler",
-      value: function updateRuler(ctx) {
-        var _this$wf$options4 = this.wf.options,
-            rulerColor = _this$wf$options4.rulerColor,
-            perDuration = _this$wf$options4.perDuration,
-            pixelRatio = _this$wf$options4.pixelRatio,
-            padding = _this$wf$options4.padding,
-            rulerAtTop = _this$wf$options4.rulerAtTop;
-        var ruler = -1;
-        var fontSize = 11;
-        ctx.font = "".concat(fontSize * pixelRatio, "px Arial");
-        ctx.fillStyle = rulerColor;
-        var gridNum = perDuration * 10 + padding * 2;
-        var gridGap = ctx.canvas.width / gridNum;
-        var beginTime = Math.floor(this.wf.currentTime / perDuration) * 10;
-        var height = ctx.canvas.height;
+      value: function updateRuler() {
+        var _this$wf$options3 = this.wf.options,
+            rulerColor = _this$wf$options3.rulerColor,
+            pixelRatio = _this$wf$options3.pixelRatio,
+            padding = _this$wf$options3.padding,
+            rulerAtTop = _this$wf$options3.rulerAtTop;
+        var height = this.canvas.height;
+        this.ctx.font = "".concat(this.fontSize * pixelRatio, "px Arial");
+        this.ctx.fillStyle = rulerColor;
+        var second = -1;
 
-        for (var index = 0; index < gridNum; index += 1) {
+        for (var index = 0; index < this.gridNum; index += 1) {
           if ((index - padding) % 10 === 0) {
-            ruler += 1;
-            ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - gridGap, pixelRatio, gridGap);
-            ctx.fillText(durationToTime(beginTime + ruler).split('.')[0], gridGap * index - fontSize * pixelRatio * 2, rulerAtTop ? gridGap * 2 : height - gridGap * 2 + fontSize);
+            second += 1;
+            this.ctx.fillRect(this.gridGap * index, rulerAtTop ? 0 : height - this.gridGap, pixelRatio, this.gridGap);
+            this.ctx.fillText(durationToTime(this.beginTime + second).split('.')[0], this.gridGap * index - this.fontSize * pixelRatio * 2 + pixelRatio, rulerAtTop ? this.gridGap * 2 : height - this.gridGap * 2 + this.fontSize);
           } else if ((index - padding) % 5 === 0 && index) {
-            ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - gridGap / 2, pixelRatio, gridGap / 2);
+            this.ctx.fillRect(this.gridGap * index, rulerAtTop ? 0 : height - this.gridGap / 2, pixelRatio, this.gridGap / 2);
           }
         }
       }
     }, {
       key: "updateCursor",
-      value: function updateCursor(ctx) {
-        var _this$wf$options5 = this.wf.options,
-            cursorColor = _this$wf$options5.cursorColor,
-            perDuration = _this$wf$options5.perDuration,
-            pixelRatio = _this$wf$options5.pixelRatio,
-            padding = _this$wf$options5.padding;
-        ctx.fillStyle = cursorColor;
-        var gridNum = perDuration * 10 + padding * 2;
-        var gridGap = ctx.canvas.width / gridNum;
-        var beginTime = Math.floor(this.wf.currentTime / perDuration) * 10;
-        ctx.fillRect(padding * gridGap + (this.wf.currentTime - beginTime) * gridGap * 10, 0, pixelRatio, ctx.canvas.height);
+      value: function updateCursor() {
+        var _this$wf3 = this.wf,
+            currentTime = _this$wf3.currentTime,
+            _this$wf3$options = _this$wf3.options,
+            cursorColor = _this$wf3$options.cursorColor,
+            pixelRatio = _this$wf3$options.pixelRatio,
+            padding = _this$wf3$options.padding;
+        var height = this.canvas.height;
+        this.ctx.fillStyle = cursorColor;
+        this.ctx.fillRect(padding * this.gridGap + (currentTime - this.beginTime) * this.gridGap * 10, 0, pixelRatio, height);
       }
     }]);
 
@@ -942,6 +1024,7 @@
 
   function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
   var id = 0;
+  var instances = [];
 
   var WFPlayer =
   /*#__PURE__*/
@@ -949,6 +1032,11 @@
     inherits(WFPlayer, _Emitter);
 
     createClass(WFPlayer, null, [{
+      key: "instances",
+      get: function get() {
+        return instances;
+      }
+    }, {
       key: "version",
       get: function get() {
         return '1.1.3';
@@ -969,7 +1057,7 @@
           cursor: true,
           cursorColor: '#ff0000',
           progress: true,
-          progressColor: '#fff',
+          progressColor: 'rgba(255, 255, 255, 0.5)',
           grid: true,
           gridColor: 'rgba(255, 255, 255, 0.05)',
           ruler: true,
@@ -1022,6 +1110,7 @@
       classCallCheck(this, WFPlayer);
 
       _this = possibleConstructorReturn(this, getPrototypeOf(WFPlayer).call(this));
+      _this._currentTime = 0;
       _this.destroy = false;
       _this.options = {};
 
@@ -1035,7 +1124,7 @@
       _this.loader = new Loader(assertThisInitialized(_this));
       id += 1;
       _this.id = id;
-      WFPlayer.instances.push(assertThisInitialized(_this));
+      instances.push(assertThisInitialized(_this));
       return _this;
     }
 
@@ -1096,26 +1185,17 @@
         this.controller.destroy();
         this.decoder.destroy();
         this.loader.destroy();
-        WFPlayer.instances.splice(WFPlayer.instances.indexOf(this), 1);
+        instances.splice(instances.indexOf(this), 1);
       }
     }, {
       key: "currentTime",
       get: function get() {
-        return this.options.mediaElement ? this.options.mediaElement.currentTime : 0;
-      }
-    }, {
-      key: "duration",
-      get: function get() {
-        return this.options.mediaElement ? this.options.mediaElement.duration : 0;
+        return this.options.mediaElement ? this.options.mediaElement.currentTime : this._currentTime;
       }
     }]);
 
     return WFPlayer;
   }(Emitter);
-
-  Object.defineProperty(WFPlayer, 'instances', {
-    value: []
-  });
 
   return WFPlayer;
 

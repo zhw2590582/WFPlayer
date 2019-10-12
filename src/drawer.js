@@ -1,120 +1,143 @@
-import { durationToTime, clamp } from './utils';
+import { durationToTime, clamp, getMinAndMax } from './utils';
 
 export default class Drawer {
     constructor(wf) {
         this.wf = wf;
+        this.canvas = wf.template.canvas;
+        this.ctx = this.canvas.getContext('2d');
+        this.gridNum = 0;
+        this.gridGap = 0;
+        this.fontSize = 11;
+        this.beginTime = 0;
+
         this.update();
 
-        this.wf.on('options', () => {
+        wf.on('options', () => {
             this.update();
         });
 
-        this.wf.on('channelData', () => {
+        wf.on('channelData', () => {
             this.update();
         });
     }
 
     update() {
-        const { canvas } = this.wf.template;
-        const { cursor, grid, ruler } = this.wf.options;
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        this.updateBackground(ctx);
+        const {
+            currentTime,
+            options: { cursor, grid, ruler, perDuration, padding },
+        } = this.wf;
+        this.gridNum = perDuration * 10 + padding * 2;
+        this.gridGap = this.canvas.width / this.gridNum;
+        this.beginTime = Math.floor(currentTime / perDuration) * 10;
+        this.updateBackground();
         if (grid) {
-            this.updateGrid(ctx);
+            this.updateGrid();
         }
         if (ruler) {
-            this.updateRuler(ctx);
+            this.updateRuler();
         }
-        this.updateWave(ctx);
+        this.updateWave();
         if (cursor) {
-            this.updateCursor(ctx);
+            this.updateCursor();
         }
     }
 
-    updateBackground(ctx) {
+    updateBackground() {
         const { backgroundColor } = this.wf.options;
-        ctx.fillStyle = backgroundColor;
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        const { width, height } = this.canvas;
+        this.ctx.clearRect(0, 0, width, height);
+        this.ctx.fillStyle = backgroundColor;
+        this.ctx.fillRect(0, 0, width, height);
     }
 
-    updateWave(ctx) {
-        const { channelData } = this.wf.decoder;
-        const { sampleRate } = this.wf.decoder.audiobuffer;
-        const { waveColor, perDuration, pixelRatio, padding } = this.wf.options;
-        ctx.fillStyle = waveColor;
-        const gridNum = perDuration * 10 + padding * 2;
-        const gridGap = ctx.canvas.width / gridNum;
-        const beginTime = Math.floor(this.wf.currentTime / perDuration) * 10;
-        const startIndex = clamp(beginTime * sampleRate, 0, channelData.length - 1);
-        const endIndex = clamp((beginTime + perDuration) * sampleRate, startIndex, channelData.length - 1);
-        const middle = ctx.canvas.height / 2;
-        const width = ctx.canvas.width - gridGap * padding * 2;
-        const step = Math.ceil((endIndex - startIndex) / width);
-        for (let i = 0; i < width; i += 1) {
-            let min = 1.0;
-            let max = -1.0;
-            for (let j = startIndex; j < step; j += 1) {
-                const datum = channelData[i * step + j] || 0;
-                if (datum < min) {
-                    min = datum;
-                } else if (datum > max) {
-                    max = datum;
-                }
+    updateWave() {
+        const {
+            channelData,
+            audiobuffer: { sampleRate },
+        } = this.wf.decoder;
+        const {
+            currentTime,
+            options: { progress, waveColor, progressColor, perDuration, pixelRatio, padding },
+        } = this.wf;
+        const { width, height } = this.canvas;
+        const middle = height / 2;
+        const waveWidth = width - this.gridGap * padding * 2;
+        const startIndex = clamp(this.beginTime * sampleRate, 0, channelData.length);
+        const endIndex = clamp((this.beginTime + perDuration) * sampleRate, startIndex, channelData.length);
+        if (endIndex <= startIndex || channelData.length - 1 < endIndex) return;
+        const step = Math.floor((endIndex - startIndex) / waveWidth);
+        const cursorX = padding * this.gridGap + (currentTime - this.beginTime) * this.gridGap * 10;
+
+        let index = -1;
+        const arr = [];
+        for (let i = startIndex; i < endIndex; i += 1) {
+            arr.push(channelData[i] || 0);
+            if (arr.length >= step && index < waveWidth) {
+                index += 1;
+                const [min, max] = getMinAndMax(arr);
+                const waveX = this.gridGap * padding + index;
+                this.ctx.fillStyle = progress && cursorX >= waveX ? progressColor : waveColor;
+                this.ctx.fillRect(waveX, (1 + min) * middle, pixelRatio, Math.max(1, (max - min) * middle));
+                arr.length = 0;
             }
-            ctx.fillRect(gridGap * padding + i, (1 + min) * middle, pixelRatio, Math.max(1, (max - min) * middle));
         }
     }
 
-    updateGrid(ctx) {
-        const { gridColor, perDuration, pixelRatio, padding } = this.wf.options;
-        ctx.fillStyle = gridColor;
-        const gridNum = perDuration * 10 + padding * 2;
-        const gridGap = ctx.canvas.width / gridNum;
-        for (let index = 0; index < gridNum; index += 1) {
-            ctx.fillRect(gridGap * index, 0, pixelRatio, ctx.canvas.height);
+    updateGrid() {
+        const { gridColor, pixelRatio } = this.wf.options;
+        const { width, height } = this.canvas;
+        this.ctx.fillStyle = gridColor;
+        for (let index = 0; index < this.gridNum; index += 1) {
+            this.ctx.fillRect(this.gridGap * index, 0, pixelRatio, height);
         }
-        for (let index = 0; index < ctx.canvas.height / gridGap; index += 1) {
-            ctx.fillRect(0, gridGap * index, ctx.canvas.width, pixelRatio);
+        for (let index = 0; index < height / this.gridGap; index += 1) {
+            this.ctx.fillRect(0, this.gridGap * index, width, pixelRatio);
         }
     }
 
-    updateRuler(ctx) {
-        const { rulerColor, perDuration, pixelRatio, padding, rulerAtTop } = this.wf.options;
-        let ruler = -1;
-        const fontSize = 11;
-        ctx.font = `${fontSize * pixelRatio}px Arial`;
-        ctx.fillStyle = rulerColor;
-        const gridNum = perDuration * 10 + padding * 2;
-        const gridGap = ctx.canvas.width / gridNum;
-        const beginTime = Math.floor(this.wf.currentTime / perDuration) * 10;
-        const { height } = ctx.canvas;
-        for (let index = 0; index < gridNum; index += 1) {
+    updateRuler() {
+        const { rulerColor, pixelRatio, padding, rulerAtTop } = this.wf.options;
+        const { height } = this.canvas;
+        this.ctx.font = `${this.fontSize * pixelRatio}px Arial`;
+        this.ctx.fillStyle = rulerColor;
+        let second = -1;
+        for (let index = 0; index < this.gridNum; index += 1) {
             if ((index - padding) % 10 === 0) {
-                ruler += 1;
-                ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - gridGap, pixelRatio, gridGap);
-                ctx.fillText(
-                    durationToTime(beginTime + ruler).split('.')[0],
-                    gridGap * index - fontSize * pixelRatio * 2,
-                    rulerAtTop ? gridGap * 2 : height - gridGap * 2 + fontSize,
+                second += 1;
+                this.ctx.fillRect(
+                    this.gridGap * index,
+                    rulerAtTop ? 0 : height - this.gridGap,
+                    pixelRatio,
+                    this.gridGap,
+                );
+                this.ctx.fillText(
+                    durationToTime(this.beginTime + second).split('.')[0],
+                    this.gridGap * index - this.fontSize * pixelRatio * 2 + pixelRatio,
+                    rulerAtTop ? this.gridGap * 2 : height - this.gridGap * 2 + this.fontSize,
                 );
             } else if ((index - padding) % 5 === 0 && index) {
-                ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - gridGap / 2, pixelRatio, gridGap / 2);
+                this.ctx.fillRect(
+                    this.gridGap * index,
+                    rulerAtTop ? 0 : height - this.gridGap / 2,
+                    pixelRatio,
+                    this.gridGap / 2,
+                );
             }
         }
     }
 
-    updateCursor(ctx) {
-        const { cursorColor, perDuration, pixelRatio, padding } = this.wf.options;
-        ctx.fillStyle = cursorColor;
-        const gridNum = perDuration * 10 + padding * 2;
-        const gridGap = ctx.canvas.width / gridNum;
-        const beginTime = Math.floor(this.wf.currentTime / perDuration) * 10;
-        ctx.fillRect(
-            padding * gridGap + (this.wf.currentTime - beginTime) * gridGap * 10,
+    updateCursor() {
+        const {
+            currentTime,
+            options: { cursorColor, pixelRatio, padding },
+        } = this.wf;
+        const { height } = this.canvas;
+        this.ctx.fillStyle = cursorColor;
+        this.ctx.fillRect(
+            padding * this.gridGap + (currentTime - this.beginTime) * this.gridGap * 10,
             0,
             pixelRatio,
-            ctx.canvas.height,
+            height,
         );
     }
 }
