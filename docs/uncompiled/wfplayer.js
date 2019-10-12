@@ -638,9 +638,8 @@
             height = _this$canvas2.height;
         var middle = height / 2;
         var waveWidth = width - this.gridGap * padding * 2;
-        var startIndex = clamp(this.beginTime * sampleRate, 0, channelData.length);
-        var endIndex = clamp((this.beginTime + duration) * sampleRate, startIndex, channelData.length);
-        if (endIndex <= startIndex || channelData.length - 1 < endIndex) return;
+        var startIndex = clamp(this.beginTime * sampleRate, 0, Infinity);
+        var endIndex = clamp((this.beginTime + duration) * sampleRate, startIndex, Infinity);
         var step = Math.floor((endIndex - startIndex) / waveWidth);
         var cursorX = padding * this.gridGap + (currentTime - this.beginTime) * this.gridGap * 10;
         var index = -1;

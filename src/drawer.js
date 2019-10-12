@@ -61,9 +61,8 @@ export default class Drawer {
         const { width, height } = this.canvas;
         const middle = height / 2;
         const waveWidth = width - this.gridGap * padding * 2;
-        const startIndex = clamp(this.beginTime * sampleRate, 0, channelData.length);
-        const endIndex = clamp((this.beginTime + duration) * sampleRate, startIndex, channelData.length);
-        if (endIndex <= startIndex || channelData.length - 1 < endIndex) return;
+        const startIndex = clamp(this.beginTime * sampleRate, 0, Infinity);
+        const endIndex = clamp((this.beginTime + duration) * sampleRate, startIndex, Infinity);
         const step = Math.floor((endIndex - startIndex) / waveWidth);
         const cursorX = padding * this.gridGap + (currentTime - this.beginTime) * this.gridGap * 10;
 
