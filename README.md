@@ -131,6 +131,15 @@ Export image:
 wf.exportImage();
 ```
 
+Modify option:
+
+```js
+wf.setOptions({
+    // Like change wave color
+    waveColor: 'red',
+});
+```
+
 Destroy instance:
 
 ```js

@@ -1527,7 +1527,7 @@
               _this4.wf.emit('playing', mediaElement.currentTime);
             }
 
-            if (!_this4.wf.destroy) {
+            if (!_this4.wf.isDestroy) {
               loop.call(_this4);
             }
           });
@@ -1632,7 +1632,7 @@
 
       _this = possibleConstructorReturn(this, getPrototypeOf(WFPlayer).call(this));
       _this._currentTime = 0;
-      _this.destroy = false;
+      _this.isDestroy = false;
       _this.options = {};
 
       _this.setOptions(options);
@@ -1697,10 +1697,9 @@
     }, {
       key: "destroy",
       value: function destroy() {
-        this.destroy = true;
+        this.isDestroy = true;
         this.events.destroy();
         this.template.destroy();
-        this.drawer.destroy();
         this.controller.destroy();
         this.decoder.destroy();
         this.loader.destroy();

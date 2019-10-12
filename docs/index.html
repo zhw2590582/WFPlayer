@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="./assets/css/normalize.css" />
     <link rel="stylesheet" href="./assets/css/artplayer.css" />
     <link rel="stylesheet" href="./assets/css/style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css" />
 </head>
 
 <body>
@@ -24,19 +25,56 @@
                     Github
                 </a>
             </div>
+            <div class="right">
+                <div class="item">
+                    Open Video
+                    <input class="open" type="file" name="file" />
+                </div>
+                <div class="item download">Download Image</div>
+            </div>
         </header>
         <section class="main">
-            <div class="left"></div>
+            <div class="left">
+                <div class="item">
+                    <div class="name">Wave Color:</div>
+                    <div class="controller">
+                        <div class="color-picker" name="waveColor"></div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="name">Background Color:</div>
+                    <div class="controller">
+                        <div class="color-picker" name="backgroundColor"></div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="name">Cursor Color:</div>
+                    <div class="controller">
+                        <div class="color-picker" name="cursorColor"></div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="name">Progress Color:</div>
+                    <div class="controller">
+                        <div class="color-picker" name="progressColor"></div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="name">Ruler Color:</div>
+                    <div class="controller">
+                        <div class="color-picker" name="rulerColor"></div>
+                    </div>
+                </div>
+            </div>
             <div class="right">
                 <div class="artplayer"></div>
             </div>
         </section>
-        <footer class="waveform">
-
-        </footer>
+        <footer class="waveform"></footer>
     </div>
     <script src="./uncompiled/wfplayer.js"></script>
     <script src="./assets/js/artplayer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
     <script src="./assets/js/index.js"></script>
     <script>
         var _hmt = _hmt || [];

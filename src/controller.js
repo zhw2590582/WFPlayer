@@ -60,7 +60,7 @@ export default class Controller {
                     this.wf.emit('playing', mediaElement.currentTime);
                 }
 
-                if (!this.wf.destroy) {
+                if (!this.wf.isDestroy) {
                     loop.call(this);
                 }
             });

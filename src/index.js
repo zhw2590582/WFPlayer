@@ -77,7 +77,7 @@ export default class WFPlayer extends Emitter {
         super();
 
         this._currentTime = 0;
-        this.destroy = false;
+        this.isDestroy = false;
         this.options = {};
         this.setOptions(options);
 
@@ -165,10 +165,9 @@ export default class WFPlayer extends Emitter {
     }
 
     destroy() {
-        this.destroy = true;
+        this.isDestroy = true;
         this.events.destroy();
         this.template.destroy();
-        this.drawer.destroy();
         this.controller.destroy();
         this.decoder.destroy();
         this.loader.destroy();
