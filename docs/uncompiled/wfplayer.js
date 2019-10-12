@@ -1290,8 +1290,12 @@
       value: function decodeAudioData(uint8) {
         var _this2 = this;
 
-        var channel = this.wf.options.channel;
+        var _this$wf = this.wf,
+            channel = _this$wf.options.channel,
+            duration = _this$wf.duration;
         this.audioCtx.decodeAudioData(uint8.buffer).then(function (audiobuffer) {
+          _this2.wf.emit('decodeing', audiobuffer.duration / duration);
+
           _this2.audiobuffer = audiobuffer;
           _this2.channelData = audiobuffer.getChannelData(channel);
 
@@ -1374,7 +1378,7 @@
 
                 _this2.loadSize += value.byteLength;
 
-                _this2.wf.emit('percentage', _this2.loadSize / _this2.fileSize);
+                _this2.wf.emit('downloading', _this2.loadSize / _this2.fileSize);
 
                 _this2.data = mergeBuffer(_this2.data, value);
 

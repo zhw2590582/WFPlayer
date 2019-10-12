@@ -44,7 +44,7 @@ export default class Loader {
                                 return null;
                             }
                             this.loadSize += value.byteLength;
-                            this.wf.emit('percentage', this.loadSize / this.fileSize);
+                            this.wf.emit('downloading', this.loadSize / this.fileSize);
                             this.data = mergeBuffer(this.data, value);
                             this.wf.emit('loading', this.data.slice());
                             return read.call(this);

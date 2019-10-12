@@ -15,10 +15,14 @@ export default class Decoder {
     }
 
     decodeAudioData(uint8) {
-        const { channel } = this.wf.options;
+        const {
+            options: { channel },
+            duration,
+        } = this.wf;
         this.audioCtx
             .decodeAudioData(uint8.buffer)
             .then(audiobuffer => {
+                this.wf.emit('decodeing', audiobuffer.duration / duration);
                 this.audiobuffer = audiobuffer;
                 this.channelData = audiobuffer.getChannelData(channel);
                 this.wf.emit('channelData', this.channelData);
