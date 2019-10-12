@@ -1291,11 +1291,13 @@
         var _this2 = this;
 
         var channel = this.wf.options.channel;
-        this.audioCtx.decodeAudioData(uint8.buffer, function (audiobuffer) {
+        this.audioCtx.decodeAudioData(uint8.buffer).then(function (audiobuffer) {
           _this2.audiobuffer = audiobuffer;
           _this2.channelData = audiobuffer.getChannelData(channel);
 
           _this2.wf.emit('channelData', _this2.channelData);
+        }).catch(function (error) {
+          throw error;
         });
       }
     }, {
@@ -1351,12 +1353,11 @@
         return fetch(url, {
           credentials: withCredentials ? 'include' : 'omit',
           mode: cors ? 'cors' : 'no-cors',
-          signal: this.abortController.signal,
-          headers: headers
+          headers: headers,
+          signal: this.abortController.signal
         }).then(function (response) {
-          _this.fileSize = Number(response.headers.get('content-length'));
-
           if (response.body && typeof response.body.getReader === 'function') {
+            _this.fileSize = Number(response.headers.get('content-length'));
             _this.reader = response.body.getReader();
             return function read() {
               var _this2 = this;
@@ -1372,6 +1373,9 @@
                 }
 
                 _this2.loadSize += value.byteLength;
+
+                _this2.wf.emit('percentage', _this2.loadSize / _this2.fileSize);
+
                 _this2.data = mergeBuffer(_this2.data, value);
 
                 _this2.wf.emit('loading', _this2.data.slice());
@@ -1383,8 +1387,9 @@
 
           return response.arrayBuffer();
         }).then(function (arrayBuffer) {
-          if (arrayBuffer) {
+          if (arrayBuffer && arrayBuffer.byteLength) {
             var uint8 = new Uint8Array(arrayBuffer);
+            _this.fileSize = uint8.byteLength;
             _this.loadSize = uint8.byteLength;
 
             _this.wf.emit('loading', uint8);

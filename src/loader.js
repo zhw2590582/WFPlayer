@@ -30,12 +30,12 @@ export default class Loader {
         return fetch(url, {
             credentials: withCredentials ? 'include' : 'omit',
             mode: cors ? 'cors' : 'no-cors',
-            signal: this.abortController.signal,
             headers,
+            signal: this.abortController.signal,
         })
             .then(response => {
-                this.fileSize = Number(response.headers.get('content-length'));
                 if (response.body && typeof response.body.getReader === 'function') {
+                    this.fileSize = Number(response.headers.get('content-length'));
                     this.reader = response.body.getReader();
                     return function read() {
                         return this.reader.read().then(({ done, value }) => {
@@ -44,6 +44,7 @@ export default class Loader {
                                 return null;
                             }
                             this.loadSize += value.byteLength;
+                            this.wf.emit('percentage', this.loadSize / this.fileSize);
                             this.data = mergeBuffer(this.data, value);
                             this.wf.emit('loading', this.data.slice());
                             return read.call(this);
@@ -53,8 +54,9 @@ export default class Loader {
                 return response.arrayBuffer();
             })
             .then(arrayBuffer => {
-                if (arrayBuffer) {
+                if (arrayBuffer && arrayBuffer.byteLength) {
                     const uint8 = new Uint8Array(arrayBuffer);
+                    this.fileSize = uint8.byteLength;
                     this.loadSize = uint8.byteLength;
                     this.wf.emit('loading', uint8);
                     this.wf.emit('loadEnd');

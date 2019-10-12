@@ -1,6 +1,6 @@
 var art = new Artplayer({
     container: '.artplayer',
-    url: 'https://zhw2590582.github.io/assets-cdn/video/one-more-time-one-more-chance-480p.mp4',
+    url: 'https://zhw2590582.github.io/assets-cdn/video/your-name.mp4',
     autoSize: true,
     loop: true,
     moreVideoAttr: {
@@ -10,6 +10,7 @@ var art = new Artplayer({
 
 var wf = new WFPlayer({
     container: '.waveform',
+    cors: true,
 });
 
 art.on('ready', function() {
