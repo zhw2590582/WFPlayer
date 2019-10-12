@@ -1,3 +1,4 @@
+var $version = document.querySelector('.version');
 var $open = document.querySelector('.open');
 var $download = document.querySelector('.download');
 var $filesize = document.querySelector('.filesize');
@@ -5,6 +6,8 @@ var $downloading = document.querySelector('.downloading');
 var $decodeing = document.querySelector('.decodeing');
 var $pickers = Array.from(document.querySelectorAll('.color-picker'));
 var $range = Array.from(document.querySelectorAll('.range input'));
+
+$version.innerHTML = 'Beta ' + WFPlayer.version;
 
 var art = new Artplayer({
     container: '.artplayer',

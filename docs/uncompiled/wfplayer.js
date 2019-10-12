@@ -1,10 +1,3 @@
-/*!
- * WFPlayer.js v1.0.1
- * Github: https://github.com/zhw2590582/WFPlayer#readme
- * (c) 2017-2019 Harvey Zack
- * Released under the MIT License.
- */
-
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
@@ -1533,7 +1526,7 @@
     }, {
       key: "version",
       get: function get() {
-        return '1.0.1';
+        return '1.0.4';
       }
     }, {
       key: "env",

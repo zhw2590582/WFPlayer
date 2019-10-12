@@ -3,8 +3,7 @@ import commonjs from 'rollup-plugin-commonjs';
 import nodeResolve from 'rollup-plugin-node-resolve';
 import { eslint } from 'rollup-plugin-eslint';
 import replace from 'rollup-plugin-replace';
-import minify from 'rollup-plugin-babel-minify';
-import workerInline from 'rollup-plugin-worker-inline';
+import { uglify } from 'rollup-plugin-uglify';
 import { version, homepage } from './package.json';
 
 const isProd = process.env.NODE_ENV === 'production';
@@ -16,13 +15,6 @@ export default {
         file: isProd ? 'dist/wfplayer.js' : 'docs/uncompiled/wfplayer.js',
         format: 'umd',
         sourcemap: !isProd,
-        banner:
-            '/*!\n' +
-            ` * WFPlayer.js v${version}\n` +
-            ` * Github: ${homepage}\n` +
-            ` * (c) 2017-${new Date().getFullYear()} Harvey Zack\n` +
-            ' * Released under the MIT License.\n' +
-            ' */\n',
     },
     plugins: [
         eslint({
@@ -30,7 +22,6 @@ export default {
         }),
         nodeResolve(),
         commonjs(),
-        workerInline(),
         babel({
             runtimeHelpers: true,
             exclude: 'node_modules/**',
@@ -49,6 +40,17 @@ export default {
             __ENV__: JSON.stringify(process.env.NODE_ENV || 'development'),
             __VERSION__: version,
         }),
-        isProd && minify(),
+        isProd &&
+            uglify({
+                output: {
+                    preamble:
+                        '/*!\n' +
+                        ` * WFPlayer.js v${version}\n` +
+                        ` * Github: ${homepage}\n` +
+                        ` * (c) 2017-${new Date().getFullYear()} Harvey Zack\n` +
+                        ' * Released under the MIT License.\n' +
+                        ' */\n',
+                },
+            }),
     ],
 };
