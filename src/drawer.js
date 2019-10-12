@@ -103,7 +103,7 @@ export default class Drawer {
         this.ctx.fillStyle = rulerColor;
         let second = -1;
         for (let index = 0; index < this.gridNum; index += 1) {
-            if ((index - padding) % 10 === 0) {
+            if ((index - padding) % 10 === 0 && index) {
                 second += 1;
                 this.ctx.fillRect(
                     this.gridGap * index,
