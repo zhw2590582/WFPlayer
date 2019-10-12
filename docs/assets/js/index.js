@@ -33,6 +33,8 @@ wf.on('decodeing', function(value) {
 });
 
 art.on('ready', function() {
+    art.seek = 3;
+    wf.seek(3);
     wf.load(art.template.$video);
 });
 
@@ -70,6 +72,7 @@ Array.from(document.querySelectorAll('.color-picker')).forEach(function($el) {
     var pickr = Pickr.create({
         el: $el,
         theme: 'classic',
+        default: 'rgb(33, 150, 243)',
         swatches: [
             'rgba(244, 67, 54, 1)',
             'rgba(233, 30, 99, 0.95)',

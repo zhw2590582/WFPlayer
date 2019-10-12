@@ -7,6 +7,8 @@
 
 > WFPlayer.js is an audio waveform generator
 
+![Screenshot](./images/screenshot.png)
+
 ## Demo
 
 [Checkout the demo](https://wfplayer.js.org/) from Github Pages
@@ -188,6 +190,14 @@ Get the env:
 ```js
 WFPlayer.env;
 ```
+
+## Donations
+
+We accept donations through these channels:
+
+-   [Paypal](https://www.paypal.me/harveyzack)
+-   [WeChat Pay](./images/wechatpay.jpg)
+-   [Alipay](./images/alipay.jpg)
 
 ## QQ Group
 
