@@ -55,16 +55,9 @@ export default class Controller {
         if (!mediaElement) return;
         (function loop() {
             this.playTimer = requestAnimationFrame(() => {
-                const playing = !!(
-                    mediaElement.currentTime > 0 &&
-                    !mediaElement.paused &&
-                    !mediaElement.ended &&
-                    mediaElement.readyState > 2
-                );
-
-                if (playing) {
+                if (this.wf.playing) {
                     drawer.update();
-                    this.wf.emit('play', mediaElement.currentTime);
+                    this.wf.emit('playing', mediaElement.currentTime);
                 }
 
                 if (!this.wf.destroy) {

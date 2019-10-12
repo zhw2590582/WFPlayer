@@ -1297,6 +1297,7 @@
 
           _this2.wf.emit('channelData', _this2.channelData);
         }).catch(function (error) {
+          errorHandle(false, 'It seems that the AudioContext decoding get wrong.');
           throw error;
         });
       }
@@ -1515,12 +1516,10 @@
           var _this4 = this;
 
           this.playTimer = requestAnimationFrame(function () {
-            var playing = !!(mediaElement.currentTime > 0 && !mediaElement.paused && !mediaElement.ended && mediaElement.readyState > 2);
-
-            if (playing) {
+            if (_this4.wf.playing) {
               drawer.update();
 
-              _this4.wf.emit('play', mediaElement.currentTime);
+              _this4.wf.emit('playing', mediaElement.currentTime);
             }
 
             if (!_this4.wf.destroy) {
@@ -1732,6 +1731,17 @@
       key: "duration",
       get: function get() {
         return this.options.mediaElement ? this.options.mediaElement.duration : timeToDuration('99:59:59.999');
+      }
+    }, {
+      key: "playing",
+      get: function get() {
+        var mediaElement = this.options.mediaElement;
+
+        if (mediaElement) {
+          return !!(mediaElement.currentTime > 0 && !mediaElement.paused && !mediaElement.ended && mediaElement.readyState > 2);
+        }
+
+        return false;
       }
     }]);
 

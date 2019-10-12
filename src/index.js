@@ -114,6 +114,19 @@ export default class WFPlayer extends Emitter {
         return this.options.mediaElement ? this.options.mediaElement.duration : timeToDuration('99:59:59.999');
     }
 
+    get playing() {
+        const { mediaElement } = this.options;
+        if (mediaElement) {
+            return !!(
+                mediaElement.currentTime > 0 &&
+                !mediaElement.paused &&
+                !mediaElement.ended &&
+                mediaElement.readyState > 2
+            );
+        }
+        return false;
+    }
+
     setOptions(options = {}) {
         errorHandle(validator.kindOf(options) === 'object', 'setOptions expects to receive object as a parameter');
 

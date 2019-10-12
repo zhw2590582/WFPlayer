@@ -1,4 +1,5 @@
 import throttle from 'lodash/throttle';
+import { errorHandle } from './utils';
 
 export default class Decoder {
     constructor(wf) {
@@ -23,6 +24,7 @@ export default class Decoder {
                 this.wf.emit('channelData', this.channelData);
             })
             .catch(error => {
+                errorHandle(false, 'It seems that the AudioContext decoding get wrong.');
                 throw error;
             });
     }
