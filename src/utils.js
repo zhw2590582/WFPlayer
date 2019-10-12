@@ -22,14 +22,6 @@ export function timeToDuration(time) {
     return DT.t2d(time);
 }
 
-export function checkReadableStream() {
-    return (
-        typeof window.ReadableStream === 'function' &&
-        typeof window.Response === 'function' &&
-        Object.prototype.hasOwnProperty.call(window.Response.prototype, 'body')
-    );
-}
-
 export function mergeBuffer(...buffers) {
     const Cons = buffers[0].constructor;
     return buffers.reduce((pre, val) => {

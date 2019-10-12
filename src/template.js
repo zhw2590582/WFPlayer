@@ -15,10 +15,8 @@ export default class Template {
             this.canvas.height = clientHeight * pixelRatio;
         } else {
             errorHandle(
-                this.wf.constructor.instances.every(
-                    wf => wf.options.container !== container,
-                    'Cannot mount multiple instances on the same dom element, please destroy the previous instance first.',
-                ),
+                this.wf.constructor.instances.every(wf => wf.options.container !== container),
+                'Cannot mount multiple instances on the same dom element, please destroy the previous instance first.',
             );
             errorHandle(clientWidth && clientHeight, 'The width and height of the container cannot be 0');
             container.innerHTML = '';

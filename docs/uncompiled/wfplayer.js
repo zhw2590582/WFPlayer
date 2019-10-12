@@ -414,9 +414,6 @@
   function timeToDuration(time) {
     return durationTimeConversion.t2d(time);
   }
-  function checkReadableStream() {
-    return typeof window.ReadableStream === 'function' && typeof window.Response === 'function' && Object.prototype.hasOwnProperty.call(window.Response.prototype, 'body');
-  }
   function mergeBuffer() {
     for (var _len = arguments.length, buffers = new Array(_len), _key = 0; _key < _len; _key++) {
       buffers[_key] = arguments[_key];
@@ -476,7 +473,7 @@
         } else {
           errorHandle(this.wf.constructor.instances.every(function (wf) {
             return wf.options.container !== container;
-          }, 'Cannot mount multiple instances on the same dom element, please destroy the previous instance first.'));
+          }), 'Cannot mount multiple instances on the same dom element, please destroy the previous instance first.');
           errorHandle(clientWidth && clientHeight, 'The width and height of the container cannot be 0');
           container.innerHTML = '';
           this.canvas = document.createElement('canvas');
@@ -1323,6 +1320,7 @@
       this.loadSize = 0;
       this.data = new Uint8Array();
       this.reader = null;
+      this.abortController = null;
     }
 
     createClass(Loader, [{
@@ -1332,22 +1330,19 @@
         var targetType = optionValidator.kindOf(target);
 
         if (targetType === 'string') {
-          if (checkReadableStream()) {
-            this.loadFromSteam(target);
-          } else {
-            this.loadFromUrl(target);
-          }
-        } else if (targetType === 'Blob' || targetType === 'File') {
+          this.loadFromUrl(target);
+        } else if (targetType === 'blob' || targetType === 'file') {
           this.loadFromFile(target);
         } else {
           errorHandle(false, "This format is not supported: ".concat(targetType));
         }
       }
     }, {
-      key: "loadFromSteam",
-      value: function loadFromSteam(url) {
+      key: "loadFromUrl",
+      value: function loadFromUrl(url) {
         var _this = this;
 
+        this.abortController = new AbortController();
         var _this$wf$options = this.wf.options,
             withCredentials = _this$wf$options.withCredentials,
             cors = _this$wf$options.cors,
@@ -1356,10 +1351,12 @@
         return fetch(url, {
           credentials: withCredentials ? 'include' : 'omit',
           mode: cors ? 'cors' : 'no-cors',
+          signal: this.abortController.signal,
           headers: headers
         }).then(function (response) {
-          if (response.body && response.body.getReader) {
-            _this.fileSize = Number(response.headers.get('content-length'));
+          _this.fileSize = Number(response.headers.get('content-length'));
+
+          if (response.body && typeof response.body.getReader === 'function') {
             _this.reader = response.body.getReader();
             return function read() {
               var _this2 = this;
@@ -1371,10 +1368,10 @@
                 if (done) {
                   _this2.wf.emit('loadEnd');
 
-                  return _this2.reader;
+                  return null;
                 }
 
-                _this2.fileSize += value.byteLength;
+                _this2.loadSize += value.byteLength;
                 _this2.data = mergeBuffer(_this2.data, value);
 
                 _this2.wf.emit('loading', _this2.data.slice());
@@ -1384,55 +1381,37 @@
             }.call(_this);
           }
 
-          _this.destroy();
-
-          return _this.loadFromUrl(url);
-        });
-      }
-    }, {
-      key: "loadFromUrl",
-      value: function loadFromUrl(url) {
-        var _this3 = this;
-
-        this.reader = new AbortController();
-        var _this$wf$options2 = this.wf.options,
-            withCredentials = _this$wf$options2.withCredentials,
-            cors = _this$wf$options2.cors,
-            headers = _this$wf$options2.headers;
-        this.wf.emit('loadStart');
-        return fetch(url, {
-          credentials: withCredentials ? 'include' : 'omit',
-          mode: cors ? 'cors' : 'no-cors',
-          headers: headers,
-          signal: this.reader.signal
-        }).then(function (response) {
-          _this3.fileSize = Number(response.headers.get('content-length'));
           return response.arrayBuffer();
         }).then(function (arrayBuffer) {
-          var uint8 = new Uint8Array(arrayBuffer);
-          _this3.loadSize = uint8.byteLength;
+          if (arrayBuffer) {
+            var uint8 = new Uint8Array(arrayBuffer);
+            _this.loadSize = uint8.byteLength;
 
-          _this3.wf.emit('loading', uint8);
+            _this.wf.emit('loading', uint8);
 
-          _this3.wf.emit('loadEnd');
+            _this.wf.emit('loadEnd');
+          }
         });
       }
     }, {
       key: "loadFromFile",
       value: function loadFromFile(file) {
-        var _this4 = this;
+        var _this3 = this;
 
-        var proxy = this.wf.events.proxy;
         this.reader = new FileReader();
-        proxy(this.reader, 'load', function (e) {
+
+        this.reader.onload = function (e) {
           var uint8 = new Uint8Array(e.target.result);
-          _this4.fileSize = uint8.byteLength;
-          _this4.loadSize = uint8.byteLength;
+          _this3.fileSize = uint8.byteLength;
+          _this3.loadSize = uint8.byteLength;
 
-          _this4.wf.emit('loading', uint8);
+          _this3.wf.emit('loading', uint8);
 
-          _this4.wf.emit('loadEnd');
-        });
+          _this3.wf.emit('loadEnd');
+
+          _this3.reader.onload = null;
+        };
+
         this.wf.emit('loadStart');
         this.reader.readAsArrayBuffer(file);
       }
@@ -1444,15 +1423,13 @@
         this.data = new Uint8Array();
 
         if (this.reader) {
-          if (this.reader.cancel) {
-            this.reader.cancel();
-          }
-
-          if (this.reader.abort) {
-            this.reader.abort();
-          }
-
+          this.reader.cancel();
           this.reader = null;
+        }
+
+        if (this.abortController) {
+          this.abortController.abort();
+          this.abortController = null;
         }
       }
     }]);
