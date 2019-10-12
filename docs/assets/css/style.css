@@ -107,8 +107,12 @@ body,
     margin-right: 10px;
 }
 
+.main .left .item .controller {
+    flex: 1;
+}
+
 .main .left .item .range {
-    width: 300px;
+    width: 100%;
 }
 
 .main .right {
