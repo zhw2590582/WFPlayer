@@ -1,6 +1,7 @@
 var art = new Artplayer({
     container: '.artplayer',
-    url: 'https://zhw2590582.github.io/assets-cdn/video/your-name.mp4',
+    // url: 'https://zhw2590582.github.io/assets-cdn/video/your-name.mp4',
+    url: './your-name.mp4',
     autoSize: true,
     loop: true,
     moreVideoAttr: {
@@ -15,4 +16,8 @@ var wf = new WFPlayer({
 
 art.on('ready', function() {
     wf.load(art.template.$video);
+});
+
+art.on('seek', function() {
+    wf.seek(art.currentTime);
 });

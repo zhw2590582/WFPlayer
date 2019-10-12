@@ -1,2 +1,189 @@
 # WFPlayer
-WFPlayer.js is an audio waveform generator
+
+[![Build Status](https://www.travis-ci.org/zhw2590582/WFPlayer.svg?branch=master)](https://www.travis-ci.org/zhw2590582/WFPlayer)
+![version](https://badgen.net/npm/v/wfplayer)
+![license](https://badgen.net/npm/license/wfplayer)
+![size](https://badgen.net/bundlephobia/minzip/wfplayer)
+
+> WFPlayer.js is an audio waveform generator
+
+## Demo
+
+[Checkout the demo](https://wfplayer.js.org/) from Github Pages
+
+## Install player
+
+Install with `npm`
+
+```bash
+$ npm install wfplayer
+```
+
+Or install with `yarn`
+
+```bash
+$ yarn add wfplayer
+```
+
+```js
+import WFPlayer from 'wfplayer';
+```
+
+Or umd builds are also available
+
+```html
+<script src="path/to/wfplayer.js"></script>
+```
+
+Will expose the global variable to `window.WFPlayer`.
+
+## Usage
+
+```html
+<div id="waveform"></div>
+<video id="video" src="path/to/video.mp4"></video>
+```
+
+```js
+var wf = new WFPlayer({
+    // Mount the audio waveform of the dom
+    container: '#waveform',
+
+    // Media element like: video tag or audio tag
+    mediaElement: '#video',
+
+    // Waveform color
+    waveColor: 'rgba(255, 255, 255, 0.1)',
+
+    // Background color
+    backgroundColor: 'rgb(28, 32, 34)',
+
+    // Whether to display cursor
+    cursor: true,
+
+    // Cursor color
+    cursorColor: '#ff0000',
+
+    // Whether to display progress
+    progress: true,
+
+    // progress color
+    progressColor: 'rgba(255, 255, 255, 0.5)',
+
+    // Whether to display grid
+    grid: true,
+
+    // Grid color
+    gridColor: 'rgba(255, 255, 255, 0.05)',
+
+    // Whether to display ruler
+    ruler: true,
+
+    // Ruler color
+    rulerColor: 'rgba(255, 255, 255, 0.5)',
+
+    // Whether to display ruler at the top
+    rulerAtTop: true,
+
+    // Indicates whether to do http fetching with cookies
+    withCredentials: false,
+
+    // Indicates whether to enable CORS for http fetching
+    cors: false,
+
+    // Initialize http headers
+    headers: {},
+
+    // Pixel ratio
+    pixelRatio: window.devicePixelRatio,
+
+    // Which audio channel to render
+    channel: 0,
+
+    // Duration of rendering
+    duration: 10,
+
+    // The ratio of spaces on both sides
+    padding: 5,
+});
+```
+
+## API
+
+### Instance methods and properties
+
+Load target:
+
+```js
+// The target can be the url address of media or a mediaElement
+wf.load(target);
+```
+
+Jump to a certain time:
+
+```js
+wf.seek(second);
+```
+
+Export image:
+
+```js
+wf.exportImage();
+```
+
+Destroy instance:
+
+```js
+wf.destroy();
+```
+
+### Instance event
+
+| Name          | Description                                                 |
+| ------------- | ----------------------------------------------------------- |
+| `load`        | Start loading                                               |
+| `options`     | Received new options                                        |
+| `click`       | Click on the canvas to return to the click time             |
+| `contextmenu` | Right click on the canvas to return to the click time       |
+| `resize`      | Canvas adaptive size                                        |
+| `playing`     | Playing animation                                           |
+| `decodeing`   | Decoding and returning the proportion that has been decoded |
+| `loadStart`   | Start loading resources                                     |
+| `loadEnd`     | The resource is loaded                                      |
+| `downloading` | The proportion of loading and returning loading             |
+
+Example:
+
+```js
+wf.on('decodeing', function(percentage) {
+    console.log(percentage);
+});
+```
+
+### Class methods and properties
+
+Get all instances:
+
+```js
+WFPlayer.instances;
+```
+
+Get the version:
+
+```js
+WFPlayer.version;
+```
+
+Get the env:
+
+```js
+WFPlayer.env;
+```
+
+## QQ Group
+
+![QQ Group](./images/qqgroup.png)
+
+## License
+
+MIT © [Harvey Zack](https://sleepy.im/)

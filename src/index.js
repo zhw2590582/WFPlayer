@@ -25,7 +25,7 @@ export default class WFPlayer extends Emitter {
 
     static get default() {
         return {
-            container: '#wfplayer',
+            container: '#waveform',
             mediaElement: null,
             waveColor: 'rgba(255, 255, 255, 0.1)',
             backgroundColor: 'rgb(28, 32, 34)',
@@ -43,7 +43,7 @@ export default class WFPlayer extends Emitter {
             headers: {},
             pixelRatio: window.devicePixelRatio,
             channel: 0,
-            perDuration: 10,
+            duration: 10,
             padding: 5,
         };
     }
@@ -66,29 +66,16 @@ export default class WFPlayer extends Emitter {
             withCredentials: 'boolean',
             cors: 'boolean',
             headers: 'object',
-            pixelRatio: (value, type) => {
-                errorHandle(type === 'number', 'pixelRatio is not a number');
-                return value >= 1 && Number.isInteger(value);
-            },
-            channel: (value, type) => {
-                errorHandle(type === 'number', 'channel is not a number');
-                return value >= 0 && Number.isInteger(value);
-            },
-            perDuration: (value, type) => {
-                errorHandle(type === 'number', 'perDuration is not a number');
-                return value >= 1 && Number.isInteger(value);
-            },
-            padding: (value, type) => {
-                errorHandle(type === 'number', 'padding is not a number');
-                return value >= 0 && Number.isInteger(value);
-            },
+            pixelRatio: 'number',
+            channel: 'number',
+            duration: 'number',
+            padding: 'number',
         };
     }
 
     constructor(options = {}) {
         super();
 
-        this._zoom = 1;
         this._currentTime = 0;
         this.destroy = false;
         this.options = {};
@@ -165,22 +152,9 @@ export default class WFPlayer extends Emitter {
         return this;
     }
 
-    seek(time) {
-        errorHandle(
-            !this.options.mediaElement,
-            `If you have used mediaElement, you can't use the seek method, please use the mediaElement.currentTime property.`,
-        );
-        this._currentTime = clamp(time, 0, this.duration);
-        this.drawer.update();
-        return this;
-    }
-
-    zoom(zoom) {
-        errorHandle(
-            zoom >= 1 && Number.isInteger(zoom),
-            `The zoom method only accepts positive integers greater than or equal to 1.`,
-        );
-        this._zoom = clamp(zoom, 1, 10);
+    seek(second) {
+        errorHandle(typeof second === 'number', 'seek expects to receive number as a parameter');
+        this._currentTime = clamp(second, 0, this.duration);
         this.drawer.update();
         return this;
     }

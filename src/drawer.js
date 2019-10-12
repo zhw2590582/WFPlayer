@@ -7,7 +7,6 @@ export default class Drawer {
         this.ctx = this.canvas.getContext('2d');
         this.gridNum = 0;
         this.gridGap = 0;
-        this.fontSize = 11;
         this.beginTime = 0;
 
         this.update();
@@ -24,11 +23,11 @@ export default class Drawer {
     update() {
         const {
             currentTime,
-            options: { cursor, grid, ruler, perDuration, padding },
+            options: { cursor, grid, ruler, duration, padding },
         } = this.wf;
-        this.gridNum = perDuration * 10 + padding * 2;
+        this.gridNum = duration * 10 + padding * 2;
         this.gridGap = this.canvas.width / this.gridNum;
-        this.beginTime = Math.floor(currentTime / perDuration) * 10;
+        this.beginTime = Math.floor(currentTime / duration) * duration;
         this.updateBackground();
         if (grid) {
             this.updateGrid();
@@ -53,7 +52,7 @@ export default class Drawer {
     updateWave() {
         const {
             currentTime,
-            options: { progress, waveColor, progressColor, perDuration, pixelRatio, padding },
+            options: { progress, waveColor, progressColor, duration, pixelRatio, padding },
             decoder: {
                 channelData,
                 audiobuffer: { sampleRate },
@@ -63,7 +62,7 @@ export default class Drawer {
         const middle = height / 2;
         const waveWidth = width - this.gridGap * padding * 2;
         const startIndex = clamp(this.beginTime * sampleRate, 0, channelData.length);
-        const endIndex = clamp((this.beginTime + perDuration) * sampleRate, startIndex, channelData.length);
+        const endIndex = clamp((this.beginTime + duration) * sampleRate, startIndex, channelData.length);
         if (endIndex <= startIndex || channelData.length - 1 < endIndex) return;
         const step = Math.floor((endIndex - startIndex) / waveWidth);
         const cursorX = padding * this.gridGap + (currentTime - this.beginTime) * this.gridGap * 10;
@@ -98,7 +97,10 @@ export default class Drawer {
     updateRuler() {
         const { rulerColor, pixelRatio, padding, rulerAtTop } = this.wf.options;
         const { height } = this.canvas;
-        this.ctx.font = `${this.fontSize * pixelRatio}px Arial`;
+        const fontSize = 11;
+        const fontHeight = 15;
+        const fontTop = 30;
+        this.ctx.font = `${fontSize * pixelRatio}px Arial`;
         this.ctx.fillStyle = rulerColor;
         let second = -1;
         for (let index = 0; index < this.gridNum; index += 1) {
@@ -106,21 +108,21 @@ export default class Drawer {
                 second += 1;
                 this.ctx.fillRect(
                     this.gridGap * index,
-                    rulerAtTop ? 0 : height - this.gridGap,
+                    rulerAtTop ? 0 : height - fontHeight * pixelRatio,
                     pixelRatio,
-                    this.gridGap,
+                    fontHeight * pixelRatio,
                 );
                 this.ctx.fillText(
                     durationToTime(this.beginTime + second).split('.')[0],
-                    this.gridGap * index - this.fontSize * pixelRatio * 2 + pixelRatio,
-                    rulerAtTop ? this.gridGap * 2 : height - this.gridGap * 2 + this.fontSize,
+                    this.gridGap * index - fontSize * pixelRatio * 2 + pixelRatio,
+                    rulerAtTop ? fontTop : height - fontTop + fontSize,
                 );
             } else if ((index - padding) % 5 === 0 && index) {
                 this.ctx.fillRect(
                     this.gridGap * index,
-                    rulerAtTop ? 0 : height - this.gridGap / 2,
+                    rulerAtTop ? 0 : height - (fontHeight / 2) * pixelRatio,
                     pixelRatio,
-                    this.gridGap / 2,
+                    (fontHeight / 2) * pixelRatio,
                 );
             }
         }

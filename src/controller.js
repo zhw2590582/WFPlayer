@@ -20,13 +20,13 @@ export default class Controller {
         proxy(canvas, ['click', 'contextmenu'], event => {
             const {
                 currentTime,
-                options: { perDuration, padding, container },
+                options: { duration, padding, container },
             } = this.wf;
-            const gridNum = perDuration * 10 + padding * 2;
+            const gridNum = duration * 10 + padding * 2;
             const gridGap = canvas.width / gridNum;
             const left = clamp(event.pageX - container.offsetLeft - padding * gridGap, 0, Infinity);
-            const beginTime = Math.floor(currentTime / perDuration) * 10;
-            const time = clamp(left / gridGap / 10 + beginTime, beginTime, beginTime + perDuration);
+            const beginTime = Math.floor(currentTime / duration) * 10;
+            const time = clamp(left / gridGap / 10 + beginTime, beginTime, beginTime + duration);
             this.wf.emit(event.type, time, event);
         });
     }

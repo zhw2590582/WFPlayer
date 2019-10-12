@@ -568,7 +568,6 @@
       this.ctx = this.canvas.getContext('2d');
       this.gridNum = 0;
       this.gridGap = 0;
-      this.fontSize = 11;
       this.beginTime = 0;
       this.update();
       wf.on('options', function () {
@@ -588,11 +587,11 @@
             cursor = _this$wf$options.cursor,
             grid = _this$wf$options.grid,
             ruler = _this$wf$options.ruler,
-            perDuration = _this$wf$options.perDuration,
+            duration = _this$wf$options.duration,
             padding = _this$wf$options.padding;
-        this.gridNum = perDuration * 10 + padding * 2;
+        this.gridNum = duration * 10 + padding * 2;
         this.gridGap = this.canvas.width / this.gridNum;
-        this.beginTime = Math.floor(currentTime / perDuration) * 10;
+        this.beginTime = Math.floor(currentTime / duration) * duration;
         this.updateBackground();
 
         if (grid) {
@@ -629,7 +628,7 @@
             progress = _this$wf2$options.progress,
             waveColor = _this$wf2$options.waveColor,
             progressColor = _this$wf2$options.progressColor,
-            perDuration = _this$wf2$options.perDuration,
+            duration = _this$wf2$options.duration,
             pixelRatio = _this$wf2$options.pixelRatio,
             padding = _this$wf2$options.padding,
             _this$wf2$decoder = _this$wf2.decoder,
@@ -641,7 +640,7 @@
         var middle = height / 2;
         var waveWidth = width - this.gridGap * padding * 2;
         var startIndex = clamp(this.beginTime * sampleRate, 0, channelData.length);
-        var endIndex = clamp((this.beginTime + perDuration) * sampleRate, startIndex, channelData.length);
+        var endIndex = clamp((this.beginTime + duration) * sampleRate, startIndex, channelData.length);
         if (endIndex <= startIndex || channelData.length - 1 < endIndex) return;
         var step = Math.floor((endIndex - startIndex) / waveWidth);
         var cursorX = padding * this.gridGap + (currentTime - this.beginTime) * this.gridGap * 10;
@@ -694,17 +693,20 @@
             padding = _this$wf$options3.padding,
             rulerAtTop = _this$wf$options3.rulerAtTop;
         var height = this.canvas.height;
-        this.ctx.font = "".concat(this.fontSize * pixelRatio, "px Arial");
+        var fontSize = 11;
+        var fontHeight = 15;
+        var fontTop = 30;
+        this.ctx.font = "".concat(fontSize * pixelRatio, "px Arial");
         this.ctx.fillStyle = rulerColor;
         var second = -1;
 
         for (var index = 0; index < this.gridNum; index += 1) {
           if ((index - padding) % 10 === 0) {
             second += 1;
-            this.ctx.fillRect(this.gridGap * index, rulerAtTop ? 0 : height - this.gridGap, pixelRatio, this.gridGap);
-            this.ctx.fillText(durationToTime(this.beginTime + second).split('.')[0], this.gridGap * index - this.fontSize * pixelRatio * 2 + pixelRatio, rulerAtTop ? this.gridGap * 2 : height - this.gridGap * 2 + this.fontSize);
+            this.ctx.fillRect(this.gridGap * index, rulerAtTop ? 0 : height - fontHeight * pixelRatio, pixelRatio, fontHeight * pixelRatio);
+            this.ctx.fillText(durationToTime(this.beginTime + second).split('.')[0], this.gridGap * index - fontSize * pixelRatio * 2 + pixelRatio, rulerAtTop ? fontTop : height - fontTop + fontSize);
           } else if ((index - padding) % 5 === 0 && index) {
-            this.ctx.fillRect(this.gridGap * index, rulerAtTop ? 0 : height - this.gridGap / 2, pixelRatio, this.gridGap / 2);
+            this.ctx.fillRect(this.gridGap * index, rulerAtTop ? 0 : height - fontHeight / 2 * pixelRatio, pixelRatio, fontHeight / 2 * pixelRatio);
           }
         }
       }
@@ -1477,14 +1479,14 @@
           var _this2$wf = _this2.wf,
               currentTime = _this2$wf.currentTime,
               _this2$wf$options = _this2$wf.options,
-              perDuration = _this2$wf$options.perDuration,
+              duration = _this2$wf$options.duration,
               padding = _this2$wf$options.padding,
               container = _this2$wf$options.container;
-          var gridNum = perDuration * 10 + padding * 2;
+          var gridNum = duration * 10 + padding * 2;
           var gridGap = canvas.width / gridNum;
           var left = clamp(event.pageX - container.offsetLeft - padding * gridGap, 0, Infinity);
-          var beginTime = Math.floor(currentTime / perDuration) * 10;
-          var time = clamp(left / gridGap / 10 + beginTime, beginTime, beginTime + perDuration);
+          var beginTime = Math.floor(currentTime / duration) * 10;
+          var time = clamp(left / gridGap / 10 + beginTime, beginTime, beginTime + duration);
 
           _this2.wf.emit(event.type, time, event);
         });
@@ -1571,7 +1573,7 @@
       key: "default",
       get: function get() {
         return {
-          container: '#wfplayer',
+          container: '#waveform',
           mediaElement: null,
           waveColor: 'rgba(255, 255, 255, 0.1)',
           backgroundColor: 'rgb(28, 32, 34)',
@@ -1589,7 +1591,7 @@
           headers: {},
           pixelRatio: window.devicePixelRatio,
           channel: 0,
-          perDuration: 10,
+          duration: 10,
           padding: 5
         };
       }
@@ -1613,22 +1615,10 @@
           withCredentials: 'boolean',
           cors: 'boolean',
           headers: 'object',
-          pixelRatio: function pixelRatio(value, type) {
-            errorHandle(type === 'number', 'pixelRatio is not a number');
-            return value >= 1 && Number.isInteger(value);
-          },
-          channel: function channel(value, type) {
-            errorHandle(type === 'number', 'channel is not a number');
-            return value >= 0 && Number.isInteger(value);
-          },
-          perDuration: function perDuration(value, type) {
-            errorHandle(type === 'number', 'perDuration is not a number');
-            return value >= 1 && Number.isInteger(value);
-          },
-          padding: function padding(value, type) {
-            errorHandle(type === 'number', 'padding is not a number');
-            return value >= 0 && Number.isInteger(value);
-          }
+          pixelRatio: 'number',
+          channel: 'number',
+          duration: 'number',
+          padding: 'number'
         };
       }
     }]);
@@ -1641,7 +1631,6 @@
       classCallCheck(this, WFPlayer);
 
       _this = possibleConstructorReturn(this, getPrototypeOf(WFPlayer).call(this));
-      _this._zoom = 1;
       _this._currentTime = 0;
       _this.destroy = false;
       _this.options = {};
@@ -1693,17 +1682,9 @@
       }
     }, {
       key: "seek",
-      value: function seek(time) {
-        errorHandle(!this.options.mediaElement, "If you have used mediaElement, you can't use the seek method, please use the mediaElement.currentTime property.");
-        this._currentTime = clamp(time, 0, this.duration);
-        this.drawer.update();
-        return this;
-      }
-    }, {
-      key: "zoom",
-      value: function zoom(_zoom) {
-        errorHandle(_zoom >= 1 && Number.isInteger(_zoom), "The zoom method only accepts positive integers greater than or equal to 1.");
-        this._zoom = clamp(_zoom, 1, 10);
+      value: function seek(second) {
+        errorHandle(typeof second === 'number', 'seek expects to receive number as a parameter');
+        this._currentTime = clamp(second, 0, this.duration);
         this.drawer.update();
         return this;
       }
