@@ -1445,12 +1445,13 @@
               _this2$wf$options = _this2$wf.options,
               duration = _this2$wf$options.duration,
               padding = _this2$wf$options.padding,
-              container = _this2$wf$options.container;
+              container = _this2$wf$options.container,
+              pixelRatio = _this2$wf$options.pixelRatio;
           var gridNum = duration * 10 + padding * 2;
           var gridGap = canvas.width / gridNum;
-          var left = clamp(event.pageX - container.offsetLeft - padding * gridGap, 0, Infinity);
+          var left = clamp(event.pageX - container.offsetLeft - padding * gridGap / pixelRatio, 0, Infinity);
           var beginTime = Math.floor(currentTime / duration) * 10;
-          var time = clamp(left / gridGap / 10 + beginTime, beginTime, beginTime + duration);
+          var time = clamp(left / gridGap * pixelRatio / 10 + beginTime, beginTime, beginTime + duration);
 
           _this2.wf.emit(event.type, time, event);
         });

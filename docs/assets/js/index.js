@@ -20,25 +20,32 @@ var art = new Artplayer({
     },
 });
 
-var options = {
-    container: '.waveform',
-    cors: true,
-};
+var wf = null;
 
-var wf = new WFPlayer(options);
+function initWFPlayer() {
+    wf = new WFPlayer({
+        container: '.waveform',
+        cors: true,
+    });
 
-wf.on('fileSize', function(fileSize) {
-    $filesize.innerHTML = (fileSize / 1024 / 1024).toFixed(3) + ' M';
-});
+    wf.on('fileSize', function(fileSize) {
+        $filesize.innerHTML = (fileSize / 1024 / 1024).toFixed(3) + ' M';
+    });
 
-wf.on('downloading', function(value) {
-    $downloading.innerHTML = ((value === Infinity ? 0 : value) * 100).toFixed(3) + ' %';
-});
+    wf.on('downloading', function(value) {
+        $downloading.innerHTML = ((value === Infinity ? 0 : value) * 100).toFixed(3) + ' %';
+    });
 
-wf.on('decodeing', function(value) {
-    $decodeing.innerHTML = (value * 100).toFixed(3) + ' %';
-});
+    wf.on('decodeing', function(value) {
+        $decodeing.innerHTML = (value * 100 || 0).toFixed(3) + ' %';
+    });
 
+    wf.on('click', function(value) {
+        art.seek = value;
+    });
+}
+
+initWFPlayer();
 art.on('ready', function() {
     art.seek = 3;
     wf.seek(3);
@@ -58,7 +65,7 @@ $open.addEventListener('change', function() {
             var url = URL.createObjectURL(file);
             art.player.switchUrl(url, file.name).then(() => {
                 wf.destroy();
-                wf = new WFPlayer(options);
+                initWFPlayer();
                 wf.load(art.template.$video);
             });
         } else {
