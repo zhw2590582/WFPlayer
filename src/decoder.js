@@ -24,8 +24,7 @@ export default class Decoder {
                 this.wf.emit('channelData', this.channelData);
             })
             .catch(error => {
-                errorHandle(false, 'It seems that the AudioContext decoding get wrong.');
-                throw error;
+                errorHandle(false, `It seems that the AudioContext decoding get wrong: ${error.message.trim()}`);
             });
     }
 

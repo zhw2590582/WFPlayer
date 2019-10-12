@@ -1297,8 +1297,7 @@
 
           _this2.wf.emit('channelData', _this2.channelData);
         }).catch(function (error) {
-          errorHandle(false, 'It seems that the AudioContext decoding get wrong.');
-          throw error;
+          errorHandle(false, "It seems that the AudioContext decoding get wrong: ".concat(error.message.trim()));
         });
       }
     }, {
