@@ -103,7 +103,12 @@ body,
 }
 
 .main .left .item .name {
-    margin-right: 20px;
+    color: #999;
+    margin-right: 10px;
+}
+
+.main .left .item .range {
+    width: 300px;
 }
 
 .main .right {

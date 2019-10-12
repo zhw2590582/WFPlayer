@@ -36,6 +36,7 @@ export default class Loader {
             .then(response => {
                 if (response.body && typeof response.body.getReader === 'function') {
                     this.fileSize = Number(response.headers.get('content-length'));
+                    this.wf.emit('fileSize', this.fileSize);
                     this.reader = response.body.getReader();
                     return function read() {
                         return this.reader.read().then(({ done, value }) => {
@@ -57,6 +58,7 @@ export default class Loader {
                 if (arrayBuffer && arrayBuffer.byteLength) {
                     const uint8 = new Uint8Array(arrayBuffer);
                     this.fileSize = uint8.byteLength;
+                    this.wf.emit('fileSize', this.fileSize);
                     this.loadSize = uint8.byteLength;
                     this.wf.emit('loading', uint8);
                     this.wf.emit('loadEnd');
@@ -69,6 +71,7 @@ export default class Loader {
         this.reader.onload = e => {
             const uint8 = new Uint8Array(e.target.result);
             this.fileSize = uint8.byteLength;
+            this.wf.emit('fileSize', this.fileSize);
             this.loadSize = uint8.byteLength;
             this.wf.emit('loading', uint8);
             this.wf.emit('loadEnd');

@@ -1,10 +1,13 @@
 var $open = document.querySelector('.open');
 var $download = document.querySelector('.download');
+var $filesize = document.querySelector('.filesize');
+var $downloading = document.querySelector('.downloading');
+var $decodeing = document.querySelector('.decodeing');
 
 var art = new Artplayer({
     container: '.artplayer',
-    // url: 'https://zhw2590582.github.io/assets-cdn/video/your-name.mp4',
-    url: './your-name.mp4',
+    url: 'https://zhw2590582.github.io/assets-cdn/video/your-name.mp4',
+    // url: './your-name.mp4',
     autoSize: true,
     loop: true,
     moreVideoAttr: {
@@ -15,6 +18,18 @@ var art = new Artplayer({
 var wf = new WFPlayer({
     container: '.waveform',
     cors: true,
+});
+
+wf.on('fileSize', function(fileSize) {
+    $filesize.innerHTML = fileSize / 1024 / 1024 + ' M';
+});
+
+wf.on('downloading', function(value) {
+    $downloading.innerHTML = ((value === Infinity ? 0 : value) * 100).toFixed(3) + ' %';
+});
+
+wf.on('decodeing', function(value) {
+    $decodeing.innerHTML = (value * 100).toFixed(3) + ' %';
 });
 
 art.on('ready', function() {
@@ -96,4 +111,13 @@ Array.from(document.querySelectorAll('.color-picker')).forEach(function($el) {
                 [name]: color.toRGBA().toString(),
             });
         });
+});
+
+Array.from(document.querySelectorAll('.range')).forEach(function($el) {
+    var name = $el.getAttribute('name');
+    $el.addEventListener('change', function() {
+        wf.setOptions({
+            [name]: Number($el.value),
+        });
+    });
 });

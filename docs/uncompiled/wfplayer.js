@@ -1364,6 +1364,9 @@
         }).then(function (response) {
           if (response.body && typeof response.body.getReader === 'function') {
             _this.fileSize = Number(response.headers.get('content-length'));
+
+            _this.wf.emit('fileSize', _this.fileSize);
+
             _this.reader = response.body.getReader();
             return function read() {
               var _this2 = this;
@@ -1396,6 +1399,9 @@
           if (arrayBuffer && arrayBuffer.byteLength) {
             var uint8 = new Uint8Array(arrayBuffer);
             _this.fileSize = uint8.byteLength;
+
+            _this.wf.emit('fileSize', _this.fileSize);
+
             _this.loadSize = uint8.byteLength;
 
             _this.wf.emit('loading', uint8);
@@ -1414,6 +1420,9 @@
         this.reader.onload = function (e) {
           var uint8 = new Uint8Array(e.target.result);
           _this3.fileSize = uint8.byteLength;
+
+          _this3.wf.emit('fileSize', _this3.fileSize);
+
           _this3.loadSize = uint8.byteLength;
 
           _this3.wf.emit('loading', uint8);
