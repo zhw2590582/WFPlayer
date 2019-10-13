@@ -1425,8 +1425,6 @@
       this.wf.on('load', function () {
         _this.clickInit();
 
-        _this.moveInit();
-
         _this.resizeInit();
 
         _this.playInit();

@@ -7,7 +7,6 @@ export default class Controller {
         this.playTimer = null;
         this.wf.on('load', () => {
             this.clickInit();
-            this.moveInit();
             this.resizeInit();
             this.playInit();
         });
