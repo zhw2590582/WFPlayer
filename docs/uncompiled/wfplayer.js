@@ -1293,9 +1293,12 @@
             channel = _this$wf.options.channel,
             duration = _this$wf.duration;
         this.audioCtx.decodeAudioData(uint8.buffer).then(function (audiobuffer) {
-          _this2.wf.emit('decodeing', audiobuffer.duration / duration);
-
           _this2.audiobuffer = audiobuffer;
+
+          _this2.wf.emit('audiobuffer', _this2.audiobuffer);
+
+          _this2.wf.emit('decodeing', _this2.audiobuffer.duration / duration);
+
           _this2.channelData = audiobuffer.getChannelData(channel);
 
           _this2.wf.emit('channelData', _this2.channelData);
@@ -1583,7 +1586,7 @@
     }, {
       key: "version",
       get: function get() {
-        return '1.0.6';
+        return '1.0.7';
       }
     }, {
       key: "env",

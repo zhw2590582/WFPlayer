@@ -2,6 +2,8 @@ var $version = document.querySelector('.version');
 var $open = document.querySelector('.open');
 var $download = document.querySelector('.download');
 var $filesize = document.querySelector('.filesize');
+var $numberOfChannels = document.querySelector('.numberOfChannels');
+var $sampleRate = document.querySelector('.sampleRate');
 var $downloading = document.querySelector('.downloading');
 var $decodeing = document.querySelector('.decodeing');
 var $pickers = Array.from(document.querySelectorAll('.color-picker'));
@@ -38,6 +40,11 @@ function initWFPlayer() {
 
     wf.on('decodeing', function(value) {
         $decodeing.innerHTML = (value * 100 || 0).toFixed(3) + ' %';
+    });
+
+    wf.on('audiobuffer', function(audiobuffer) {
+        $numberOfChannels.innerHTML = audiobuffer.numberOfChannels;
+        $sampleRate.innerHTML = audiobuffer.sampleRate;
     });
 
     wf.on('click', function(value) {

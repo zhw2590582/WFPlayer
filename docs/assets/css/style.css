@@ -121,6 +121,14 @@ body,
     padding: 0 20px;
 }
 
+.main .left .item.infos {
+    display: flex;
+}
+
+.main .left .item.infos .info {
+    display: flex;
+}
+
 .main .left .item .name {
     color: #999;
     margin-right: 10px;

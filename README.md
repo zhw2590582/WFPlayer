@@ -172,6 +172,8 @@ wf.destroy();
 | `loadStart`   | Start loading resources                                     |
 | `loadEnd`     | The resource is loaded                                      |
 | `downloading` | The proportion of loading and returning loading             |
+| `audiobuffer` | Decoded audio data                                          |
+| `channelData` | Decoded audio channelData data                              |
 
 Example:
 

@@ -22,8 +22,9 @@ export default class Decoder {
         this.audioCtx
             .decodeAudioData(uint8.buffer)
             .then(audiobuffer => {
-                this.wf.emit('decodeing', audiobuffer.duration / duration);
                 this.audiobuffer = audiobuffer;
+                this.wf.emit('audiobuffer', this.audiobuffer);
+                this.wf.emit('decodeing', this.audiobuffer.duration / duration);
                 this.channelData = audiobuffer.getChannelData(channel);
                 this.wf.emit('channelData', this.channelData);
             })
