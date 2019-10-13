@@ -59,7 +59,7 @@ export default class WFPlayer extends Emitter {
         };
 
         return {
-            container: 'htmlelement',
+            container: 'htmlelement|htmldivelement',
             mediaElement: 'null|htmlvideoelement|htmlaudioelement',
             waveColor: 'string',
             backgroundColor: 'string',
