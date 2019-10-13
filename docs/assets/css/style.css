@@ -115,7 +115,7 @@ body,
 
 .main .left .item {
     display: flex;
-    height: 42px;
+    height: 41px;
     border-bottom: 1px solid rgb(53, 53, 53);
     align-items: center;
     padding: 0 20px;

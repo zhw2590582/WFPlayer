@@ -55,7 +55,7 @@ export default class Drawer {
     updateWave() {
         const {
             currentTime,
-            options: { progress, waveColor, progressColor, duration, padding },
+            options: { progress, waveColor, progressColor, duration, padding, waveScale },
             decoder: {
                 channelData,
                 audiobuffer: { sampleRate },
@@ -75,7 +75,7 @@ export default class Drawer {
             arr.push(channelData[i] || 0);
             if (arr.length >= step && index < waveWidth) {
                 index += 1;
-                const [min, max] = getMinAndMax(arr);
+                const [min, max] = getMinAndMax(arr, waveScale);
                 const waveX = this.gridGap * padding + index;
                 this.ctx.fillStyle = progress && cursorX >= waveX ? progressColor : waveColor;
                 this.ctx.fillRect(waveX, (1 + min) * middle, 1, Math.max(1, (max - min) * middle));

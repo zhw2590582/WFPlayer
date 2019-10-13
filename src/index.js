@@ -46,12 +46,13 @@ export default class WFPlayer extends Emitter {
             channel: 0,
             duration: 10,
             padding: 5,
+            waveScale: 0.8,
         };
     }
 
     static get scheme() {
         const checkNum = (name, min) => (value, type) => {
-            errorHandle(type === 'number', `${name} expects to receive object as a parameter.`);
+            errorHandle(type === 'number', `${name} expects to receive number as a parameter.`);
             errorHandle(
                 value >= min && Number.isInteger(value),
                 `${name} expect a positive integer greater than or equal to ${min}, but got ${value}.`,
@@ -81,6 +82,14 @@ export default class WFPlayer extends Emitter {
             channel: checkNum('channel', 0),
             duration: checkNum('duration', 1),
             padding: checkNum('padding', 1),
+            waveScale: (value, type) => {
+                errorHandle(type === 'number', `waveScale expects to receive number as a parameter.`);
+                errorHandle(
+                    value >= 0.1 && value <= 2,
+                    `waveScale expect a number that greater than or equal to 0.1 and less than or equal to 2, but got ${value}.`,
+                );
+                return true;
+            },
         };
     }
 

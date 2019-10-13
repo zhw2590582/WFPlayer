@@ -135,7 +135,17 @@ $pickers.forEach(function($el) {
 
 $range.forEach(function($el) {
     var name = $el.getAttribute('name');
-    new Powerange($el, { min: 1, max: 20, start: $el.value, step: 1, hideRange: true });
+    var min = Number($el.getAttribute('min'));
+    var max = Number($el.getAttribute('max'));
+    var step = Number($el.getAttribute('step'));
+    new Powerange($el, {
+        start: $el.value,
+        min: min || 1,
+        max: max || 20,
+        step: step || 1,
+        hideRange: true,
+        decimal: true,
+    });
     $el.onchange = function() {
         $el.previousElementSibling.innerHTML = $el.value;
         wf.setOptions({

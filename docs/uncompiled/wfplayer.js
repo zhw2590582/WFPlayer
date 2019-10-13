@@ -420,7 +420,7 @@
       return merge;
     }, new Cons());
   }
-  function getMinAndMax(arr) {
+  function getMinAndMax(arr, scale) {
     var min = 1;
     var max = -1;
 
@@ -434,7 +434,7 @@
       }
     }
 
-    return [min, max];
+    return [min * scale, max * scale];
   }
   function clamp(num, a, b) {
     return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
@@ -629,6 +629,7 @@
             progressColor = _this$wf2$options.progressColor,
             duration = _this$wf2$options.duration,
             padding = _this$wf2$options.padding,
+            waveScale = _this$wf2$options.waveScale,
             _this$wf2$decoder = _this$wf2.decoder,
             channelData = _this$wf2$decoder.channelData,
             sampleRate = _this$wf2$decoder.audiobuffer.sampleRate;
@@ -650,7 +651,7 @@
           if (arr.length >= step && index < waveWidth) {
             index += 1;
 
-            var _getMinAndMax = getMinAndMax(arr),
+            var _getMinAndMax = getMinAndMax(arr, waveScale),
                 _getMinAndMax2 = slicedToArray(_getMinAndMax, 2),
                 min = _getMinAndMax2[0],
                 max = _getMinAndMax2[1];
@@ -1299,7 +1300,7 @@
 
           _this2.wf.emit('decodeing', _this2.audiobuffer.duration / duration);
 
-          _this2.channelData = audiobuffer.getChannelData(channel);
+          _this2.channelData = audiobuffer.getChannelData(channel) || new Float32Array();
 
           _this2.wf.emit('channelData', _this2.channelData);
         }).catch(function (error) {
@@ -1617,7 +1618,8 @@
           pixelRatio: window.devicePixelRatio,
           channel: 0,
           duration: 10,
-          padding: 5
+          padding: 5,
+          waveScale: 0.8
         };
       }
     }, {
@@ -1625,7 +1627,7 @@
       get: function get() {
         var checkNum = function checkNum(name, min) {
           return function (value, type) {
-            errorHandle(type === 'number', "".concat(name, " expects to receive object as a parameter."));
+            errorHandle(type === 'number', "".concat(name, " expects to receive number as a parameter."));
             errorHandle(value >= min && Number.isInteger(value), "".concat(name, " expect a positive integer greater than or equal to ").concat(min, ", but got ").concat(value, "."));
             return true;
           };
@@ -1652,7 +1654,12 @@
           pixelRatio: checkNum('pixelRatio', 1),
           channel: checkNum('channel', 0),
           duration: checkNum('duration', 1),
-          padding: checkNum('padding', 1)
+          padding: checkNum('padding', 1),
+          waveScale: function waveScale(value, type) {
+            errorHandle(type === 'number', "waveScale expects to receive number as a parameter.");
+            errorHandle(value >= 0.1 && value <= 2, "waveScale expect a number that greater than or equal to 0.1 and less than or equal to 2, but got ".concat(value, "."));
+            return true;
+          }
         };
       }
     }]);

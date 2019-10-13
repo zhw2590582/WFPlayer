@@ -32,7 +32,7 @@ export function mergeBuffer(...buffers) {
     }, new Cons());
 }
 
-export function getMinAndMax(arr) {
+export function getMinAndMax(arr, scale) {
     let min = 1;
     let max = -1;
     for (let i = 0; i < arr.length; i += 1) {
@@ -43,7 +43,7 @@ export function getMinAndMax(arr) {
             max = item;
         }
     }
-    return [min, max];
+    return [min * scale, max * scale];
 }
 
 export function clamp(num, a, b) {

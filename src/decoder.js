@@ -25,7 +25,7 @@ export default class Decoder {
                 this.audiobuffer = audiobuffer;
                 this.wf.emit('audiobuffer', this.audiobuffer);
                 this.wf.emit('decodeing', this.audiobuffer.duration / duration);
-                this.channelData = audiobuffer.getChannelData(channel);
+                this.channelData = audiobuffer.getChannelData(channel) || new Float32Array();
                 this.wf.emit('channelData', this.channelData);
             })
             .catch(error => {

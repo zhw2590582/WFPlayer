@@ -117,6 +117,9 @@ var wf = new WFPlayer({
 
     // The ratio of spaces on both sides
     padding: 5,
+
+    // Waveform height scale ratio
+    waveScale: 0.8,
 });
 ```
 
