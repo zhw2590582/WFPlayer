@@ -20,6 +20,7 @@
 -   Support for loading media urls and loading media dom elements (video tags and audio tags)
 -   Support for real-time change options like color or width etc
 -   Listen to the playback state of media elements for playback animation
+-   Adaptive parent element size and audio data
 -   And more...
 
 ## Install
