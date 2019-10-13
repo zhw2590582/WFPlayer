@@ -1425,6 +1425,8 @@
       this.wf.on('load', function () {
         _this.clickInit();
 
+        _this.moveInit();
+
         _this.resizeInit();
 
         _this.playInit();
@@ -1432,44 +1434,94 @@
     }
 
     createClass(Controller, [{
+      key: "getTimeFromEvent",
+      value: function getTimeFromEvent(event) {
+        var _this$wf = this.wf,
+            currentTime = _this$wf.currentTime,
+            canvas = _this$wf.template.canvas,
+            _this$wf$options = _this$wf.options,
+            duration = _this$wf$options.duration,
+            padding = _this$wf$options.padding,
+            container = _this$wf$options.container,
+            pixelRatio = _this$wf$options.pixelRatio;
+        var gridNum = duration * 10 + padding * 2;
+        var gridGap = canvas.width / gridNum;
+        var left = clamp(event.pageX - container.offsetLeft - padding * gridGap / pixelRatio, 0, Infinity);
+        var beginTime = Math.floor(currentTime / duration) * duration;
+        var time = clamp(left / gridGap * pixelRatio / 10 + beginTime, beginTime, beginTime + duration);
+        return time;
+      }
+    }, {
       key: "clickInit",
       value: function clickInit() {
         var _this2 = this;
 
-        var _this$wf = this.wf,
-            canvas = _this$wf.template.canvas,
-            proxy = _this$wf.events.proxy;
+        var _this$wf2 = this.wf,
+            canvas = _this$wf2.template.canvas,
+            proxy = _this$wf2.events.proxy;
         proxy(canvas, ['click', 'contextmenu'], function (event) {
-          var _this2$wf = _this2.wf,
-              currentTime = _this2$wf.currentTime,
-              _this2$wf$options = _this2$wf.options,
-              duration = _this2$wf$options.duration,
-              padding = _this2$wf$options.padding,
-              container = _this2$wf$options.container,
-              pixelRatio = _this2$wf$options.pixelRatio;
-          var gridNum = duration * 10 + padding * 2;
-          var gridGap = canvas.width / gridNum;
-          var left = clamp(event.pageX - container.offsetLeft - padding * gridGap / pixelRatio, 0, Infinity);
-          var beginTime = Math.floor(currentTime / duration) * 10;
-          var time = clamp(left / gridGap * pixelRatio / 10 + beginTime, beginTime, beginTime + duration);
+          var time = _this2.getTimeFromEvent(event);
 
           _this2.wf.emit(event.type, time, event);
         });
       }
     }, {
-      key: "resizeInit",
-      value: function resizeInit() {
+      key: "moveInit",
+      value: function moveInit() {
         var _this3 = this;
 
-        var _this$wf2 = this.wf,
-            template = _this$wf2.template,
-            drawer = _this$wf2.drawer,
-            proxy = _this$wf2.events.proxy;
+        var _this$wf3 = this.wf,
+            canvas = _this$wf3.template.canvas,
+            proxy = _this$wf3.events.proxy;
+        var isDroging = false;
+        var startTime = 0;
+        var endTime = 0;
+        proxy(canvas, 'mousedown', function (event) {
+          isDroging = true;
+          startTime = _this3.getTimeFromEvent(event);
+
+          _this3.wf.emit(event.type, startTime, event);
+        });
+        proxy(document, 'mousemove', function (event) {
+          if (!isDroging) return;
+          endTime = _this3.getTimeFromEvent(event);
+
+          _this3.wf.emit(event.type, endTime, event);
+        });
+        proxy(document, 'mouseup', function (event) {
+          var startTimeCopy = startTime;
+          var endTimeCopy = endTime;
+          startTime = 0;
+          endTime = 0;
+          if (!endTimeCopy) return;
+          var minTime = Math.floor(Math.min(startTimeCopy, endTimeCopy));
+          var maxTime = Math.ceil(Math.max(startTimeCopy, endTimeCopy));
+          var duration = maxTime - minTime;
+          if (duration < 1) return;
+          if (!isDroging) return;
+          isDroging = false;
+
+          _this3.wf.emit(event.type, {
+            minTime: minTime,
+            maxTime: maxTime,
+            duration: duration
+          }, event);
+        });
+      }
+    }, {
+      key: "resizeInit",
+      value: function resizeInit() {
+        var _this4 = this;
+
+        var _this$wf4 = this.wf,
+            template = _this$wf4.template,
+            drawer = _this$wf4.drawer,
+            proxy = _this$wf4.events.proxy;
         var throttleResize = throttle_1(function () {
           template.update();
           drawer.update();
 
-          _this3.wf.emit('resize');
+          _this4.wf.emit('resize');
         }, 500);
         proxy(window, ['resize', 'orientationchange'], function () {
           throttleResize();
@@ -1478,22 +1530,22 @@
     }, {
       key: "playInit",
       value: function playInit() {
-        var _this$wf3 = this.wf,
-            drawer = _this$wf3.drawer,
-            mediaElement = _this$wf3.options.mediaElement;
+        var _this$wf5 = this.wf,
+            drawer = _this$wf5.drawer,
+            mediaElement = _this$wf5.options.mediaElement;
         if (!mediaElement) return;
         (function loop() {
-          var _this4 = this;
+          var _this5 = this;
 
           this.playTimer = requestAnimationFrame(function () {
-            if (_this4.wf.playing) {
+            if (_this5.wf.playing) {
               drawer.update();
 
-              _this4.wf.emit('playing', mediaElement.currentTime);
+              _this5.wf.emit('playing', mediaElement.currentTime);
             }
 
-            if (!_this4.wf.isDestroy) {
-              loop.call(_this4);
+            if (!_this5.wf.isDestroy) {
+              loop.call(_this5);
             }
           });
         }).call(this);
