@@ -1300,7 +1300,7 @@
 
           _this2.wf.emit('decodeing', _this2.audiobuffer.duration / duration);
 
-          _this2.channelData = audiobuffer.getChannelData(channel) || new Float32Array();
+          _this2.channelData = audiobuffer.getChannelData(channel);
 
           _this2.wf.emit('channelData', _this2.channelData);
         }).catch(function (error) {
