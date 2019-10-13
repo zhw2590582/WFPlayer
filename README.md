@@ -51,10 +51,26 @@ Will expose the global variable to `window.WFPlayer`.
 
 ## Usage
 
+HTML
+
 ```html
-<div id="waveform"></div>
+<div id="waveform" style="width: 500px; height: 200px"></div>
 <video id="video" src="path/to/video.mp4"></video>
 ```
+
+JS
+
+```js
+var wf = new WFPlayer({
+    container: '#waveform',
+});
+
+wf.load('#video');
+```
+
+## API
+
+### Options
 
 ```js
 var wf = new WFPlayer({
@@ -122,8 +138,6 @@ var wf = new WFPlayer({
     waveScale: 0.8,
 });
 ```
-
-## API
 
 ### Instance methods and properties
 
