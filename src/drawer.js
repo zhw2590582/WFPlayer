@@ -42,11 +42,14 @@ export default class Drawer {
     }
 
     updateBackground() {
-        const { backgroundColor } = this.wf.options;
+        const { backgroundColor, paddingColor, padding } = this.wf.options;
         const { width, height } = this.canvas;
         this.ctx.clearRect(0, 0, width, height);
         this.ctx.fillStyle = backgroundColor;
         this.ctx.fillRect(0, 0, width, height);
+        this.ctx.fillStyle = paddingColor;
+        this.ctx.fillRect(0, 0, padding * this.gridGap, height);
+        this.ctx.fillRect(width - padding * this.gridGap, 0, padding * this.gridGap, height);
     }
 
     updateWave() {

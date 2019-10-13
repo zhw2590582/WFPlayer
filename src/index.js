@@ -29,6 +29,7 @@ export default class WFPlayer extends Emitter {
             mediaElement: null,
             waveColor: 'rgba(255, 255, 255, 0.1)',
             backgroundColor: 'rgb(28, 32, 34)',
+            paddingColor: 'rgba(255, 255, 255, 0.05)',
             cursor: true,
             cursorColor: '#ff0000',
             progress: true,
@@ -63,6 +64,7 @@ export default class WFPlayer extends Emitter {
             mediaElement: 'null|htmlvideoelement|htmlaudioelement',
             waveColor: 'string',
             backgroundColor: 'string',
+            paddingColor: 'string',
             cursor: 'boolean',
             cursorColor: 'string',
             progress: 'boolean',
@@ -153,7 +155,7 @@ export default class WFPlayer extends Emitter {
             target = target.src;
         }
         errorHandle(
-            typeof target === 'string',
+            typeof target === 'string' && target.trim(),
             `The load target is not a string. If you are loading a mediaElement, make sure the mediaElement.src is not empty.`,
         );
         this.loader.load(target);

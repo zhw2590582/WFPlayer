@@ -604,13 +604,19 @@
     }, {
       key: "updateBackground",
       value: function updateBackground() {
-        var backgroundColor = this.wf.options.backgroundColor;
+        var _this$wf$options2 = this.wf.options,
+            backgroundColor = _this$wf$options2.backgroundColor,
+            paddingColor = _this$wf$options2.paddingColor,
+            padding = _this$wf$options2.padding;
         var _this$canvas = this.canvas,
             width = _this$canvas.width,
             height = _this$canvas.height;
         this.ctx.clearRect(0, 0, width, height);
         this.ctx.fillStyle = backgroundColor;
         this.ctx.fillRect(0, 0, width, height);
+        this.ctx.fillStyle = paddingColor;
+        this.ctx.fillRect(0, 0, padding * this.gridGap, height);
+        this.ctx.fillRect(width - padding * this.gridGap, 0, padding * this.gridGap, height);
       }
     }, {
       key: "updateWave",
@@ -659,9 +665,9 @@
     }, {
       key: "updateGrid",
       value: function updateGrid() {
-        var _this$wf$options2 = this.wf.options,
-            gridColor = _this$wf$options2.gridColor,
-            pixelRatio = _this$wf$options2.pixelRatio;
+        var _this$wf$options3 = this.wf.options,
+            gridColor = _this$wf$options3.gridColor,
+            pixelRatio = _this$wf$options3.pixelRatio;
         var _this$canvas3 = this.canvas,
             width = _this$canvas3.width,
             height = _this$canvas3.height;
@@ -678,11 +684,11 @@
     }, {
       key: "updateRuler",
       value: function updateRuler() {
-        var _this$wf$options3 = this.wf.options,
-            rulerColor = _this$wf$options3.rulerColor,
-            pixelRatio = _this$wf$options3.pixelRatio,
-            padding = _this$wf$options3.padding,
-            rulerAtTop = _this$wf$options3.rulerAtTop;
+        var _this$wf$options4 = this.wf.options,
+            rulerColor = _this$wf$options4.rulerColor,
+            pixelRatio = _this$wf$options4.pixelRatio,
+            padding = _this$wf$options4.padding,
+            rulerAtTop = _this$wf$options4.rulerAtTop;
         var height = this.canvas.height;
         var fontSize = 11;
         var fontHeight = 15;
@@ -1577,7 +1583,7 @@
     }, {
       key: "version",
       get: function get() {
-        return '1.0.4';
+        return '1.0.6';
       }
     }, {
       key: "env",
@@ -1592,6 +1598,7 @@
           mediaElement: null,
           waveColor: 'rgba(255, 255, 255, 0.1)',
           backgroundColor: 'rgb(28, 32, 34)',
+          paddingColor: 'rgba(255, 255, 255, 0.05)',
           cursor: true,
           cursorColor: '#ff0000',
           progress: true,
@@ -1622,10 +1629,11 @@
         };
 
         return {
-          container: 'htmlelement',
+          container: 'htmlelement|htmldivelement',
           mediaElement: 'null|htmlvideoelement|htmlaudioelement',
           waveColor: 'string',
           backgroundColor: 'string',
+          paddingColor: 'string',
           cursor: 'boolean',
           cursorColor: 'string',
           progress: 'boolean',
@@ -1698,7 +1706,7 @@
           target = target.src;
         }
 
-        errorHandle(typeof target === 'string', "The load target is not a string. If you are loading a mediaElement, make sure the mediaElement.src is not empty.");
+        errorHandle(typeof target === 'string' && target.trim(), "The load target is not a string. If you are loading a mediaElement, make sure the mediaElement.src is not empty.");
         this.loader.load(target);
         this.emit('load');
         return this;
