@@ -56,6 +56,9 @@ HTML
 ```html
 <div id="waveform" style="width: 1000px; height: 300px"></div>
 <video id="video" src="path/to/video.mp4"></video>
+
+<!-- or -->
+<audio id="audio" src="path/to/audio.mp4"></audio>
 ```
 
 JS
@@ -66,6 +69,9 @@ var wf = new WFPlayer({
 });
 
 wf.load(document.querySelector('#video'));
+
+<!-- or -->
+wf.load(document.querySelector('#audio'));
 ```
 
 ## API
