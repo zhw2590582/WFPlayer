@@ -70,7 +70,7 @@ var wf = new WFPlayer({
 
 wf.load(document.querySelector('#video'));
 
-<!-- or -->
+// or
 wf.load(document.querySelector('#audio'));
 ```
 
