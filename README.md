@@ -78,7 +78,7 @@ var wf = new WFPlayer({
     container: '#waveform',
 
     // Media element like: video tag or audio tag
-    mediaElement: '#video',
+    mediaElement: null,
 
     // Whether to display wave
     wave: true,
