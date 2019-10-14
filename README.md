@@ -58,7 +58,7 @@ HTML
 <video id="video" src="path/to/video.mp4"></video>
 
 <!-- or -->
-<audio id="audio" src="path/to/audio.mp4"></audio>
+<audio id="audio" src="path/to/audio.mp3"></audio>
 ```
 
 JS
