@@ -23,25 +23,27 @@ export default class Drawer {
     update() {
         const {
             currentTime,
-            options: { cursor, grid, ruler, duration, padding },
+            options: { cursor, grid, ruler, wave, duration, padding },
         } = this.wf;
         this.gridNum = duration * 10 + padding * 2;
         this.gridGap = this.canvas.width / this.gridNum;
         this.beginTime = Math.floor(currentTime / duration) * duration;
-        this.updateBackground();
+        this.drawBackground();
         if (grid) {
-            this.updateGrid();
+            this.drawGrid();
         }
         if (ruler) {
-            this.updateRuler();
+            this.drawRuler();
         }
-        this.updateWave();
+        if (wave) {
+            this.drawWave();
+        }
         if (cursor) {
-            this.updateCursor();
+            this.drawCursor();
         }
     }
 
-    updateBackground() {
+    drawBackground() {
         const { backgroundColor, paddingColor, padding } = this.wf.options;
         const { width, height } = this.canvas;
         this.ctx.clearRect(0, 0, width, height);
@@ -52,7 +54,7 @@ export default class Drawer {
         this.ctx.fillRect(width - padding * this.gridGap, 0, padding * this.gridGap, height);
     }
 
-    updateWave() {
+    drawWave() {
         const {
             currentTime,
             options: { progress, waveColor, progressColor, duration, padding, waveScale },
@@ -84,7 +86,7 @@ export default class Drawer {
         }
     }
 
-    updateGrid() {
+    drawGrid() {
         const { gridColor, pixelRatio } = this.wf.options;
         const { width, height } = this.canvas;
         this.ctx.fillStyle = gridColor;
@@ -96,7 +98,7 @@ export default class Drawer {
         }
     }
 
-    updateRuler() {
+    drawRuler() {
         const { rulerColor, pixelRatio, padding, rulerAtTop } = this.wf.options;
         const { height } = this.canvas;
         const fontSize = 11;
@@ -130,7 +132,7 @@ export default class Drawer {
         }
     }
 
-    updateCursor() {
+    drawCursor() {
         const {
             currentTime,
             options: { cursorColor, pixelRatio, padding },

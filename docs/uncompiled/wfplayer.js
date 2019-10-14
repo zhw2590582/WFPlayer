@@ -580,30 +580,33 @@
             cursor = _this$wf$options.cursor,
             grid = _this$wf$options.grid,
             ruler = _this$wf$options.ruler,
+            wave = _this$wf$options.wave,
             duration = _this$wf$options.duration,
             padding = _this$wf$options.padding;
         this.gridNum = duration * 10 + padding * 2;
         this.gridGap = this.canvas.width / this.gridNum;
         this.beginTime = Math.floor(currentTime / duration) * duration;
-        this.updateBackground();
+        this.drawBackground();
 
         if (grid) {
-          this.updateGrid();
+          this.drawGrid();
         }
 
         if (ruler) {
-          this.updateRuler();
+          this.drawRuler();
         }
 
-        this.updateWave();
+        if (wave) {
+          this.drawWave();
+        }
 
         if (cursor) {
-          this.updateCursor();
+          this.drawCursor();
         }
       }
     }, {
-      key: "updateBackground",
-      value: function updateBackground() {
+      key: "drawBackground",
+      value: function drawBackground() {
         var _this$wf$options2 = this.wf.options,
             backgroundColor = _this$wf$options2.backgroundColor,
             paddingColor = _this$wf$options2.paddingColor,
@@ -619,8 +622,8 @@
         this.ctx.fillRect(width - padding * this.gridGap, 0, padding * this.gridGap, height);
       }
     }, {
-      key: "updateWave",
-      value: function updateWave() {
+      key: "drawWave",
+      value: function drawWave() {
         var _this$wf2 = this.wf,
             currentTime = _this$wf2.currentTime,
             _this$wf2$options = _this$wf2.options,
@@ -664,8 +667,8 @@
         }
       }
     }, {
-      key: "updateGrid",
-      value: function updateGrid() {
+      key: "drawGrid",
+      value: function drawGrid() {
         var _this$wf$options3 = this.wf.options,
             gridColor = _this$wf$options3.gridColor,
             pixelRatio = _this$wf$options3.pixelRatio;
@@ -683,8 +686,8 @@
         }
       }
     }, {
-      key: "updateRuler",
-      value: function updateRuler() {
+      key: "drawRuler",
+      value: function drawRuler() {
         var _this$wf$options4 = this.wf.options,
             rulerColor = _this$wf$options4.rulerColor,
             pixelRatio = _this$wf$options4.pixelRatio,
@@ -709,8 +712,8 @@
         }
       }
     }, {
-      key: "updateCursor",
-      value: function updateCursor() {
+      key: "drawCursor",
+      value: function drawCursor() {
         var _this$wf3 = this.wf,
             currentTime = _this$wf3.currentTime,
             _this$wf3$options = _this$wf3.options,
@@ -1474,62 +1477,19 @@
         });
       }
     }, {
-      key: "moveInit",
-      value: function moveInit() {
+      key: "resizeInit",
+      value: function resizeInit() {
         var _this3 = this;
 
         var _this$wf3 = this.wf,
-            canvas = _this$wf3.template.canvas,
+            template = _this$wf3.template,
+            drawer = _this$wf3.drawer,
             proxy = _this$wf3.events.proxy;
-        var isDroging = false;
-        var startTime = 0;
-        var endTime = 0;
-        proxy(canvas, 'mousedown', function (event) {
-          isDroging = true;
-          startTime = _this3.getTimeFromEvent(event);
-
-          _this3.wf.emit(event.type, startTime, event);
-        });
-        proxy(document, 'mousemove', function (event) {
-          if (!isDroging) return;
-          endTime = _this3.getTimeFromEvent(event);
-
-          _this3.wf.emit(event.type, endTime, event);
-        });
-        proxy(document, 'mouseup', function (event) {
-          var startTimeCopy = startTime;
-          var endTimeCopy = endTime;
-          startTime = 0;
-          endTime = 0;
-          if (!endTimeCopy) return;
-          var minTime = Math.floor(Math.min(startTimeCopy, endTimeCopy));
-          var maxTime = Math.ceil(Math.max(startTimeCopy, endTimeCopy));
-          var duration = maxTime - minTime;
-          if (duration < 1) return;
-          if (!isDroging) return;
-          isDroging = false;
-
-          _this3.wf.emit(event.type, {
-            minTime: minTime,
-            maxTime: maxTime,
-            duration: duration
-          }, event);
-        });
-      }
-    }, {
-      key: "resizeInit",
-      value: function resizeInit() {
-        var _this4 = this;
-
-        var _this$wf4 = this.wf,
-            template = _this$wf4.template,
-            drawer = _this$wf4.drawer,
-            proxy = _this$wf4.events.proxy;
         var throttleResize = throttle_1(function () {
           template.update();
           drawer.update();
 
-          _this4.wf.emit('resize');
+          _this3.wf.emit('resize');
         }, 500);
         proxy(window, ['resize', 'orientationchange'], function () {
           throttleResize();
@@ -1538,22 +1498,22 @@
     }, {
       key: "playInit",
       value: function playInit() {
-        var _this$wf5 = this.wf,
-            drawer = _this$wf5.drawer,
-            mediaElement = _this$wf5.options.mediaElement;
+        var _this$wf4 = this.wf,
+            drawer = _this$wf4.drawer,
+            mediaElement = _this$wf4.options.mediaElement;
         if (!mediaElement) return;
         (function loop() {
-          var _this5 = this;
+          var _this4 = this;
 
           this.playTimer = requestAnimationFrame(function () {
-            if (_this5.wf.playing) {
+            if (_this4.wf.playing) {
               drawer.update();
 
-              _this5.wf.emit('playing', mediaElement.currentTime);
+              _this4.wf.emit('playing', mediaElement.currentTime);
             }
 
-            if (!_this5.wf.isDestroy) {
-              loop.call(_this5);
+            if (!_this4.wf.isDestroy) {
+              loop.call(_this4);
             }
           });
         }).call(this);
@@ -1587,7 +1547,7 @@
     }, {
       key: "version",
       get: function get() {
-        return '1.0.7';
+        return '1.0.8';
       }
     }, {
       key: "env",
@@ -1600,6 +1560,7 @@
         return {
           container: '#waveform',
           mediaElement: null,
+          wave: true,
           waveColor: 'rgba(255, 255, 255, 0.1)',
           backgroundColor: 'rgb(28, 32, 34)',
           paddingColor: 'rgba(255, 255, 255, 0.05)',
@@ -1636,6 +1597,7 @@
         return {
           container: 'htmlelement|htmldivelement',
           mediaElement: 'null|htmlvideoelement|htmlaudioelement',
+          wave: 'boolean',
           waveColor: 'string',
           backgroundColor: 'string',
           paddingColor: 'string',

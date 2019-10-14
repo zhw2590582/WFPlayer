@@ -27,6 +27,7 @@ export default class WFPlayer extends Emitter {
         return {
             container: '#waveform',
             mediaElement: null,
+            wave: true,
             waveColor: 'rgba(255, 255, 255, 0.1)',
             backgroundColor: 'rgb(28, 32, 34)',
             paddingColor: 'rgba(255, 255, 255, 0.05)',
@@ -63,6 +64,7 @@ export default class WFPlayer extends Emitter {
         return {
             container: 'htmlelement|htmldivelement',
             mediaElement: 'null|htmlvideoelement|htmlaudioelement',
+            wave: 'boolean',
             waveColor: 'string',
             backgroundColor: 'string',
             paddingColor: 'string',

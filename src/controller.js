@@ -37,51 +37,6 @@ export default class Controller {
         });
     }
 
-    moveInit() {
-        const {
-            template: { canvas },
-            events: { proxy },
-        } = this.wf;
-
-        let isDroging = false;
-        let startTime = 0;
-        let endTime = 0;
-        proxy(canvas, 'mousedown', event => {
-            isDroging = true;
-            startTime = this.getTimeFromEvent(event);
-            this.wf.emit(event.type, startTime, event);
-        });
-
-        proxy(document, 'mousemove', event => {
-            if (!isDroging) return;
-            endTime = this.getTimeFromEvent(event);
-            this.wf.emit(event.type, endTime, event);
-        });
-
-        proxy(document, 'mouseup', event => {
-            const startTimeCopy = startTime;
-            const endTimeCopy = endTime;
-            startTime = 0;
-            endTime = 0;
-            if (!endTimeCopy) return;
-            const minTime = Math.floor(Math.min(startTimeCopy, endTimeCopy));
-            const maxTime = Math.ceil(Math.max(startTimeCopy, endTimeCopy));
-            const duration = maxTime - minTime;
-            if (duration < 1) return;
-            if (!isDroging) return;
-            isDroging = false;
-            this.wf.emit(
-                event.type,
-                {
-                    minTime,
-                    maxTime,
-                    duration,
-                },
-                event,
-            );
-        });
-    }
-
     resizeInit() {
         const {
             template,

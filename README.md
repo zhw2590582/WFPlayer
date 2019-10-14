@@ -54,7 +54,7 @@ Will expose the global variable to `window.WFPlayer`.
 HTML
 
 ```html
-<div id="waveform" style="width: 500px; height: 200px"></div>
+<div id="waveform" style="width: 1000px; height: 300px"></div>
 <video id="video" src="path/to/video.mp4"></video>
 ```
 
@@ -62,10 +62,10 @@ JS
 
 ```js
 var wf = new WFPlayer({
-    container: '#waveform',
+    container: document.querySelector('#waveform'),
 });
 
-wf.load('#video');
+wf.load(document.querySelector('#video'));
 ```
 
 ## API
@@ -79,6 +79,9 @@ var wf = new WFPlayer({
 
     // Media element like: video tag or audio tag
     mediaElement: '#video',
+
+    // Whether to display wave
+    wave: true,
 
     // Waveform color
     waveColor: 'rgba(255, 255, 255, 0.1)',
