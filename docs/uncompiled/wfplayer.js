@@ -1576,20 +1576,20 @@
           withCredentials: false,
           cors: false,
           headers: {},
-          pixelRatio: window.devicePixelRatio,
           channel: 0,
           duration: 10,
           padding: 5,
-          waveScale: 0.8
+          waveScale: 0.8,
+          pixelRatio: window.devicePixelRatio
         };
       }
     }, {
       key: "scheme",
       get: function get() {
-        var checkNum = function checkNum(name, min) {
+        var checkNum = function checkNum(name, min, max, isInteger) {
           return function (value, type) {
-            errorHandle(type === 'number', "".concat(name, " expects to receive number as a parameter."));
-            errorHandle(value >= min && Number.isInteger(value), "".concat(name, " expect a positive integer greater than or equal to ").concat(min, ", but got ").concat(value, "."));
+            errorHandle(type === 'number', "".concat(name, " expects to receive number as a parameter, but got ").concat(type, "."));
+            errorHandle(value >= min && value <= max && (isInteger ? Number.isInteger(value) : true), "'options.".concat(name, "' expect ").concat(isInteger ? 'an integer ' : 'a ', "number that >= ").concat(min, " and <= ").concat(max, ", but got ").concat(value, "."));
             return true;
           };
         };
@@ -1613,15 +1613,11 @@
           withCredentials: 'boolean',
           cors: 'boolean',
           headers: 'object',
-          pixelRatio: checkNum('pixelRatio', 1),
-          channel: checkNum('channel', 0),
-          duration: checkNum('duration', 1),
-          padding: checkNum('padding', 1),
-          waveScale: function waveScale(value, type) {
-            errorHandle(type === 'number', "waveScale expects to receive number as a parameter.");
-            errorHandle(value >= 0.1 && value <= 2, "waveScale expect a number that greater than or equal to 0.1 and less than or equal to 2, but got ".concat(value, "."));
-            return true;
-          }
+          channel: checkNum('channel', 0, 5, true),
+          duration: checkNum('duration', 1, 100, true),
+          padding: checkNum('padding', 1, 100, true),
+          waveScale: checkNum('waveScale', 0.1, 10, false),
+          pixelRatio: checkNum('pixelRatio', 1, 10, false)
         };
       }
     }]);

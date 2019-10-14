@@ -43,20 +43,20 @@ export default class WFPlayer extends Emitter {
             withCredentials: false,
             cors: false,
             headers: {},
-            pixelRatio: window.devicePixelRatio,
             channel: 0,
             duration: 10,
             padding: 5,
             waveScale: 0.8,
+            pixelRatio: window.devicePixelRatio,
         };
     }
 
     static get scheme() {
-        const checkNum = (name, min) => (value, type) => {
-            errorHandle(type === 'number', `${name} expects to receive number as a parameter.`);
+        const checkNum = (name, min, max, isInteger) => (value, type) => {
+            errorHandle(type === 'number', `${name} expects to receive number as a parameter, but got ${type}.`);
             errorHandle(
-                value >= min && Number.isInteger(value),
-                `${name} expect a positive integer greater than or equal to ${min}, but got ${value}.`,
+                value >= min && value <= max && (isInteger ? Number.isInteger(value) : true),
+                `'options.${name}' expect ${isInteger ? 'an integer ' : 'a '}number that >= ${min} and <= ${max}, but got ${value}.`,
             );
             return true;
         };
@@ -80,18 +80,11 @@ export default class WFPlayer extends Emitter {
             withCredentials: 'boolean',
             cors: 'boolean',
             headers: 'object',
-            pixelRatio: checkNum('pixelRatio', 1),
-            channel: checkNum('channel', 0),
-            duration: checkNum('duration', 1),
-            padding: checkNum('padding', 1),
-            waveScale: (value, type) => {
-                errorHandle(type === 'number', `waveScale expects to receive number as a parameter.`);
-                errorHandle(
-                    value >= 0.1 && value <= 2,
-                    `waveScale expect a number that greater than or equal to 0.1 and less than or equal to 2, but got ${value}.`,
-                );
-                return true;
-            },
+            channel: checkNum('channel', 0, 5, true),
+            duration: checkNum('duration', 1, 100, true),
+            padding: checkNum('padding', 1, 100, true),
+            waveScale: checkNum('waveScale', 0.1, 10, false),
+            pixelRatio: checkNum('pixelRatio', 1, 10, false),
         };
     }
 
