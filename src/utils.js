@@ -49,3 +49,13 @@ export function getMinAndMax(arr, scale) {
 export function clamp(num, a, b) {
     return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
 }
+
+export function setStyle(element, key, value) {
+    if (typeof key === 'object') {
+        Object.keys(key).forEach(item => {
+            setStyle(element, item, key[item]);
+        });
+    }
+    element.style[key] = value;
+    return element;
+}

@@ -439,6 +439,16 @@
   function clamp(num, a, b) {
     return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
   }
+  function setStyle(element, key, value) {
+    if (_typeof_1(key) === 'object') {
+      Object.keys(key).forEach(function (item) {
+        setStyle(element, item, key[item]);
+      });
+    }
+
+    element.style[key] = value;
+    return element;
+  }
 
   var Template =
   /*#__PURE__*/
@@ -469,6 +479,7 @@
           }), 'Cannot mount multiple instances on the same dom element, please destroy the previous instance first.');
           errorHandle(clientWidth && clientHeight, 'The width and height of the container cannot be 0');
           container.innerHTML = '';
+          container.style.position = 'relative';
           this.canvas = document.createElement('canvas');
           this.canvas.width = clientWidth * pixelRatio;
           this.canvas.height = clientHeight * pixelRatio;
@@ -1484,14 +1495,43 @@
         var _this$wf3 = this.wf,
             template = _this$wf3.template,
             drawer = _this$wf3.drawer,
-            proxy = _this$wf3.events.proxy;
+            proxy = _this$wf3.events.proxy,
+            container = _this$wf3.options.container;
+        var object = document.createElement('object');
+        object.setAttribute('aria-hidden', 'true');
+        object.setAttribute('tabindex', -1);
+        object.type = 'text/html';
+        object.data = 'about:blank';
+        setStyle(object, {
+          display: 'block',
+          position: 'absolute',
+          top: '0',
+          left: '0',
+          height: '100%',
+          width: '100%',
+          overflow: 'hidden',
+          pointerEvents: 'none',
+          zIndex: '-1'
+        });
+        var containerWidth = container.clientWidth;
+        var containerHeight = container.clientWidth;
         var throttleResize = throttle_1(function () {
+          containerWidth = container.clientWidth;
+          containerHeight = container.clientWidth;
           template.update();
           drawer.update();
 
           _this3.wf.emit('resize');
         }, 500);
-        proxy(window, ['resize', 'orientationchange'], function () {
+        proxy(object, 'load', function () {
+          proxy(object.contentDocument.defaultView, 'resize', function () {
+            if (container.clientWidth !== containerWidth || container.clientWidth !== containerHeight) {
+              throttleResize();
+            }
+          });
+        });
+        container.appendChild(object);
+        proxy(window, 'orientationchange', function () {
           throttleResize();
         });
       }
@@ -1547,7 +1587,7 @@
     }, {
       key: "version",
       get: function get() {
-        return '1.0.8';
+        return '1.0.9';
       }
     }, {
       key: "env",
