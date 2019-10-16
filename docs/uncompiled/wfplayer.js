@@ -420,22 +420,6 @@
       return merge;
     }, new Cons());
   }
-  function getMinAndMax(arr, scale) {
-    var min = 1;
-    var max = -1;
-
-    for (var i = 0; i < arr.length; i += 1) {
-      var item = arr[i];
-
-      if (item < min) {
-        min = item;
-      } else if (item > max) {
-        max = item;
-      }
-    }
-
-    return [min * scale, max * scale];
-  }
   function clamp(num, a, b) {
     return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
   }
@@ -508,56 +492,6 @@
 
     return Template;
   }();
-
-  function _arrayWithHoles(arr) {
-    if (Array.isArray(arr)) return arr;
-  }
-
-  var arrayWithHoles = _arrayWithHoles;
-
-  function _iterableToArrayLimit(arr, i) {
-    if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
-      return;
-    }
-
-    var _arr = [];
-    var _n = true;
-    var _d = false;
-    var _e = undefined;
-
-    try {
-      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-        _arr.push(_s.value);
-
-        if (i && _arr.length === i) break;
-      }
-    } catch (err) {
-      _d = true;
-      _e = err;
-    } finally {
-      try {
-        if (!_n && _i["return"] != null) _i["return"]();
-      } finally {
-        if (_d) throw _e;
-      }
-    }
-
-    return _arr;
-  }
-
-  var iterableToArrayLimit = _iterableToArrayLimit;
-
-  function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance");
-  }
-
-  var nonIterableRest = _nonIterableRest;
-
-  function _slicedToArray(arr, i) {
-    return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || nonIterableRest();
-  }
-
-  var slicedToArray = _slicedToArray;
 
   var Drawer =
   /*#__PURE__*/
@@ -656,24 +590,29 @@
         var endIndex = clamp((this.beginTime + duration) * sampleRate, startIndex, Infinity);
         var step = Math.floor((endIndex - startIndex) / waveWidth);
         var cursorX = padding * this.gridGap + (currentTime - this.beginTime) * this.gridGap * 10;
-        var index = -1;
-        var arr = [];
+        var stepIndex = 0;
+        var xIndex = 0;
+        var min = 1;
+        var max = -1;
 
         for (var i = startIndex; i < endIndex; i += 1) {
-          arr.push(channelData[i] || 0);
+          stepIndex += 1;
+          var item = channelData[i] || 0;
 
-          if (arr.length >= step && index < waveWidth) {
-            index += 1;
+          if (item < min) {
+            min = item;
+          } else if (item > max) {
+            max = item;
+          }
 
-            var _getMinAndMax = getMinAndMax(arr, waveScale),
-                _getMinAndMax2 = slicedToArray(_getMinAndMax, 2),
-                min = _getMinAndMax2[0],
-                max = _getMinAndMax2[1];
-
-            var waveX = this.gridGap * padding + index;
+          if (stepIndex >= step && xIndex < waveWidth) {
+            xIndex += 1;
+            var waveX = this.gridGap * padding + xIndex;
             this.ctx.fillStyle = progress && cursorX >= waveX ? progressColor : waveColor;
-            this.ctx.fillRect(waveX, (1 + min) * middle, 1, Math.max(1, (max - min) * middle));
-            arr.length = 0;
+            this.ctx.fillRect(waveX, (1 + min * waveScale) * middle, 1, Math.max(1, (max - min) * middle * waveScale));
+            stepIndex = 0;
+            min = 1;
+            max = -1;
           }
         }
       }

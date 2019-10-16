@@ -32,20 +32,6 @@ export function mergeBuffer(...buffers) {
     }, new Cons());
 }
 
-export function getMinAndMax(arr, scale) {
-    let min = 1;
-    let max = -1;
-    for (let i = 0; i < arr.length; i += 1) {
-        const item = arr[i];
-        if (item < min) {
-            min = item;
-        } else if (item > max) {
-            max = item;
-        }
-    }
-    return [min * scale, max * scale];
-}
-
 export function clamp(num, a, b) {
     return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
 }

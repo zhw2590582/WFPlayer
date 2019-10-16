@@ -1,4 +1,4 @@
-import { durationToTime, clamp, getMinAndMax } from './utils';
+import { durationToTime, clamp } from './utils';
 
 export default class Drawer {
     constructor(wf) {
@@ -71,17 +71,31 @@ export default class Drawer {
         const step = Math.floor((endIndex - startIndex) / waveWidth);
         const cursorX = padding * this.gridGap + (currentTime - this.beginTime) * this.gridGap * 10;
 
-        let index = -1;
-        const arr = [];
+        let stepIndex = 0;
+        let xIndex = 0;
+        let min = 1;
+        let max = -1;
         for (let i = startIndex; i < endIndex; i += 1) {
-            arr.push(channelData[i] || 0);
-            if (arr.length >= step && index < waveWidth) {
-                index += 1;
-                const [min, max] = getMinAndMax(arr, waveScale);
-                const waveX = this.gridGap * padding + index;
+            stepIndex += 1;
+            const item = channelData[i] || 0;
+            if (item < min) {
+                min = item;
+            } else if (item > max) {
+                max = item;
+            }
+            if (stepIndex >= step && xIndex < waveWidth) {
+                xIndex += 1;
+                const waveX = this.gridGap * padding + xIndex;
                 this.ctx.fillStyle = progress && cursorX >= waveX ? progressColor : waveColor;
-                this.ctx.fillRect(waveX, (1 + min) * middle, 1, Math.max(1, (max - min) * middle));
-                arr.length = 0;
+                this.ctx.fillRect(
+                    waveX,
+                    (1 + min * waveScale) * middle,
+                    1,
+                    Math.max(1, (max - min) * middle * waveScale),
+                );
+                stepIndex = 0;
+                min = 1;
+                max = -1;
             }
         }
     }
