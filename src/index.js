@@ -42,6 +42,7 @@ export default class WFPlayer extends Emitter {
             rulerAtTop: true,
             withCredentials: false,
             cors: false,
+            manualDecode: false,
             headers: {},
             channel: 0,
             duration: 10,
@@ -56,7 +57,9 @@ export default class WFPlayer extends Emitter {
             errorHandle(type === 'number', `${name} expects to receive number as a parameter, but got ${type}.`);
             errorHandle(
                 value >= min && value <= max && (isInteger ? Number.isInteger(value) : true),
-                `'options.${name}' expect ${isInteger ? 'an integer ' : 'a '}number that >= ${min} and <= ${max}, but got ${value}.`,
+                `'options.${name}' expect ${
+                    isInteger ? 'an integer ' : 'a '
+                }number that >= ${min} and <= ${max}, but got ${value}.`,
             );
             return true;
         };
@@ -79,6 +82,7 @@ export default class WFPlayer extends Emitter {
             rulerAtTop: 'boolean',
             withCredentials: 'boolean',
             cors: 'boolean',
+            manualDecode: 'boolean',
             headers: 'object',
             channel: checkNum('channel', 0, 5, true),
             duration: checkNum('duration', 1, 100, true),
@@ -176,6 +180,15 @@ export default class WFPlayer extends Emitter {
 
     exportImage() {
         this.template.exportImage();
+        return this;
+    }
+
+    decode() {
+        errorHandle(this.options.manualDecode === true, 'You need to instantiate this to set manualDecode to true.');
+        this.setOptions({
+            manualDecode: false,
+        });
+        this.decoder.manualDecode();
         return this;
     }
 

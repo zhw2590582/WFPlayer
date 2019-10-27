@@ -1,5 +1,5 @@
 import throttle from 'lodash/throttle';
-import { errorHandle } from './utils';
+import { errorHandle, mergeBuffer } from './utils';
 
 export default class Decoder {
     constructor(wf) {
@@ -8,10 +8,19 @@ export default class Decoder {
         this.throttleDecodeAudioData = throttle(this.decodeAudioData, 500);
         this.audiobuffer = this.audioCtx.createBuffer(2, 22050, 44100);
         this.channelData = new Float32Array();
+        this.data = new Uint8Array();
 
         this.wf.on('loading', uint8 => {
-            this.throttleDecodeAudioData(uint8);
+            if (wf.options.manualDecode) {
+                this.data = mergeBuffer(this.data, uint8);
+            } else {
+                this.throttleDecodeAudioData(uint8);
+            }
         });
+    }
+
+    manualDecode() {
+        this.decodeAudioData(this.data);
     }
 
     decodeAudioData(uint8) {
