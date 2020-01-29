@@ -38,6 +38,7 @@ export default class Controller {
             if (mediaElement && mediaElement.currentTime !== time) {
                 mediaElement.currentTime = time;
             }
+            this.wf.drawer.update();
         });
     }
 

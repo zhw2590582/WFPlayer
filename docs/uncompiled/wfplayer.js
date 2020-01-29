@@ -1437,6 +1437,8 @@
           if (mediaElement && mediaElement.currentTime !== time) {
             mediaElement.currentTime = time;
           }
+
+          _this2.wf.drawer.update();
         });
       }
     }, {
@@ -1539,7 +1541,7 @@
     }, {
       key: "version",
       get: function get() {
-        return '1.1.0';
+        return '1.1.1';
       }
     }, {
       key: "env",
