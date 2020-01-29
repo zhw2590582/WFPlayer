@@ -1233,12 +1233,22 @@
       this.throttleDecodeAudioData = throttle_1(this.decodeAudioData, 500);
       this.audiobuffer = this.audioCtx.createBuffer(2, 22050, 44100);
       this.channelData = new Float32Array();
+      this.data = new Uint8Array();
       this.wf.on('loading', function (uint8) {
-        _this.throttleDecodeAudioData(uint8);
+        if (wf.options.manualDecode) {
+          _this.data = mergeBuffer(_this.data, uint8);
+        } else {
+          _this.throttleDecodeAudioData(uint8);
+        }
       });
     }
 
     createClass(Decoder, [{
+      key: "manualDecode",
+      value: function manualDecode() {
+        this.decodeAudioData(this.data);
+      }
+    }, {
       key: "decodeAudioData",
       value: function decodeAudioData(uint8) {
         var _this2 = this;
@@ -1554,6 +1564,7 @@
           rulerAtTop: true,
           withCredentials: false,
           cors: false,
+          manualDecode: false,
           headers: {},
           channel: 0,
           duration: 10,
@@ -1591,6 +1602,7 @@
           rulerAtTop: 'boolean',
           withCredentials: 'boolean',
           cors: 'boolean',
+          manualDecode: 'boolean',
           headers: 'object',
           channel: checkNum('channel', 0, 5, true),
           duration: checkNum('duration', 1, 100, true),
@@ -1663,6 +1675,11 @@
       value: function seek(second) {
         errorHandle(typeof second === 'number', 'seek expects to receive number as a parameter.');
         this._currentTime = clamp(second, 0, this.duration);
+
+        if (this.options.mediaElement && this.options.mediaElement.currentTime !== this._currentTime) {
+          this.options.mediaElement.currentTime = this._currentTime;
+        }
+
         this.drawer.update();
         return this;
       }
@@ -1670,6 +1687,16 @@
       key: "exportImage",
       value: function exportImage() {
         this.template.exportImage();
+        return this;
+      }
+    }, {
+      key: "decode",
+      value: function decode() {
+        errorHandle(this.options.manualDecode === true, 'You need to instantiate this to set manualDecode to true.');
+        this.setOptions({
+          manualDecode: false
+        });
+        this.decoder.manualDecode();
         return this;
       }
     }, {

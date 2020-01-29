@@ -174,6 +174,9 @@ export default class WFPlayer extends Emitter {
     seek(second) {
         errorHandle(typeof second === 'number', 'seek expects to receive number as a parameter.');
         this._currentTime = clamp(second, 0, this.duration);
+        if (this.options.mediaElement && this.options.mediaElement.currentTime !== this._currentTime) {
+            this.options.mediaElement.currentTime = this._currentTime;
+        }
         this.drawer.update();
         return this;
     }
