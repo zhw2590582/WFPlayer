@@ -46,10 +46,6 @@ function initWFPlayer() {
         $numberOfChannels.innerHTML = audiobuffer.numberOfChannels;
         $sampleRate.innerHTML = audiobuffer.sampleRate;
     });
-
-    wf.on('click', function(value) {
-        art.seek = value;
-    });
 }
 
 initWFPlayer();

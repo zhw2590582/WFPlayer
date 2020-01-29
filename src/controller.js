@@ -30,10 +30,14 @@ export default class Controller {
         const {
             template: { canvas },
             events: { proxy },
+            options: { mediaElement },
         } = this.wf;
         proxy(canvas, ['click', 'contextmenu'], event => {
             const time = this.getTimeFromEvent(event);
             this.wf.emit(event.type, time, event);
+            if (mediaElement && mediaElement.currentTime !== time) {
+                mediaElement.currentTime = time;
+            }
         });
     }
 
