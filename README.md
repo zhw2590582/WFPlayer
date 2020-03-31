@@ -157,6 +157,12 @@ Load target:
 wf.load(target);
 ```
 
+Change Channel:
+
+```js
+wf.changeChannel(1);
+```
+
 Jump to a certain time:
 
 ```js

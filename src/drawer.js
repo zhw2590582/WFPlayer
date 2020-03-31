@@ -28,6 +28,15 @@ export default class Drawer {
         this.gridNum = duration * 10 + padding * 2;
         this.gridGap = this.canvas.width / this.gridNum;
         this.beginTime = Math.floor(currentTime / duration) * duration;
+
+        this.wf.emit('render', {
+            padding,
+            duration,
+            gridGap: this.gridGap,
+            gridNum: this.gridNum,
+            beginTime: this.beginTime,
+        });
+
         this.drawBackground();
         if (grid) {
             this.drawGrid();
