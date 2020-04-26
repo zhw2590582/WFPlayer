@@ -30,36 +30,36 @@ function initWFPlayer() {
         cors: true,
     });
 
-    wf.on('fileSize', function(fileSize) {
+    wf.on('fileSize', function (fileSize) {
         $filesize.innerHTML = (fileSize / 1024 / 1024).toFixed(3) + ' M';
     });
 
-    wf.on('downloading', function(value) {
+    wf.on('downloading', function (value) {
         $downloading.innerHTML = ((value === Infinity ? 0 : value) * 100).toFixed(3) + ' %';
     });
 
-    wf.on('decodeing', function(value) {
+    wf.on('decodeing', function (value) {
         $decodeing.innerHTML = (value * 100 || 0).toFixed(3) + ' %';
     });
 
-    wf.on('audiobuffer', function(audiobuffer) {
+    wf.on('audiobuffer', function (audiobuffer) {
         $numberOfChannels.innerHTML = audiobuffer.numberOfChannels;
         $sampleRate.innerHTML = audiobuffer.sampleRate;
     });
 }
 
 initWFPlayer();
-art.on('ready', function() {
+art.on('ready', function () {
     art.seek = 3;
     wf.seek(3);
     wf.load(art.template.$video);
 });
 
-art.on('seek', function() {
+art.on('seek', function () {
     wf.seek(art.currentTime);
 });
 
-$open.addEventListener('change', function() {
+$open.addEventListener('change', function () {
     var file = $open.files[0];
     if (file) {
         var $video = document.createElement('video');
@@ -77,11 +77,11 @@ $open.addEventListener('change', function() {
     }
 });
 
-$download.addEventListener('click', function() {
+$download.addEventListener('click', function () {
     wf.exportImage();
 });
 
-$pickers.forEach(function($el) {
+$pickers.forEach(function ($el) {
     var name = $el.getAttribute('name');
     var pickr = Pickr.create({
         el: $el,
@@ -116,20 +116,20 @@ $pickers.forEach(function($el) {
         },
     });
     pickr
-        .on('save', function(color) {
+        .on('save', function (color) {
             wf.setOptions({
                 [name]: color.toRGBA().toString(),
             });
             pickr.hide();
         })
-        .on('change', function(color) {
+        .on('change', function (color) {
             wf.setOptions({
                 [name]: color.toRGBA().toString(),
             });
         });
 });
 
-$range.forEach(function($el) {
+$range.forEach(function ($el) {
     var name = $el.getAttribute('name');
     var min = Number($el.getAttribute('min'));
     var max = Number($el.getAttribute('max'));
@@ -142,10 +142,10 @@ $range.forEach(function($el) {
         hideRange: true,
         decimal: true,
     });
-    $el.onchange = function() {
+    $el.onchange = function () {
         $el.previousElementSibling.innerHTML = $el.value;
         wf.setOptions({
-            [name]: Number($el.value),
+            [name]: name === 'waveScale' ? Number($el.value) : Math.floor(Number($el.value)),
         });
     };
 });
