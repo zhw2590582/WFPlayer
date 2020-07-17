@@ -22,7 +22,7 @@ export default class Controller {
         const gridGap = canvas.width / gridNum;
         const left = clamp(event.pageX - container.offsetLeft - (padding * gridGap) / pixelRatio, 0, Infinity);
         const beginTime = Math.floor(currentTime / duration) * duration;
-        const time = clamp(((left / gridGap) * pixelRatio) / 10 + beginTime, beginTime, beginTime + duration);
+        const time = beginTime + clamp(((left / gridGap) * pixelRatio) / 10, 0, duration);
         return time;
     }
 
