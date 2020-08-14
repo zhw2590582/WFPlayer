@@ -25,18 +25,18 @@
     },
     "homepage": "https://github.com/zhw2590582/WFPlayer#readme",
     "devDependencies": {
-        "@babel/core": "^7.10.3",
-        "@babel/plugin-external-helpers": "^7.10.1",
-        "@babel/plugin-transform-runtime": "^7.10.3",
-        "@babel/preset-env": "^7.10.3",
-        "@babel/runtime": "^7.10.3",
+        "@babel/core": "^7.11.1",
+        "@babel/plugin-external-helpers": "^7.10.4",
+        "@babel/plugin-transform-runtime": "^7.11.0",
+        "@babel/preset-env": "^7.11.0",
+        "@babel/runtime": "^7.11.2",
         "babel-eslint": "^10.1.0",
         "cross-env": "^7.0.2",
-        "eslint": "^7.3.1",
+        "eslint": "^7.6.0",
         "eslint-config-airbnb-base": "^14.2.0",
         "eslint-config-prettier": "^6.11.0",
         "eslint-plugin-import": "^2.22.0",
-        "rollup": "^2.18.1",
+        "rollup": "^2.25.0",
         "rollup-plugin-babel": "^4.4.0",
         "rollup-plugin-commonjs": "^10.1.0",
         "rollup-plugin-eslint": "^7.0.0",
@@ -47,7 +47,7 @@
     },
     "dependencies": {
         "duration-time-conversion": "^1.0.1",
-        "lodash": "^4.17.15",
+        "lodash": "^4.17.20",
         "option-validator": "^2.0.5"
     }
 }
