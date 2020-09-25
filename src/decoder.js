@@ -1,5 +1,4 @@
 import throttle from 'lodash/throttle';
-import { errorHandle } from './utils';
 
 export default class Decoder {
     constructor(wf) {
@@ -9,28 +8,25 @@ export default class Decoder {
         this.audiobuffer = this.audioCtx.createBuffer(2, 22050, 44100);
         this.channelData = new Float32Array();
 
-        this.wf.on('loading', uint8 => {
+        this.wf.on('loading', (uint8) => {
             this.throttleDecodeAudioData(uint8);
         });
     }
 
     decodeAudioData(uint8) {
-        const {
-            options: { channel },
-        } = this.wf;
         this.audioCtx.decodeAudioData(
             uint8.buffer,
-            audiobuffer => {
-                this.audiobuffer = audiobuffer;
-                this.wf.emit('audiobuffer', this.audiobuffer);
-                this.wf.emit('decodeing', this.audiobuffer.duration / this.wf.duration);
-                this.channelData = audiobuffer.getChannelData(channel);
-                this.wf.emit('channelData', this.channelData);
-            },
-            error => {
-                errorHandle(false, `It seems that the AudioContext decoding get wrong: ${error.message.trim()}`);
-            },
+            (audiobuffer) => this.decodeSuccess(audiobuffer),
+            () => null,
         );
+    }
+
+    decodeSuccess(audiobuffer) {
+        this.audiobuffer = audiobuffer;
+        this.wf.emit('audiobuffer', this.audiobuffer);
+        this.wf.emit('decodeing', this.audiobuffer.duration / this.wf.duration);
+        this.channelData = audiobuffer.getChannelData(this.wf.options.channel);
+        this.wf.emit('channelData', this.channelData);
     }
 
     changeChannel(channel) {

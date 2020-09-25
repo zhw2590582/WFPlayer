@@ -2,7 +2,7 @@
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
   (global = global || self, global.WFPlayer = factory());
-}(this, (function () { 'use strict';
+}(this, function () { 'use strict';
 
   function _defineProperty(obj, key, value) {
     if (key in obj) {
@@ -36,14 +36,16 @@
   }
 
   var _typeof_1 = createCommonjsModule(function (module) {
+  function _typeof2(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof2 = function _typeof2(obj) { return typeof obj; }; } else { _typeof2 = function _typeof2(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof2(obj); }
+
   function _typeof(obj) {
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+    if (typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol") {
       module.exports = _typeof = function _typeof(obj) {
-        return typeof obj;
+        return _typeof2(obj);
       };
     } else {
       module.exports = _typeof = function _typeof(obj) {
-        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : _typeof2(obj);
       };
     }
 
@@ -133,7 +135,7 @@
   var inherits = _inherits;
 
   var optionValidator = createCommonjsModule(function (module, exports) {
-  !function(r,t){module.exports=t();}(commonjsGlobal,function(){function e(r){return (e="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(r){return typeof r}:function(r){return r&&"function"==typeof Symbol&&r.constructor===Symbol&&r!==Symbol.prototype?"symbol":typeof r})(r)}var n=Object.prototype.toString,c=function(r){if(void 0===r)return "undefined";if(null===r)return "null";var t=e(r);if("boolean"===t)return "boolean";if("string"===t)return "string";if("number"===t)return "number";if("symbol"===t)return "symbol";if("function"===t)return function(r){return "GeneratorFunction"===o(r)}(r)?"generatorfunction":"function";if(function(r){return Array.isArray?Array.isArray(r):r instanceof Array}(r))return "array";if(function(r){if(r.constructor&&"function"==typeof r.constructor.isBuffer)return r.constructor.isBuffer(r);return !1}(r))return "buffer";if(function(r){try{if("number"==typeof r.length&&"function"==typeof r.callee)return !0}catch(r){if(-1!==r.message.indexOf("callee"))return !0}return !1}(r))return "arguments";if(function(r){return r instanceof Date||"function"==typeof r.toDateString&&"function"==typeof r.getDate&&"function"==typeof r.setDate}(r))return "date";if(function(r){return r instanceof Error||"string"==typeof r.message&&r.constructor&&"number"==typeof r.constructor.stackTraceLimit}(r))return "error";if(function(r){return r instanceof RegExp||"string"==typeof r.flags&&"boolean"==typeof r.ignoreCase&&"boolean"==typeof r.multiline&&"boolean"==typeof r.global}(r))return "regexp";switch(o(r)){case"Symbol":return "symbol";case"Promise":return "promise";case"WeakMap":return "weakmap";case"WeakSet":return "weakset";case"Map":return "map";case"Set":return "set";case"Int8Array":return "int8array";case"Uint8Array":return "uint8array";case"Uint8ClampedArray":return "uint8clampedarray";case"Int16Array":return "int16array";case"Uint16Array":return "uint16array";case"Int32Array":return "int32array";case"Uint32Array":return "uint32array";case"Float32Array":return "float32array";case"Float64Array":return "float64array"}if(function(r){return "function"==typeof r.throw&&"function"==typeof r.return&&"function"==typeof r.next}(r))return "generator";switch(t=n.call(r)){case"[object Object]":return "object";case"[object Map Iterator]":return "mapiterator";case"[object Set Iterator]":return "setiterator";case"[object String Iterator]":return "stringiterator";case"[object Array Iterator]":return "arrayiterator"}return t.slice(8,-1).toLowerCase().replace(/\s/g,"")};function o(r){return r.constructor?r.constructor.name:null}function f(r,t){var e=2<arguments.length&&void 0!==arguments[2]?arguments[2]:["option"];return s(r,t,e),y(r,t,e),function(a,i,u){var r=c(i),t=c(a);if("object"===r){if("object"!==t)throw new Error("[Type Error]: '".concat(u.join("."),"' require 'object' type, but got '").concat(t,"'"));Object.keys(i).forEach(function(r){var t=a[r],e=i[r],n=u.slice();n.push(r),s(t,e,n),y(t,e,n),f(t,e,n);});}if("array"===r){if("array"!==t)throw new Error("[Type Error]: '".concat(u.join("."),"' require 'array' type, but got '").concat(t,"'"));a.forEach(function(r,t){var e=a[t],n=i[t]||i[0],o=u.slice();o.push(t),s(e,n,o),y(e,n,o),f(e,n,o);});}}(r,t,e),r}function s(r,t,e){if("string"===c(t)){var n=c(r);if(!(-1<t.indexOf("|")?t.split("|").map(function(r){return r.toLowerCase().trim()}).filter(Boolean).some(function(r){return n===r}):t.toLowerCase().trim()===n))throw new Error("[Type Error]: '".concat(e.join("."),"' require '").concat(t,"' type, but got '").concat(n,"'"))}}function y(r,t,e){if("function"===c(t)){var n=t(r,c(r),e);if(!0!==n){var o=c(n);throw "string"===o?new Error(n):"error"===o?n:new Error("[Validator Error]: The scheme for '".concat(e.join("."),"' validator require return true, but got '").concat(n,"'"))}}}return f.kindOf=c,f});
+  !function(r,t){module.exports=t();}(commonjsGlobal,function(){function e(r){return (e="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(r){return typeof r}:function(r){return r&&"function"==typeof Symbol&&r.constructor===Symbol&&r!==Symbol.prototype?"symbol":typeof r})(r)}var n=Object.prototype.toString,c=function(r){if(void 0===r)return "undefined";if(null===r)return "null";var t=e(r);if("boolean"===t)return "boolean";if("string"===t)return "string";if("number"===t)return "number";if("symbol"===t)return "symbol";if("function"===t)return function(r){return "GeneratorFunction"===o(r)}(r)?"generatorfunction":"function";if(function(r){return Array.isArray?Array.isArray(r):r instanceof Array}(r))return "array";if(function(r){if(r.constructor&&"function"==typeof r.constructor.isBuffer)return r.constructor.isBuffer(r);return !1}(r))return "buffer";if(function(r){try{if("number"==typeof r.length&&"function"==typeof r.callee)return !0}catch(r){if(-1!==r.message.indexOf("callee"))return !0}return !1}(r))return "arguments";if(function(r){return r instanceof Date||"function"==typeof r.toDateString&&"function"==typeof r.getDate&&"function"==typeof r.setDate}(r))return "date";if(function(r){return r instanceof Error||"string"==typeof r.message&&r.constructor&&"number"==typeof r.constructor.stackTraceLimit}(r))return "error";if(function(r){return r instanceof RegExp||"string"==typeof r.flags&&"boolean"==typeof r.ignoreCase&&"boolean"==typeof r.multiline&&"boolean"==typeof r.global}(r))return "regexp";switch(o(r)){case"Symbol":return "symbol";case"Promise":return "promise";case"WeakMap":return "weakmap";case"WeakSet":return "weakset";case"Map":return "map";case"Set":return "set";case"Int8Array":return "int8array";case"Uint8Array":return "uint8array";case"Uint8ClampedArray":return "uint8clampedarray";case"Int16Array":return "int16array";case"Uint16Array":return "uint16array";case"Int32Array":return "int32array";case"Uint32Array":return "uint32array";case"Float32Array":return "float32array";case"Float64Array":return "float64array"}if(function(r){return "function"==typeof r.throw&&"function"==typeof r.return&&"function"==typeof r.next}(r))return "generator";switch(t=n.call(r)){case"[object Object]":return "object";case"[object Map Iterator]":return "mapiterator";case"[object Set Iterator]":return "setiterator";case"[object String Iterator]":return "stringiterator";case"[object Array Iterator]":return "arrayiterator"}return t.slice(8,-1).toLowerCase().replace(/\s/g,"")};function o(r){return r.constructor?r.constructor.name:null}function f(r,t){var e=2<arguments.length&&void 0!==arguments[2]?arguments[2]:["option"];return s(r,t,e),y(r,t,e),function(a,i,u){var r=c(i),t=c(a);if("object"===r){if("object"!==t)throw new Error("[Type Error]: '".concat(u.join("."),"' require 'object' type, but got '").concat(t,"'"));Object.keys(i).forEach(function(r){var t=a[r],e=i[r],n=u.slice();n.push(r),s(t,e,n),y(t,e,n),f(t,e,n);});}if("array"===r){if("array"!==t)throw new Error("[Type Error]: '".concat(u.join("."),"' require 'array' type, but got '").concat(t,"'"));a.forEach(function(r,t){var e=a[t],n=i[t]||i[0],o=u.slice();o.push(t),s(e,n,o),y(e,n,o),f(e,n,o);});}}(r,t,e),r}function s(r,t,e){if("string"===c(t)){var n=c(r);if(!(-1<t.indexOf("|")?t.split("|").map(function(r){return r.toLowerCase().trim()}).filter(Boolean).some(function(r){return n===r}):t.toLowerCase().trim()===n))throw new Error("[Type Error]: '".concat(e.join("."),"' require '").concat(t,"' type, but got '").concat(n,"'"))}}function y(r,t,e){if("function"===c(t)){var n=t(r,c(r),e);if(!0!==n){var o=c(n);throw"string"===o?new Error(n):"error"===o?n:new Error("[Validator Error]: The scheme for '".concat(e.join("."),"' validator require return true, but got '").concat(n,"'"))}}}return f.kindOf=c,f});
   });
 
   var Emitter =
@@ -421,16 +423,6 @@
   function clamp(num, a, b) {
     return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
   }
-  function setStyle(element, key, value) {
-    if (_typeof_1(key) === 'object') {
-      Object.keys(key).forEach(function (item) {
-        setStyle(element, item, key[item]);
-      });
-    }
-
-    element.style[key] = value;
-    return element;
-  }
 
   var Template =
   /*#__PURE__*/
@@ -461,7 +453,6 @@
           }), 'Cannot mount multiple instances on the same dom element, please destroy the previous instance first.');
           errorHandle(clientWidth && clientHeight, 'The width and height of the container cannot be 0');
           container.innerHTML = '';
-          container.style.position = 'relative';
           this.canvas = document.createElement('canvas');
           this.canvas.width = clientWidth * pixelRatio;
           this.canvas.height = clientHeight * pixelRatio;
@@ -529,6 +520,13 @@
         this.gridNum = duration * 10 + padding * 2;
         this.gridGap = this.canvas.width / this.gridNum;
         this.beginTime = Math.floor(currentTime / duration) * duration;
+        this.wf.emit('render', {
+          padding: padding,
+          duration: duration,
+          gridGap: this.gridGap,
+          gridNum: this.gridNum,
+          beginTime: this.beginTime
+        });
         this.drawBackground();
 
         if (grid) {
@@ -1228,45 +1226,39 @@
 
       this.wf = wf;
       this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      this.throttleDecodeAudioData = throttle_1(this.decodeAudioData, 500);
+      this.throttleDecodeAudioData = throttle_1(this.decodeAudioData, 1000);
       this.audiobuffer = this.audioCtx.createBuffer(2, 22050, 44100);
       this.channelData = new Float32Array();
-      this.data = new Uint8Array();
       this.wf.on('loading', function (uint8) {
-        if (wf.options.manualDecode) {
-          _this.data = mergeBuffer(_this.data, uint8);
-        } else {
-          _this.throttleDecodeAudioData(uint8);
-        }
+        _this.throttleDecodeAudioData(uint8);
       });
     }
 
     createClass(Decoder, [{
-      key: "manualDecode",
-      value: function manualDecode() {
-        this.decodeAudioData(this.data);
-      }
-    }, {
       key: "decodeAudioData",
       value: function decodeAudioData(uint8) {
         var _this2 = this;
 
-        var _this$wf = this.wf,
-            channel = _this$wf.options.channel,
-            duration = _this$wf.duration;
-        this.audioCtx.decodeAudioData(uint8.buffer).then(function (audiobuffer) {
-          _this2.audiobuffer = audiobuffer;
-
-          _this2.wf.emit('audiobuffer', _this2.audiobuffer);
-
-          _this2.wf.emit('decodeing', _this2.audiobuffer.duration / duration);
-
-          _this2.channelData = audiobuffer.getChannelData(channel);
-
-          _this2.wf.emit('channelData', _this2.channelData);
-        }).catch(function (error) {
-          errorHandle(false, "It seems that the AudioContext decoding get wrong: ".concat(error.message.trim()));
+        this.audioCtx.decodeAudioData(uint8.buffer, function (audiobuffer) {
+          return _this2.decodeSuccess(audiobuffer);
+        }, function () {
+          return null;
         });
+      }
+    }, {
+      key: "decodeSuccess",
+      value: function decodeSuccess(audiobuffer) {
+        this.audiobuffer = audiobuffer;
+        this.wf.emit('audiobuffer', this.audiobuffer);
+        this.wf.emit('decodeing', this.audiobuffer.duration / this.wf.duration);
+        this.channelData = audiobuffer.getChannelData(this.wf.options.channel);
+        this.wf.emit('channelData', this.channelData);
+      }
+    }, {
+      key: "changeChannel",
+      value: function changeChannel(channel) {
+        this.channelData = this.audiobuffer.getChannelData(channel);
+        this.wf.emit('channelData', this.channelData);
       }
     }, {
       key: "destroy",
@@ -1417,7 +1409,7 @@
         var gridGap = canvas.width / gridNum;
         var left = clamp(event.pageX - container.offsetLeft - padding * gridGap / pixelRatio, 0, Infinity);
         var beginTime = Math.floor(currentTime / duration) * duration;
-        var time = clamp(left / gridGap * pixelRatio / 10 + beginTime, beginTime, beginTime + duration);
+        var time = beginTime + clamp(left / gridGap * pixelRatio / 10, 0, duration);
         return time;
       }
     }, {
@@ -1449,43 +1441,14 @@
         var _this$wf3 = this.wf,
             template = _this$wf3.template,
             drawer = _this$wf3.drawer,
-            proxy = _this$wf3.events.proxy,
-            container = _this$wf3.options.container;
-        var object = document.createElement('object');
-        object.setAttribute('aria-hidden', 'true');
-        object.setAttribute('tabindex', -1);
-        object.type = 'text/html';
-        object.data = 'about:blank';
-        setStyle(object, {
-          display: 'block',
-          position: 'absolute',
-          top: '0',
-          left: '0',
-          height: '100%',
-          width: '100%',
-          overflow: 'hidden',
-          pointerEvents: 'none',
-          zIndex: '-1'
-        });
-        var containerWidth = container.clientWidth;
-        var containerHeight = container.clientWidth;
+            proxy = _this$wf3.events.proxy;
         var throttleResize = throttle_1(function () {
-          containerWidth = container.clientWidth;
-          containerHeight = container.clientWidth;
           template.update();
           drawer.update();
 
           _this3.wf.emit('resize');
         }, 500);
-        proxy(object, 'load', function () {
-          proxy(object.contentDocument.defaultView, 'resize', function () {
-            if (container.clientWidth !== containerWidth || container.clientWidth !== containerHeight) {
-              throttleResize();
-            }
-          });
-        });
-        container.appendChild(object);
-        proxy(window, 'orientationchange', function () {
+        proxy(window, ['resize', 'orientationchange'], function () {
           throttleResize();
         });
       }
@@ -1494,8 +1457,12 @@
       value: function playInit() {
         var _this$wf4 = this.wf,
             drawer = _this$wf4.drawer,
+            proxy = _this$wf4.events.proxy,
             mediaElement = _this$wf4.options.mediaElement;
         if (!mediaElement) return;
+        proxy(mediaElement, 'seeked', function () {
+          drawer.update();
+        });
         (function loop() {
           var _this4 = this;
 
@@ -1524,7 +1491,7 @@
 
   function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
-  function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+  function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
   var id = 0;
   var instances = [];
 
@@ -1541,7 +1508,7 @@
     }, {
       key: "version",
       get: function get() {
-        return '1.1.1';
+        return '1.1.3';
       }
     }, {
       key: "env",
@@ -1569,7 +1536,6 @@
           rulerAtTop: true,
           withCredentials: false,
           cors: false,
-          manualDecode: false,
           headers: {},
           channel: 0,
           duration: 10,
@@ -1607,7 +1573,6 @@
           rulerAtTop: 'boolean',
           withCredentials: 'boolean',
           cors: 'boolean',
-          manualDecode: 'boolean',
           headers: 'object',
           channel: checkNum('channel', 0, 5, true),
           duration: checkNum('duration', 1, 100, true),
@@ -1665,6 +1630,12 @@
     }, {
       key: "load",
       value: function load(target) {
+        if (target && typeof target.getChannelData === 'function') {
+          this.decoder.decodeSuccess(target);
+          this.emit('load');
+          return this;
+        }
+
         if (target instanceof HTMLVideoElement || target instanceof HTMLAudioElement) {
           this.options.mediaElement = target;
           target = target.src;
@@ -1689,19 +1660,17 @@
         return this;
       }
     }, {
+      key: "changeChannel",
+      value: function changeChannel(channel) {
+        this.setOptions({
+          channel: channel
+        });
+        this.decoder.changeChannel(channel);
+      }
+    }, {
       key: "exportImage",
       value: function exportImage() {
         this.template.exportImage();
-        return this;
-      }
-    }, {
-      key: "decode",
-      value: function decode() {
-        errorHandle(this.options.manualDecode === true, 'You need to instantiate this to set manualDecode to true.');
-        this.setOptions({
-          manualDecode: false
-        });
-        this.decoder.manualDecode();
         return this;
       }
     }, {
@@ -1743,5 +1712,5 @@
 
   return WFPlayer;
 
-})));
+}));
 //# sourceMappingURL=wfplayer.js.map
