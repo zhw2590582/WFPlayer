@@ -23,11 +23,23 @@ export default class Drawer {
     update() {
         const {
             currentTime,
-            options: { cursor, grid, ruler, wave, duration, padding },
+            options: { cursor, grid, ruler, wave, duration, padding, },
         } = this.wf;
         this.gridNum = duration * 10 + padding * 2;
         this.gridGap = this.canvas.width / this.gridNum;
         this.beginTime = Math.floor(currentTime / duration) * duration;
+
+        this.density =
+            {
+                1: 5,
+                2: 4,
+                3: 3,
+                4: 3,
+                5: 2,
+                6: 2,
+                7: 2,
+                8: 2,
+            }[Math.floor(this.gridGap)] || 1;
 
         this.wf.emit('render', {
             padding,
@@ -113,10 +125,10 @@ export default class Drawer {
         const { gridColor, pixelRatio } = this.wf.options;
         const { width, height } = this.canvas;
         this.ctx.fillStyle = gridColor;
-        for (let index = 0; index < this.gridNum; index += 1) {
+        for (let index = 0; index < this.gridNum; index += this.density) {
             this.ctx.fillRect(this.gridGap * index, 0, pixelRatio, height);
         }
-        for (let index = 0; index < height / this.gridGap; index += 1) {
+        for (let index = 0; index < height / this.gridGap; index += this.density) {
             this.ctx.fillRect(0, this.gridGap * index, width, pixelRatio);
         }
     }
@@ -139,11 +151,13 @@ export default class Drawer {
                     pixelRatio,
                     fontHeight * pixelRatio,
                 );
-                this.ctx.fillText(
-                    durationToTime(this.beginTime + second).split('.')[0],
-                    this.gridGap * index - fontSize * pixelRatio * 2 + pixelRatio,
-                    rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize,
-                );
+                if ((index - padding) % (this.density * 10) === 0) {
+                    this.ctx.fillText(
+                        durationToTime(this.beginTime + second).split('.')[0],
+                        this.gridGap * index - fontSize * pixelRatio * 2 + pixelRatio,
+                        rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize,
+                    );
+                }
             } else if (index && (index - padding) % 5 === 0) {
                 this.ctx.fillRect(
                     this.gridGap * index,
@@ -162,11 +176,7 @@ export default class Drawer {
         } = this.wf;
         const { height } = this.canvas;
         this.ctx.fillStyle = cursorColor;
-        this.ctx.fillRect(
-            padding * this.gridGap + (currentTime - this.beginTime) * this.gridGap * 10,
-            0,
-            pixelRatio,
-            height,
-        );
+        const x = padding * this.gridGap + (currentTime - this.beginTime) * this.gridGap * 10;
+        this.ctx.fillRect(x, 0, pixelRatio, height);
     }
 }

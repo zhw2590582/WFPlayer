@@ -47,7 +47,7 @@ export default class WFPlayer extends Emitter {
             duration: 10,
             padding: 5,
             waveScale: 0.8,
-            pixelRatio: window.devicePixelRatio,
+            pixelRatio: Math.ceil(window.devicePixelRatio),
         };
     }
 
@@ -116,6 +116,10 @@ export default class WFPlayer extends Emitter {
 
     get duration() {
         return this.options.mediaElement ? this.options.mediaElement.duration : timeToDuration('99:59:59.999');
+    }
+
+    get hasChannelData() {
+        return !!this.decoder.channelData.byteLength;
     }
 
     get playing() {
