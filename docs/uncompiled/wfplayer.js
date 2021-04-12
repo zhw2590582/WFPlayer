@@ -620,13 +620,19 @@
 
 	    this.wf = wf;
 	    this.canvas = wf.template.canvas;
-	    var offscreen = this.canvas.transferControlToOffscreen();
-	    this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";onmessage=function onmessage(a){console.log(a.data),postMessage(9527)};"])));
-	    this.worker.postMessage({
-	      canvas: offscreen
-	    }, [offscreen]);
+	    this.ctx = this.canvas.getContext('bitmaprenderer');
+	    this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";var canvas=null,ctx=null;onmessage=function onmessage(a){var b=a.data,c=b.mode,d=b.data;if(\"INIT\"===c&&(canvas=new OffscreenCanvas(d.width,d.height),ctx=canvas.getContext(\"2d\")),\"UPDATE\"===c){var e=d.options.backgroundColor,f=canvas,g=f.width,h=f.height;ctx.fillStyle=e,ctx.fillRect(0,0,g,h),postMessage(canvas.transferToImageBitmap())}};"])));
 	    wf.events.proxy(this.worker, 'message', function (event) {
 	      console.log(event.data);
+
+	      _this.ctx.transferFromImageBitmap(event.data);
+	    });
+	    this.worker.postMessage({
+	      mode: 'INIT',
+	      data: {
+	        width: this.canvas.width,
+	        height: this.canvas.height
+	      }
 	    });
 	    this.gridNum = 0;
 	    this.gridGap = 0;
@@ -654,10 +660,13 @@
 	          sampleRate = _this$wf$decoder.audiobuffer.sampleRate;
 
 	      this.worker.postMessage({
-	        options: options,
-	        currentTime: currentTime,
-	        channelData: channelData,
-	        sampleRate: sampleRate
+	        mode: 'UPDATE',
+	        data: {
+	          options: options,
+	          currentTime: currentTime,
+	          channelData: channelData,
+	          sampleRate: sampleRate
+	        }
 	      });
 	    }
 	  }, {

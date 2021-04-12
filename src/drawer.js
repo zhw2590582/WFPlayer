@@ -5,13 +5,20 @@ export default class Drawer {
     constructor(wf) {
         this.wf = wf;
         this.canvas = wf.template.canvas;
-
-        const offscreen = this.canvas.transferControlToOffscreen();
+        this.ctx = this.canvas.getContext('bitmaprenderer');
         this.worker = new Worker('./worker.js');
-        this.worker.postMessage({ canvas: offscreen }, [offscreen]);
 
         wf.events.proxy(this.worker, 'message', (event) => {
             console.log(event.data);
+            this.ctx.transferFromImageBitmap(event.data);
+        });
+
+        this.worker.postMessage({
+            mode: 'INIT',
+            data: {
+                width: this.canvas.width,
+                height: this.canvas.height,
+            },
         });
 
         this.gridNum = 0;
@@ -38,7 +45,10 @@ export default class Drawer {
                 audiobuffer: { sampleRate },
             },
         } = this.wf;
-        this.worker.postMessage({ options, currentTime, channelData, sampleRate });
+        this.worker.postMessage({
+            mode: 'UPDATE',
+            data: { options, currentTime, channelData, sampleRate },
+        });
     }
 
     update2() {
