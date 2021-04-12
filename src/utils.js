@@ -1,5 +1,3 @@
-import DT from 'duration-time-conversion';
-
 export class WFPlayerError extends Error {
     constructor(message) {
         super(message);

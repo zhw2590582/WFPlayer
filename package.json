@@ -1,53 +1,54 @@
 {
-    "name": "wfplayer",
-    "version": "1.1.4",
-    "description": "WFPlayer.js is an audio waveform generator",
-    "main": "dist/wfplayer.js",
-    "scripts": {
-        "dev": "npx cross-env NODE_ENV=development rollup -c -m -w",
-        "build": "npx cross-env NODE_ENV=production rollup -c",
-        "start": "npx cross-env NODE_ENV=development && npx servor docs index.html 8081 5000",
-        "test": "npx eslint src"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/zhw2590582/WFPlayer.git"
-    },
-    "keywords": [
-        "waveform",
-        "audio",
-        "canvas"
-    ],
-    "author": "Harvey Zack <laozhaochaguan@gmail.com>",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/zhw2590582/WFPlayer/issues"
-    },
-    "homepage": "https://github.com/zhw2590582/WFPlayer#readme",
-    "devDependencies": {
-        "@babel/core": "^7.13.15",
-        "@babel/plugin-external-helpers": "^7.12.13",
-        "@babel/plugin-transform-runtime": "^7.13.15",
-        "@babel/preset-env": "^7.13.15",
-        "@babel/runtime": "^7.13.10",
-        "babel-eslint": "^10.1.0",
-        "cross-env": "^7.0.3",
-        "eslint": "^7.24.0",
-        "eslint-config-airbnb-base": "^14.2.1",
-        "eslint-config-prettier": "^8.1.0",
-        "eslint-plugin-import": "^2.22.1",
-        "rollup": "^2.45.1",
-        "rollup-plugin-babel": "^4.4.0",
-        "rollup-plugin-commonjs": "^10.1.0",
-        "rollup-plugin-eslint": "^7.0.0",
-        "rollup-plugin-node-resolve": "^5.2.0",
-        "rollup-plugin-replace": "^2.2.0",
-        "rollup-plugin-uglify": "^6.0.4",
-        "servor": "^4.0.2"
-    },
-    "dependencies": {
-        "duration-time-conversion": "^1.0.5",
-        "lodash": "^4.17.21",
-        "option-validator": "^2.0.6"
-    }
+  "name": "wfplayer",
+  "version": "1.1.4",
+  "description": "WFPlayer.js is an audio waveform generator",
+  "main": "dist/wfplayer.js",
+  "scripts": {
+    "dev": "npx cross-env NODE_ENV=development rollup -c -m -w",
+    "build": "npx cross-env NODE_ENV=production rollup -c",
+    "start": "npx cross-env NODE_ENV=development && npx servor docs index.html 8081 5000",
+    "test": "npx eslint src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhw2590582/WFPlayer.git"
+  },
+  "keywords": [
+    "waveform",
+    "audio",
+    "canvas"
+  ],
+  "author": "Harvey Zack <laozhaochaguan@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zhw2590582/WFPlayer/issues"
+  },
+  "homepage": "https://github.com/zhw2590582/WFPlayer#readme",
+  "devDependencies": {
+    "@babel/core": "^7.13.15",
+    "@babel/plugin-external-helpers": "^7.12.13",
+    "@babel/plugin-transform-runtime": "^7.13.15",
+    "@babel/preset-env": "^7.13.15",
+    "@babel/runtime": "^7.13.10",
+    "babel-eslint": "^10.1.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^7.24.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-import": "^2.22.1",
+    "rollup": "^2.45.1",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-eslint": "^7.0.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-replace": "^2.2.0",
+    "rollup-plugin-uglify": "^6.0.4",
+    "rollup-plugin-worker-inline": "^1.0.6",
+    "servor": "^4.0.2"
+  },
+  "dependencies": {
+    "duration-time-conversion": "^1.0.5",
+    "lodash": "^4.17.21",
+    "option-validator": "^2.0.6"
+  }
 }

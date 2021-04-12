@@ -4,6 +4,7 @@ import nodeResolve from 'rollup-plugin-node-resolve';
 import { eslint } from 'rollup-plugin-eslint';
 import replace from 'rollup-plugin-replace';
 import { uglify } from 'rollup-plugin-uglify';
+import workerInline from 'rollup-plugin-worker-inline';
 import { version, homepage } from './package.json';
 
 const isProd = process.env.NODE_ENV === 'production';
@@ -22,6 +23,7 @@ export default {
         }),
         nodeResolve(),
         commonjs(),
+        workerInline(),
         babel({
             runtimeHelpers: true,
             exclude: 'node_modules/**',

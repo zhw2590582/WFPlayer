@@ -1,10 +1,17 @@
 import DT from 'duration-time-conversion';
+import { clamp } from './utils';
 
 export default class Drawer {
     constructor(wf) {
         this.wf = wf;
         this.canvas = wf.template.canvas;
         this.ctx = this.canvas.getContext('2d');
+        this.worker = new Worker('./worker.js');
+
+        wf.events.proxy(this.worker, 'message', (event) => {
+            console.log(event.data);
+        });
+
         this.gridNum = 0;
         this.gridGap = 0;
         this.beginTime = 0;
@@ -21,6 +28,21 @@ export default class Drawer {
     }
 
     update() {
+        const {
+            currentTime,
+            template: {
+                canvas: { width, height },
+            },
+            options: { container, mediaElement, ...options },
+            decoder: {
+                channelData,
+                audiobuffer: { sampleRate },
+            },
+        } = this.wf;
+        this.worker.postMessage({ options, currentTime, width, height, channelData, sampleRate });
+    }
+
+    update2() {
         const {
             currentTime,
             options: { cursor, grid, ruler, wave, duration, padding },
