@@ -1,4 +1,5 @@
 import validator from 'option-validator';
+import DT from 'duration-time-conversion';
 import Emitter from './emitter';
 import Events from './events';
 import Template from './template';
@@ -6,7 +7,7 @@ import Drawer from './drawer';
 import Decoder from './decoder';
 import Loader from './loader';
 import Controller from './controller';
-import { timeToDuration, clamp, errorHandle } from './utils';
+import { clamp, errorHandle } from './utils';
 
 let id = 0;
 const instances = [];
@@ -40,9 +41,6 @@ export default class WFPlayer extends Emitter {
             ruler: true,
             rulerColor: 'rgba(255, 255, 255, 0.5)',
             rulerAtTop: true,
-            withCredentials: false,
-            cors: false,
-            headers: {},
             channel: 0,
             duration: 10,
             padding: 5,
@@ -79,9 +77,6 @@ export default class WFPlayer extends Emitter {
             ruler: 'boolean',
             rulerColor: 'string',
             rulerAtTop: 'boolean',
-            withCredentials: 'boolean',
-            cors: 'boolean',
-            headers: 'object',
             channel: checkNum('channel', 0, 5, true),
             duration: checkNum('duration', 1, 100, true),
             padding: checkNum('padding', 1, 100, true),
@@ -115,7 +110,7 @@ export default class WFPlayer extends Emitter {
     }
 
     get duration() {
-        return this.options.mediaElement ? this.options.mediaElement.duration : timeToDuration('99:59:59.999');
+        return this.options.mediaElement ? this.options.mediaElement.duration : DT.t2d('99:59:59.999');
     }
 
     get hasChannelData() {

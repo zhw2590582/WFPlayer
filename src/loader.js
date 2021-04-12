@@ -13,15 +13,9 @@ export default class Loader {
     load(url) {
         this.destroy();
         this.abortController = new AbortController();
-        const { withCredentials, cors, headers } = this.wf.options;
         this.wf.emit('loadStart');
-        return fetch(url, {
-            credentials: withCredentials ? 'include' : 'omit',
-            mode: cors ? 'cors' : 'no-cors',
-            signal: this.abortController.signal,
-            headers,
-        })
-            .then(response => {
+        return fetch(url)
+            .then((response) => {
                 if (response.body && typeof response.body.getReader === 'function') {
                     this.fileSize = Number(response.headers.get('content-length'));
                     this.wf.emit('fileSize', this.fileSize);
@@ -42,7 +36,7 @@ export default class Loader {
                 }
                 return response.arrayBuffer();
             })
-            .then(arrayBuffer => {
+            .then((arrayBuffer) => {
                 if (arrayBuffer && arrayBuffer.byteLength) {
                     const uint8 = new Uint8Array(arrayBuffer);
                     this.fileSize = uint8.byteLength;

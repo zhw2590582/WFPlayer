@@ -1,4 +1,4 @@
-import { durationToTime, clamp } from './utils';
+import DT from 'duration-time-conversion';
 
 export default class Drawer {
     constructor(wf) {
@@ -23,7 +23,7 @@ export default class Drawer {
     update() {
         const {
             currentTime,
-            options: { cursor, grid, ruler, wave, duration, padding, },
+            options: { cursor, grid, ruler, wave, duration, padding },
         } = this.wf;
         this.gridNum = duration * 10 + padding * 2;
         this.gridGap = this.canvas.width / this.gridNum;
@@ -153,7 +153,7 @@ export default class Drawer {
                 );
                 if ((index - padding) % (this.density * 10) === 0) {
                     this.ctx.fillText(
-                        durationToTime(this.beginTime + second).split('.')[0],
+                        DT.d2t(this.beginTime + second).split('.')[0],
                         this.gridGap * index - fontSize * pixelRatio * 2 + pixelRatio,
                         rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize,
                     );

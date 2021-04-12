@@ -3,9 +3,9 @@ import throttle from 'lodash/throttle';
 export default class Decoder {
     constructor(wf) {
         this.wf = wf;
-        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this.audioCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 2, 44100);
         this.throttleDecodeAudioData = throttle(this.decodeAudioData, 1000);
-        this.audiobuffer = this.audioCtx.createBuffer(2, 22050, 44100);
+        this.audiobuffer = this.audioCtx.createBuffer(1, 2, 44100);
         this.channelData = new Float32Array();
 
         this.wf.on('loading', (uint8) => {
@@ -14,11 +14,16 @@ export default class Decoder {
     }
 
     decodeAudioData(uint8) {
-        this.audioCtx.decodeAudioData(
-            uint8.buffer,
-            (audiobuffer) => this.decodeSuccess(audiobuffer),
-            () => null,
-        );
+        return new Promise((resolve, reject) => {
+            this.audioCtx.decodeAudioData(
+                uint8.buffer,
+                (audiobuffer) => {
+                    this.decodeSuccess(audiobuffer);
+                    resolve(audiobuffer);
+                },
+                (err) => reject(err),
+            );
+        });
     }
 
     decodeSuccess(audiobuffer) {
@@ -35,7 +40,7 @@ export default class Decoder {
     }
 
     destroy() {
-        this.audiobuffer = this.audioCtx.createBuffer(2, 22050, 44100);
+        this.audiobuffer = this.audioCtx.createBuffer(1, 2, 44100);
         this.channelData = new Float32Array();
     }
 }
