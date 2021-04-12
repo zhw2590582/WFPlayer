@@ -5,8 +5,10 @@ export default class Drawer {
     constructor(wf) {
         this.wf = wf;
         this.canvas = wf.template.canvas;
-        this.ctx = this.canvas.getContext('2d');
+
+        const offscreen = this.canvas.transferControlToOffscreen();
         this.worker = new Worker('./worker.js');
+        this.worker.postMessage({ canvas: offscreen }, [offscreen]);
 
         wf.events.proxy(this.worker, 'message', (event) => {
             console.log(event.data);
@@ -30,16 +32,13 @@ export default class Drawer {
     update() {
         const {
             currentTime,
-            template: {
-                canvas: { width, height },
-            },
             options: { container, mediaElement, ...options },
             decoder: {
                 channelData,
                 audiobuffer: { sampleRate },
             },
         } = this.wf;
-        this.worker.postMessage({ options, currentTime, width, height, channelData, sampleRate });
+        this.worker.postMessage({ options, currentTime, channelData, sampleRate });
     }
 
     update2() {

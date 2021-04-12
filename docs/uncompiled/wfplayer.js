@@ -620,8 +620,11 @@
 
 	    this.wf = wf;
 	    this.canvas = wf.template.canvas;
-	    this.ctx = this.canvas.getContext('2d');
+	    var offscreen = this.canvas.transferControlToOffscreen();
 	    this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";onmessage=function onmessage(a){console.log(a.data),postMessage(9527)};"])));
+	    this.worker.postMessage({
+	      canvas: offscreen
+	    }, [offscreen]);
 	    wf.events.proxy(this.worker, 'message', function (event) {
 	      console.log(event.data);
 	    });
@@ -642,9 +645,6 @@
 	    value: function update() {
 	      var _this$wf = this.wf,
 	          currentTime = _this$wf.currentTime,
-	          _this$wf$template$can = _this$wf.template.canvas,
-	          width = _this$wf$template$can.width,
-	          height = _this$wf$template$can.height,
 	          _this$wf$options = _this$wf.options;
 	          _this$wf$options.container;
 	          _this$wf$options.mediaElement;
@@ -656,8 +656,6 @@
 	      this.worker.postMessage({
 	        options: options,
 	        currentTime: currentTime,
-	        width: width,
-	        height: height,
 	        channelData: channelData,
 	        sampleRate: sampleRate
 	      });
