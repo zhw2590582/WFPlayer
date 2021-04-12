@@ -1,7 +1,7 @@
 let canvas = null;
 let ctx = null;
 
-onmessage = (event) => {
+self.onmessage = (event) => {
     const { mode, data } = event.data;
 
     if (mode === 'INIT') {
@@ -17,3 +17,7 @@ onmessage = (event) => {
         postMessage(canvas.transferToImageBitmap());
     }
 };
+
+if (typeof exports !== 'undefined') {
+    exports.onmessage = self.onmessage;
+}

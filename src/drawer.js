@@ -9,7 +9,6 @@ export default class Drawer {
         this.worker = new Worker('./worker.js');
 
         wf.events.proxy(this.worker, 'message', (event) => {
-            console.log(event.data);
             this.ctx.transferFromImageBitmap(event.data);
         });
 
