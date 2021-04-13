@@ -40,6 +40,7 @@ export default class WFPlayer extends Emitter {
             ruler: true,
             rulerColor: 'rgba(255, 255, 255, 0.5)',
             rulerAtTop: true,
+            throttle: 50,
             channel: 0,
             duration: 10,
             padding: 5,
@@ -51,11 +52,10 @@ export default class WFPlayer extends Emitter {
     static get scheme() {
         const checkNum = (name, min, max, isInteger) => (value, type) => {
             errorHandle(type === 'number', `${name} expects to receive number as a parameter, but got ${type}.`);
+            const numberType = isInteger ? 'an integer' : 'a';
             errorHandle(
                 value >= min && value <= max && (isInteger ? Number.isInteger(value) : true),
-                `'options.${name}' expect ${
-                    isInteger ? 'an integer ' : 'a '
-                }number that >= ${min} and <= ${max}, but got ${value}.`,
+                `'options.${name}' expect ${numberType} number that >= ${min} and <= ${max}, but got ${value}.`,
             );
             return true;
         };
@@ -76,6 +76,7 @@ export default class WFPlayer extends Emitter {
             ruler: 'boolean',
             rulerColor: 'string',
             rulerAtTop: 'boolean',
+            throttle: checkNum('channel', 16, 1000, true),
             channel: checkNum('channel', 0, 5, true),
             duration: checkNum('duration', 1, 100, true),
             padding: checkNum('padding', 1, 100, true),

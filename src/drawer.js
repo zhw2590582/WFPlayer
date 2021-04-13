@@ -6,7 +6,7 @@ export default class Drawer {
         this.canvas = wf.template.canvas;
         this.ctx = this.canvas.getContext('bitmaprenderer');
         this.worker = new Worker('./worker.js');
-        this.update = throttle(this.update, 50, this);
+        this.update = throttle(this.update, wf.options.throttle, this);
 
         wf.events.proxy(this.worker, 'message', (event) => {
             const { type, data } = event.data;

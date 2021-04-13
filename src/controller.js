@@ -1,4 +1,4 @@
-import throttle from 'lodash/throttle';
+import { throttle } from './utils';
 import { clamp } from './utils';
 
 export default class Controller {
@@ -53,7 +53,7 @@ export default class Controller {
             template.update();
             drawer.update();
             this.wf.emit('resize');
-        }, 500);
+        }, 500, this);
 
         proxy(window, ['resize', 'orientationchange'], () => {
             throttleResize();
