@@ -200,6 +200,7 @@ export default class WFPlayer extends Emitter {
         this.controller.destroy();
         this.decoder.destroy();
         this.loader.destroy();
+        this.drawer.destroy();
         instances.splice(instances.indexOf(this), 1);
     }
 }

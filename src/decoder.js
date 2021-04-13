@@ -31,12 +31,18 @@ export default class Decoder {
         this.wf.emit('audiobuffer', this.audiobuffer);
         this.wf.emit('decodeing', this.audiobuffer.duration / this.wf.duration);
         this.channelData = audiobuffer.getChannelData(this.wf.options.channel);
-        this.wf.emit('channelData', this.channelData);
+        this.wf.emit('channelData', {
+            channelData: this.channelData,
+            sampleRate: this.audiobuffer.sampleRate,
+        });
     }
 
     changeChannel(channel) {
         this.channelData = this.audiobuffer.getChannelData(channel);
-        this.wf.emit('channelData', this.channelData);
+        this.wf.emit('channelData', {
+            channelData: this.channelData,
+            sampleRate: this.audiobuffer.sampleRate,
+        });
     }
 
     destroy() {

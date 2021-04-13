@@ -621,27 +621,45 @@
 	    this.wf = wf;
 	    this.canvas = wf.template.canvas;
 	    this.ctx = this.canvas.getContext('bitmaprenderer');
-	    this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";var canvas=null,ctx=null;self.onmessage=function(a){var b=a.data,c=b.mode,d=b.data;if(\"INIT\"===c&&(canvas=new OffscreenCanvas(d.width,d.height),ctx=canvas.getContext(\"2d\")),\"UPDATE\"===c){var e=d.options.backgroundColor,f=canvas,g=f.width,h=f.height;ctx.fillStyle=e,ctx.fillRect(0,0,g,h),postMessage(canvas.transferToImageBitmap())}},\"undefined\"!=typeof exports&&(exports.onmessage=self.onmessage);"])));
+	    this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";var canvas=null,ctx=null,gridNum=0,gridGap=0,beginTime=0,density=1,sampleRate=44100,channelData=new Float32Array;function secondToTime(){var a=0<arguments.length&&arguments[0]!==void 0?arguments[0]:0,b=Math.floor(a/3600),c=Math.floor((a-3600*b)/60),d=Math.floor(a-3600*b-60*c);return(0<b?[b,c,d]:[c,d]).map(function add0(a){return 10>a?\"0\".concat(a):a+\"\"}).join(\":\")}function clamp(c,d,a){return Math.max(Math.min(c,Math.max(d,a)),Math.min(d,a))}function drawBackground(a){var b=a.options,c=b.backgroundColor,d=b.paddingColor,e=b.padding,f=canvas,g=f.width,h=f.height;ctx.clearRect(0,0,g,h),ctx.fillStyle=c,ctx.fillRect(0,0,g,h),ctx.fillStyle=d,ctx.fillRect(0,0,e*gridGap,h),ctx.fillRect(g-e*gridGap,0,e*gridGap,h)}function drawGrid(a){var b=a.options,c=b.gridColor,d=b.pixelRatio,e=canvas,f=e.width,g=e.height;ctx.fillStyle=c;for(var h=0;h<gridNum;h+=density)ctx.fillRect(gridGap*h,0,d,g);for(var i=0;i<g/gridGap;i+=density)ctx.fillRect(0,gridGap*i,f,d)}function drawRuler(a){var b=a.options,c=b.rulerColor,d=b.pixelRatio,e=b.padding,f=b.rulerAtTop,g=canvas,h=g.height,i=11,j=15,k=30;ctx.font=\"\".concat(i*d,\"px Arial\"),ctx.fillStyle=c;for(var l=-1,m=0;m<gridNum;m+=1)m&&m>=e&&m<=gridNum-e&&0==(m-e)%10?(l+=1,ctx.fillRect(gridGap*m,f?0:h-j*d,d,j*d),0==(m-e)%(10*density)&&ctx.fillText(secondToTime(beginTime+l),gridGap*m-2*(i*d)+d,f?k*d:h-k*d+i)):m&&0==(m-e)%5&&ctx.fillRect(gridGap*m,f?0:h-j/2*d,d,j/2*d)}function drawWave(a){for(var b=a.currentTime,c=a.options,d=c.progress,e=c.waveColor,f=c.progressColor,g=c.duration,h=c.padding,j=c.waveScale,k=canvas,l=k.width,m=k.height,n=m/2,o=l-2*(gridGap*h),p=clamp(beginTime*sampleRate,0,1/0),q=clamp((beginTime+g)*sampleRate,p,1/0),r=Math.floor((q-p)/o),s=h*gridGap+10*((b-beginTime)*gridGap),t=0,u=0,v=1,w=-1,x=p;x<q;x+=1){t+=1;var y=channelData[x]||0;if(y<v?v=y:y>w&&(w=y),t>=r&&u<o){u+=1;var z=gridGap*h+u;ctx.fillStyle=d&&s>=z?f:e,ctx.fillRect(z,(1+v*j)*n,1,Math.max(1,(w-v)*n*j)),t=0,v=1,w=-1}}}function drawCursor(a){var b=a.currentTime,c=a.options,d=c.cursorColor,e=c.pixelRatio,f=c.padding,g=canvas,h=g.height;ctx.fillStyle=d;var i=f*gridGap+10*((b-beginTime)*gridGap);ctx.fillRect(i,0,e,h)}self.onmessage=function(a){var b=a.data,c=b.type,d=b.data;if(\"INIT\"===c&&(canvas=new OffscreenCanvas(d.width,d.height),ctx=canvas.getContext(\"2d\")),\"CHANNE_DATA\"===c&&(sampleRate=d.sampleRate,channelData=d.channelData),\"UPDATE\"===c){var e=d.currentTime,f=d.options,g=f.cursor,h=f.grid,i=f.ruler,j=f.wave,k=f.duration,l=f.padding,m=canvas,n=m.width,o=m.height;gridNum=10*k+2*l,gridGap=n/gridNum,beginTime=Math.floor(e/k)*k,density={1:5,2:4,3:3,4:3,5:2,6:2,7:2,8:2}[Math.floor(gridGap)]||1,drawBackground(d),h&&drawGrid(d),i&&drawRuler(d),j&&drawWave(d),g&&drawCursor(d),postMessage({type:\"RENDER\",date:{padding:l,duration:k,gridGap:gridGap,gridNum:gridNum,beginTime:beginTime,width:n,height:o}}),postMessage({type:\"DRAW\",data:canvas.transferToImageBitmap()})}},\"undefined\"!=typeof exports&&(exports.onmessage=self.onmessage);"])));
 	    wf.events.proxy(this.worker, 'message', function (event) {
-	      _this.ctx.transferFromImageBitmap(event.data);
+	      var _event$data = event.data,
+	          type = _event$data.type,
+	          data = _event$data.data;
+
+	      if (type === 'RENDER') {
+	        wf.emit('render', data);
+	      }
+
+	      if (type === 'DRAW') {
+	        _this.ctx.transferFromImageBitmap(data);
+	      }
 	    });
 	    this.worker.postMessage({
-	      mode: 'INIT',
+	      type: 'INIT',
 	      data: {
 	        width: this.canvas.width,
 	        height: this.canvas.height
 	      }
 	    });
-	    this.gridNum = 0;
-	    this.gridGap = 0;
-	    this.beginTime = 0;
-	    this.update();
 	    wf.on('options', function () {
 	      _this.update();
 	    });
-	    wf.on('channelData', function () {
+	    wf.on('channelData', function (_ref) {
+	      var channelData = _ref.channelData,
+	          sampleRate = _ref.sampleRate;
+
+	      _this.worker.postMessage({
+	        type: 'CHANNE_DATA',
+	        data: {
+	          channelData: channelData,
+	          sampleRate: sampleRate
+	        }
+	      });
+
 	      _this.update();
 	    });
+	    this.update();
 	  }
 
 	  _createClass(Drawer, [{
@@ -652,199 +670,20 @@
 	          _this$wf$options = _this$wf.options;
 	          _this$wf$options.container;
 	          _this$wf$options.mediaElement;
-	          var options = _objectWithoutProperties(_this$wf$options, ["container", "mediaElement"]),
-	          _this$wf$decoder = _this$wf.decoder,
-	          channelData = _this$wf$decoder.channelData,
-	          sampleRate = _this$wf$decoder.audiobuffer.sampleRate;
+	          var options = _objectWithoutProperties(_this$wf$options, ["container", "mediaElement"]);
 
 	      this.worker.postMessage({
-	        mode: 'UPDATE',
+	        type: 'UPDATE',
 	        data: {
 	          options: options,
-	          currentTime: currentTime,
-	          channelData: channelData,
-	          sampleRate: sampleRate
+	          currentTime: currentTime
 	        }
 	      });
 	    }
 	  }, {
-	    key: "update2",
-	    value: function update2() {
-	      var _this$wf2 = this.wf,
-	          currentTime = _this$wf2.currentTime,
-	          _this$wf2$options = _this$wf2.options,
-	          cursor = _this$wf2$options.cursor,
-	          grid = _this$wf2$options.grid,
-	          ruler = _this$wf2$options.ruler,
-	          wave = _this$wf2$options.wave,
-	          duration = _this$wf2$options.duration,
-	          padding = _this$wf2$options.padding;
-	      this.gridNum = duration * 10 + padding * 2;
-	      this.gridGap = this.canvas.width / this.gridNum;
-	      this.beginTime = Math.floor(currentTime / duration) * duration;
-	      this.density = {
-	        1: 5,
-	        2: 4,
-	        3: 3,
-	        4: 3,
-	        5: 2,
-	        6: 2,
-	        7: 2,
-	        8: 2
-	      }[Math.floor(this.gridGap)] || 1;
-	      this.wf.emit('render', {
-	        padding: padding,
-	        duration: duration,
-	        gridGap: this.gridGap,
-	        gridNum: this.gridNum,
-	        beginTime: this.beginTime
-	      });
-	      this.drawBackground();
-
-	      if (grid) {
-	        this.drawGrid();
-	      }
-
-	      if (ruler) {
-	        this.drawRuler();
-	      }
-
-	      if (wave) {
-	        this.drawWave();
-	      }
-
-	      if (cursor) {
-	        this.drawCursor();
-	      }
-	    }
-	  }, {
-	    key: "drawBackground",
-	    value: function drawBackground() {
-	      var _this$wf$options2 = this.wf.options,
-	          backgroundColor = _this$wf$options2.backgroundColor,
-	          paddingColor = _this$wf$options2.paddingColor,
-	          padding = _this$wf$options2.padding;
-	      var _this$canvas = this.canvas,
-	          width = _this$canvas.width,
-	          height = _this$canvas.height;
-	      this.ctx.clearRect(0, 0, width, height);
-	      this.ctx.fillStyle = backgroundColor;
-	      this.ctx.fillRect(0, 0, width, height);
-	      this.ctx.fillStyle = paddingColor;
-	      this.ctx.fillRect(0, 0, padding * this.gridGap, height);
-	      this.ctx.fillRect(width - padding * this.gridGap, 0, padding * this.gridGap, height);
-	    }
-	  }, {
-	    key: "drawWave",
-	    value: function drawWave() {
-	      var _this$wf3 = this.wf,
-	          currentTime = _this$wf3.currentTime,
-	          _this$wf3$options = _this$wf3.options,
-	          progress = _this$wf3$options.progress,
-	          waveColor = _this$wf3$options.waveColor,
-	          progressColor = _this$wf3$options.progressColor,
-	          duration = _this$wf3$options.duration,
-	          padding = _this$wf3$options.padding,
-	          waveScale = _this$wf3$options.waveScale,
-	          _this$wf3$decoder = _this$wf3.decoder,
-	          channelData = _this$wf3$decoder.channelData,
-	          sampleRate = _this$wf3$decoder.audiobuffer.sampleRate;
-	      var _this$canvas2 = this.canvas,
-	          width = _this$canvas2.width,
-	          height = _this$canvas2.height;
-	      var middle = height / 2;
-	      var waveWidth = width - this.gridGap * padding * 2;
-	      var startIndex = clamp(this.beginTime * sampleRate, 0, Infinity);
-	      var endIndex = clamp((this.beginTime + duration) * sampleRate, startIndex, Infinity);
-	      var step = Math.floor((endIndex - startIndex) / waveWidth);
-	      var cursorX = padding * this.gridGap + (currentTime - this.beginTime) * this.gridGap * 10;
-	      var stepIndex = 0;
-	      var xIndex = 0;
-	      var min = 1;
-	      var max = -1;
-
-	      for (var i = startIndex; i < endIndex; i += 1) {
-	        stepIndex += 1;
-	        var item = channelData[i] || 0;
-
-	        if (item < min) {
-	          min = item;
-	        } else if (item > max) {
-	          max = item;
-	        }
-
-	        if (stepIndex >= step && xIndex < waveWidth) {
-	          xIndex += 1;
-	          var waveX = this.gridGap * padding + xIndex;
-	          this.ctx.fillStyle = progress && cursorX >= waveX ? progressColor : waveColor;
-	          this.ctx.fillRect(waveX, (1 + min * waveScale) * middle, 1, Math.max(1, (max - min) * middle * waveScale));
-	          stepIndex = 0;
-	          min = 1;
-	          max = -1;
-	        }
-	      }
-	    }
-	  }, {
-	    key: "drawGrid",
-	    value: function drawGrid() {
-	      var _this$wf$options3 = this.wf.options,
-	          gridColor = _this$wf$options3.gridColor,
-	          pixelRatio = _this$wf$options3.pixelRatio;
-	      var _this$canvas3 = this.canvas,
-	          width = _this$canvas3.width,
-	          height = _this$canvas3.height;
-	      this.ctx.fillStyle = gridColor;
-
-	      for (var index = 0; index < this.gridNum; index += this.density) {
-	        this.ctx.fillRect(this.gridGap * index, 0, pixelRatio, height);
-	      }
-
-	      for (var _index = 0; _index < height / this.gridGap; _index += this.density) {
-	        this.ctx.fillRect(0, this.gridGap * _index, width, pixelRatio);
-	      }
-	    }
-	  }, {
-	    key: "drawRuler",
-	    value: function drawRuler() {
-	      var _this$wf$options4 = this.wf.options,
-	          rulerColor = _this$wf$options4.rulerColor,
-	          pixelRatio = _this$wf$options4.pixelRatio,
-	          padding = _this$wf$options4.padding,
-	          rulerAtTop = _this$wf$options4.rulerAtTop;
-	      var height = this.canvas.height;
-	      var fontSize = 11;
-	      var fontHeight = 15;
-	      var fontTop = 30;
-	      this.ctx.font = "".concat(fontSize * pixelRatio, "px Arial");
-	      this.ctx.fillStyle = rulerColor;
-	      var second = -1;
-
-	      for (var index = 0; index < this.gridNum; index += 1) {
-	        if (index && index >= padding && index <= this.gridNum - padding && (index - padding) % 10 === 0) {
-	          second += 1;
-	          this.ctx.fillRect(this.gridGap * index, rulerAtTop ? 0 : height - fontHeight * pixelRatio, pixelRatio, fontHeight * pixelRatio);
-
-	          if ((index - padding) % (this.density * 10) === 0) {
-	            this.ctx.fillText(_durationTimeConversion_1_0_5_durationTimeConversion.d2t(this.beginTime + second).split('.')[0], this.gridGap * index - fontSize * pixelRatio * 2 + pixelRatio, rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize);
-	          }
-	        } else if (index && (index - padding) % 5 === 0) {
-	          this.ctx.fillRect(this.gridGap * index, rulerAtTop ? 0 : height - fontHeight / 2 * pixelRatio, pixelRatio, fontHeight / 2 * pixelRatio);
-	        }
-	      }
-	    }
-	  }, {
-	    key: "drawCursor",
-	    value: function drawCursor() {
-	      var _this$wf4 = this.wf,
-	          currentTime = _this$wf4.currentTime,
-	          _this$wf4$options = _this$wf4.options,
-	          cursorColor = _this$wf4$options.cursorColor,
-	          pixelRatio = _this$wf4$options.pixelRatio,
-	          padding = _this$wf4$options.padding;
-	      var height = this.canvas.height;
-	      this.ctx.fillStyle = cursorColor;
-	      var x = padding * this.gridGap + (currentTime - this.beginTime) * this.gridGap * 10;
-	      this.ctx.fillRect(x, 0, pixelRatio, height);
+	    key: "destroy",
+	    value: function destroy() {
+	      this.worker.terminate();
 	    }
 	  }]);
 
@@ -1465,13 +1304,19 @@
 	      this.wf.emit('audiobuffer', this.audiobuffer);
 	      this.wf.emit('decodeing', this.audiobuffer.duration / this.wf.duration);
 	      this.channelData = audiobuffer.getChannelData(this.wf.options.channel);
-	      this.wf.emit('channelData', this.channelData);
+	      this.wf.emit('channelData', {
+	        channelData: this.channelData,
+	        sampleRate: this.audiobuffer.sampleRate
+	      });
 	    }
 	  }, {
 	    key: "changeChannel",
 	    value: function changeChannel(channel) {
 	      this.channelData = this.audiobuffer.getChannelData(channel);
-	      this.wf.emit('channelData', this.channelData);
+	      this.wf.emit('channelData', {
+	        channelData: this.channelData,
+	        sampleRate: this.audiobuffer.sampleRate
+	      });
 	    }
 	  }, {
 	    key: "destroy",
@@ -1829,6 +1674,7 @@
 	      this.controller.destroy();
 	      this.decoder.destroy();
 	      this.loader.destroy();
+	      this.drawer.destroy();
 	      instances.splice(instances.indexOf(this), 1);
 	    }
 	  }], [{
