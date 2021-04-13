@@ -150,6 +150,7 @@ export default class WFPlayer extends Emitter {
             WFPlayer.scheme,
         );
 
+        this.emit('option', this.options);
         this.update();
         return this;
     }
