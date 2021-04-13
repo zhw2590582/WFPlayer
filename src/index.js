@@ -159,6 +159,12 @@ export default class WFPlayer extends Emitter {
             return this;
         }
 
+        if (target && target.buffer) {
+            this.decoder.decodeAudioData(target);
+            this.emit('load');
+            return this;
+        }
+
         if (target instanceof HTMLVideoElement || target instanceof HTMLAudioElement) {
             this.options.mediaElement = target;
             target = target.src;

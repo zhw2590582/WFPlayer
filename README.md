@@ -151,7 +151,7 @@ var wf = new WFPlayer({
 Load target:
 
 ```js
-// The target can be the url address of media or a mediaElement
+// The target can be the url address of media or a mediaElement or ArrayBuffer or Audiobuffer
 wf.load(target);
 ```
 
@@ -224,7 +224,7 @@ fetch('path/to/audio.mp3')
     .then((res) => res.arrayBuffer())
     .then((arrayBuffer) => {
         const uint8 = new Uint8Array(arrayBuffer);
-        wf.decoder.decodeAudioData(uint8);
+        wf.load(uint8);
     });
 ```
 
@@ -261,7 +261,7 @@ document.getElementById('file').addEventListener('change', async (event) => {
     await ffmpeg.run('-i', file.name, '-ac', '1', '-ar', '8000', 'audio.mp3);
     const uint8 = ffmpeg.FS('readFile', 'audio.mp3);
 
-    await wf.decoder.decodeAudioData(uint8);
+    await wf.load(uint8);
 })
 ```
 
