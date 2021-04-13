@@ -1,3 +1,6 @@
+const isWorker = self.document === undefined;
+
+let wf = null;
 let canvas = null;
 let ctx = null;
 let gridNum = 0;
@@ -126,12 +129,18 @@ function drawCursor(data) {
     ctx.fillRect(x, 0, pixelRatio, height);
 }
 
-self.onmessage = (event) => {
+self.onmessage = function onmessage(event) {
     const { type, data } = event.data;
 
     if (type === 'INIT') {
-        canvas = new OffscreenCanvas(data.width, data.height);
-        ctx = canvas.getContext('2d');
+        if (isWorker) {
+            canvas = new OffscreenCanvas(data.width, data.height);
+            ctx = canvas.getContext('2d');
+        } else {
+            wf = data.wf;
+            canvas = data.canvas;
+            ctx = canvas.getContext('2d');
+        }
     }
 
     if (type === 'CHANNE_DATA') {
@@ -180,26 +189,34 @@ self.onmessage = (event) => {
             drawCursor(data);
         }
 
-        postMessage({
-            type: 'RENDER',
-            date: {
-                padding,
-                duration,
-                gridGap,
-                gridNum,
-                beginTime,
-                width,
-                height,
-            },
-        });
+        const config = {
+            padding,
+            duration,
+            gridGap,
+            gridNum,
+            beginTime,
+            width,
+            height,
+        };
 
-        postMessage({
-            type: 'DRAW',
-            data: canvas.transferToImageBitmap(),
-        });
+        if (isWorker) {
+            self.postMessage({
+                type: 'RENDER',
+                date: config,
+            });
+
+            self.postMessage({
+                type: 'DRAW',
+                data: canvas.transferToImageBitmap(),
+            });
+        } else {
+            wf.emit('render', config);
+        }
     }
 };
 
-if (typeof exports !== 'undefined') {
-    exports.onmessage = self.onmessage;
+if (typeof exports !== 'undefined' && !isWorker) {
+    exports.postMessage = (data) => {
+        self.onmessage({ data });
+    };
 }

@@ -27,6 +27,7 @@ export default class WFPlayer extends Emitter {
         return {
             container: '#waveform',
             mediaElement: null,
+            useWorker: false,
             wave: true,
             waveColor: 'rgba(255, 255, 255, 0.1)',
             backgroundColor: 'rgb(28, 32, 34)',
@@ -40,7 +41,7 @@ export default class WFPlayer extends Emitter {
             ruler: true,
             rulerColor: 'rgba(255, 255, 255, 0.5)',
             rulerAtTop: true,
-            throttle: 50,
+            refreshRate: 50,
             channel: 0,
             duration: 10,
             padding: 5,
@@ -63,6 +64,7 @@ export default class WFPlayer extends Emitter {
         return {
             container: 'htmlelement|htmldivelement',
             mediaElement: 'null|htmlvideoelement|htmlaudioelement',
+            useWorker: 'boolean',
             wave: 'boolean',
             waveColor: 'string',
             backgroundColor: 'string',
@@ -76,7 +78,7 @@ export default class WFPlayer extends Emitter {
             ruler: 'boolean',
             rulerColor: 'string',
             rulerAtTop: 'boolean',
-            throttle: checkNum('channel', 16, 1000, true),
+            refreshRate: checkNum('channel', 16, 1000, true),
             channel: checkNum('channel', 0, 5, true),
             duration: checkNum('duration', 1, 100, true),
             padding: checkNum('padding', 1, 100, true),
