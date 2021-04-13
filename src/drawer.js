@@ -57,10 +57,11 @@ export default class Drawer {
             currentTime,
             options: { container, mediaElement, ...options },
         } = this.wf;
+        const { width, height } = this.canvas;
 
         this.worker.postMessage({
             type: 'UPDATE',
-            data: { options, currentTime },
+            data: { options, currentTime, width, height },
         });
     }
 

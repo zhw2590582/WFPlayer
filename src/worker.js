@@ -151,9 +151,18 @@ self.onmessage = function onmessage(event) {
     if (type === 'UPDATE') {
         const {
             currentTime,
+            width,
+            height,
             options: { cursor, grid, ruler, wave, duration, padding },
         } = data;
-        const { width, height } = canvas;
+
+        if (canvas.width !== width) {
+            canvas.width = width;
+        }
+
+        if (canvas.height !== height) {
+            canvas.height = height;
+        }
 
         gridNum = duration * 10 + padding * 2;
         gridGap = width / gridNum;

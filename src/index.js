@@ -27,7 +27,7 @@ export default class WFPlayer extends Emitter {
         return {
             container: '#waveform',
             mediaElement: null,
-            useWorker: false,
+            useWorker: true,
             wave: true,
             waveColor: 'rgba(255, 255, 255, 0.1)',
             backgroundColor: 'rgb(28, 32, 34)',

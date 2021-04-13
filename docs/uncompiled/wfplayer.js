@@ -735,6 +735,8 @@
 
 	    if (type === 'UPDATE') {
 	      var currentTime = data.currentTime,
+	          width = data.width,
+	          height = data.height,
 	          _data$options6 = data.options,
 	          cursor = _data$options6.cursor,
 	          grid = _data$options6.grid,
@@ -742,9 +744,15 @@
 	          wave = _data$options6.wave,
 	          duration = _data$options6.duration,
 	          padding = _data$options6.padding;
-	      var _canvas6 = canvas,
-	          width = _canvas6.width,
-	          height = _canvas6.height;
+
+	      if (canvas.width !== width) {
+	        canvas.width = width;
+	      }
+
+	      if (canvas.height !== height) {
+	        canvas.height = height;
+	      }
+
 	      gridNum = duration * 10 + padding * 2;
 	      gridGap = width / gridNum;
 	      beginTime = Math.floor(currentTime / duration) * duration;
@@ -825,7 +833,7 @@
 	    this.update = throttle(this.update, refreshRate, this);
 
 	    if (useWorker && window.OffscreenCanvas) {
-	      this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";var isWorker=self.document===void 0,wf=null,canvas=null,ctx=null,gridNum=0,gridGap=0,beginTime=0,density=1,sampleRate=44100,channelData=new Float32Array;function secondToTime(a){var b=Math.floor(a/3600),c=Math.floor((a-3600*b)/60),d=Math.floor(a-3600*b-60*c);return[b,c,d].map(function add0(a){return 10>a?\"0\".concat(a):a+\"\"}).join(\":\")}function clamp(c,d,a){return Math.max(Math.min(c,Math.max(d,a)),Math.min(d,a))}function drawBackground(a){var b=a.options,c=b.backgroundColor,d=b.paddingColor,e=b.padding,f=canvas,g=f.width,h=f.height;ctx.clearRect(0,0,g,h),ctx.fillStyle=c,ctx.fillRect(0,0,g,h),ctx.fillStyle=d,ctx.fillRect(0,0,e*gridGap,h),ctx.fillRect(g-e*gridGap,0,e*gridGap,h)}function drawGrid(a){var b=a.options,c=b.gridColor,d=b.pixelRatio,e=canvas,f=e.width,g=e.height;ctx.fillStyle=c;for(var h=0;h<gridNum;h+=density)ctx.fillRect(gridGap*h,0,d,g);for(var i=0;i<g/gridGap;i+=density)ctx.fillRect(0,gridGap*i,f,d)}function drawRuler(a){var b=a.options,c=b.rulerColor,d=b.pixelRatio,e=b.padding,f=b.rulerAtTop,g=canvas,h=g.height,i=11,j=15,k=30;ctx.font=\"\".concat(i*d,\"px Arial\"),ctx.fillStyle=c;for(var l=-1,m=0;m<gridNum;m+=1)m&&m>=e&&m<=gridNum-e&&0==(m-e)%10?(l+=1,ctx.fillRect(gridGap*m,f?0:h-j*d,d,j*d),0==(m-e)%(10*density)&&ctx.fillText(secondToTime(beginTime+l),gridGap*m-2*(i*d)+d,f?k*d:h-k*d+i)):m&&0==(m-e)%5&&ctx.fillRect(gridGap*m,f?0:h-j/2*d,d,j/2*d)}function drawWave(a){for(var b=a.currentTime,c=a.options,d=c.progress,e=c.waveColor,f=c.progressColor,g=c.duration,h=c.padding,j=c.waveScale,k=canvas,l=k.width,m=k.height,n=m/2,o=l-2*(gridGap*h),p=clamp(beginTime*sampleRate,0,1/0),q=clamp((beginTime+g)*sampleRate,p,1/0),r=Math.floor((q-p)/o),s=h*gridGap+10*((b-beginTime)*gridGap),t=0,u=0,v=1,w=-1,x=p;x<q;x+=1){t+=1;var y=channelData[x]||0;if(y<v?v=y:y>w&&(w=y),t>=r&&u<o){u+=1;var z=gridGap*h+u;ctx.fillStyle=d&&s>=z?f:e,ctx.fillRect(z,(1+v*j)*n,1,Math.max(1,(w-v)*n*j)),t=0,v=1,w=-1}}}function drawCursor(a){var b=a.currentTime,c=a.options,d=c.cursorColor,e=c.pixelRatio,f=c.padding,g=canvas,h=g.height;ctx.fillStyle=d;var i=f*gridGap+10*((b-beginTime)*gridGap);ctx.fillRect(i,0,e,h)}self.onmessage=function(a){var b=a.data,c=b.type,d=b.data;if(\"INIT\"===c&&(isWorker?(canvas=new OffscreenCanvas(d.width,d.height),ctx=canvas.getContext(\"2d\")):(wf=d.wf,canvas=d.canvas,ctx=canvas.getContext(\"2d\"))),\"CHANNE_DATA\"===c&&(sampleRate=d.sampleRate,channelData=d.channelData),\"UPDATE\"===c){var e=d.currentTime,f=d.options,g=f.cursor,h=f.grid,i=f.ruler,j=f.wave,k=f.duration,l=f.padding,m=canvas,n=m.width,o=m.height;gridNum=10*k+2*l,gridGap=n/gridNum,beginTime=Math.floor(e/k)*k,density={1:5,2:4,3:3,4:3,5:2,6:2,7:2,8:2}[Math.floor(gridGap)]||1,drawBackground(d),h&&drawGrid(d),i&&drawRuler(d),j&&drawWave(d),g&&drawCursor(d);var p={padding:l,duration:k,gridGap:gridGap,gridNum:gridNum,beginTime:beginTime,width:n,height:o};isWorker?(self.postMessage({type:\"RENDER\",date:p}),self.postMessage({type:\"DRAW\",data:canvas.transferToImageBitmap()})):wf.emit(\"render\",p)}},\"undefined\"==typeof exports||isWorker||(exports.postMessage=function(a){self.onmessage({data:a})});"])));
+	      this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";var isWorker=self.document===void 0,wf=null,canvas=null,ctx=null,gridNum=0,gridGap=0,beginTime=0,density=1,sampleRate=44100,channelData=new Float32Array;function secondToTime(a){var b=Math.floor(a/3600),c=Math.floor((a-3600*b)/60),d=Math.floor(a-3600*b-60*c);return[b,c,d].map(function add0(a){return 10>a?\"0\".concat(a):a+\"\"}).join(\":\")}function clamp(c,d,a){return Math.max(Math.min(c,Math.max(d,a)),Math.min(d,a))}function drawBackground(a){var b=a.options,c=b.backgroundColor,d=b.paddingColor,e=b.padding,f=canvas,g=f.width,h=f.height;ctx.clearRect(0,0,g,h),ctx.fillStyle=c,ctx.fillRect(0,0,g,h),ctx.fillStyle=d,ctx.fillRect(0,0,e*gridGap,h),ctx.fillRect(g-e*gridGap,0,e*gridGap,h)}function drawGrid(a){var b=a.options,c=b.gridColor,d=b.pixelRatio,e=canvas,f=e.width,g=e.height;ctx.fillStyle=c;for(var h=0;h<gridNum;h+=density)ctx.fillRect(gridGap*h,0,d,g);for(var i=0;i<g/gridGap;i+=density)ctx.fillRect(0,gridGap*i,f,d)}function drawRuler(a){var b=a.options,c=b.rulerColor,d=b.pixelRatio,e=b.padding,f=b.rulerAtTop,g=canvas,h=g.height,i=11,j=15,k=30;ctx.font=\"\".concat(i*d,\"px Arial\"),ctx.fillStyle=c;for(var l=-1,m=0;m<gridNum;m+=1)m&&m>=e&&m<=gridNum-e&&0==(m-e)%10?(l+=1,ctx.fillRect(gridGap*m,f?0:h-j*d,d,j*d),0==(m-e)%(10*density)&&ctx.fillText(secondToTime(beginTime+l),gridGap*m-2*(i*d)+d,f?k*d:h-k*d+i)):m&&0==(m-e)%5&&ctx.fillRect(gridGap*m,f?0:h-j/2*d,d,j/2*d)}function drawWave(a){for(var b=a.currentTime,c=a.options,d=c.progress,e=c.waveColor,f=c.progressColor,g=c.duration,h=c.padding,j=c.waveScale,k=canvas,l=k.width,m=k.height,n=m/2,o=l-2*(gridGap*h),p=clamp(beginTime*sampleRate,0,1/0),q=clamp((beginTime+g)*sampleRate,p,1/0),r=Math.floor((q-p)/o),s=h*gridGap+10*((b-beginTime)*gridGap),t=0,u=0,v=1,w=-1,x=p;x<q;x+=1){t+=1;var y=channelData[x]||0;if(y<v?v=y:y>w&&(w=y),t>=r&&u<o){u+=1;var z=gridGap*h+u;ctx.fillStyle=d&&s>=z?f:e,ctx.fillRect(z,(1+v*j)*n,1,Math.max(1,(w-v)*n*j)),t=0,v=1,w=-1}}}function drawCursor(a){var b=a.currentTime,c=a.options,d=c.cursorColor,e=c.pixelRatio,f=c.padding,g=canvas,h=g.height;ctx.fillStyle=d;var i=f*gridGap+10*((b-beginTime)*gridGap);ctx.fillRect(i,0,e,h)}self.onmessage=function(a){var b=a.data,c=b.type,d=b.data;if(\"INIT\"===c&&(isWorker?(canvas=new OffscreenCanvas(d.width,d.height),ctx=canvas.getContext(\"2d\")):(wf=d.wf,canvas=d.canvas,ctx=canvas.getContext(\"2d\"))),\"CHANNE_DATA\"===c&&(sampleRate=d.sampleRate,channelData=d.channelData),\"UPDATE\"===c){var e=d.currentTime,f=d.width,g=d.height,h=d.options,i=h.cursor,j=h.grid,k=h.ruler,l=h.wave,m=h.duration,n=h.padding;canvas.width!==f&&(canvas.width=f),canvas.height!==g&&(canvas.height=g),gridNum=10*m+2*n,gridGap=f/gridNum,beginTime=Math.floor(e/m)*m,density={1:5,2:4,3:3,4:3,5:2,6:2,7:2,8:2}[Math.floor(gridGap)]||1,drawBackground(d),j&&drawGrid(d),k&&drawRuler(d),l&&drawWave(d),i&&drawCursor(d);var o={padding:n,duration:m,gridGap:gridGap,gridNum:gridNum,beginTime:beginTime,width:f,height:g};isWorker?(self.postMessage({type:\"RENDER\",date:o}),self.postMessage({type:\"DRAW\",data:canvas.transferToImageBitmap()})):wf.emit(\"render\",o)}},\"undefined\"==typeof exports||isWorker||(exports.postMessage=function(a){self.onmessage({data:a})});"])));
 	      this.ctx = this.canvas.getContext('bitmaprenderer');
 	      this.wf.events.proxy(this.worker, 'message', function (event) {
 	        var _event$data = event.data,
@@ -882,11 +890,16 @@
 	          _this$wf$options.mediaElement;
 	          var options = _objectWithoutProperties(_this$wf$options, ["container", "mediaElement"]);
 
+	      var _this$canvas = this.canvas,
+	          width = _this$canvas.width,
+	          height = _this$canvas.height;
 	      this.worker.postMessage({
 	        type: 'UPDATE',
 	        data: {
 	          options: options,
-	          currentTime: currentTime
+	          currentTime: currentTime,
+	          width: width,
+	          height: height
 	        }
 	      });
 	    }
@@ -1324,7 +1337,7 @@
 	      return {
 	        container: '#waveform',
 	        mediaElement: null,
-	        useWorker: false,
+	        useWorker: true,
 	        wave: true,
 	        waveColor: 'rgba(255, 255, 255, 0.1)',
 	        backgroundColor: 'rgb(28, 32, 34)',
