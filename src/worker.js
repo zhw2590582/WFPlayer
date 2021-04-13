@@ -204,6 +204,7 @@ self.onmessage = function onmessage(event) {
             gridGap,
             gridNum,
             beginTime,
+            currentTime,
             density,
             width,
             height,
