@@ -1,5 +1,4 @@
 import validator from 'option-validator';
-import DT from 'duration-time-conversion';
 import Emitter from './emitter';
 import Events from './events';
 import Template from './template';
@@ -110,7 +109,7 @@ export default class WFPlayer extends Emitter {
     }
 
     get duration() {
-        return this.options.mediaElement ? this.options.mediaElement.duration : DT.t2d('99:59:59.999');
+        return this.options.mediaElement ? this.options.mediaElement.duration : 24 * 60 * 60;
     }
 
     get hasChannelData() {

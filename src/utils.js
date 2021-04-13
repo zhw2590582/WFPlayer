@@ -28,10 +28,22 @@ export function clamp(num, a, b) {
 
 export function setStyle(element, key, value) {
     if (typeof key === 'object') {
-        Object.keys(key).forEach(item => {
+        Object.keys(key).forEach((item) => {
             setStyle(element, item, key[item]);
         });
     }
     element.style[key] = value;
     return element;
+}
+
+export function throttle(func, delay, context) {
+    let prev = Date.now();
+    return function () {
+        const args = arguments;
+        const now = Date.now();
+        if (now - prev >= delay) {
+            func.apply(context, args);
+            prev = Date.now();
+        }
+    };
 }

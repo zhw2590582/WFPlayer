@@ -191,66 +191,6 @@
 	!function(r,t){module.exports=t();}(commonjsGlobal,function(){function e(r){return (e="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(r){return typeof r}:function(r){return r&&"function"==typeof Symbol&&r.constructor===Symbol&&r!==Symbol.prototype?"symbol":typeof r})(r)}var n=Object.prototype.toString,c=function(r){if(void 0===r)return "undefined";if(null===r)return "null";var t=e(r);if("boolean"===t)return "boolean";if("string"===t)return "string";if("number"===t)return "number";if("symbol"===t)return "symbol";if("function"===t)return function(r){return "GeneratorFunction"===o(r)}(r)?"generatorfunction":"function";if(function(r){return Array.isArray?Array.isArray(r):r instanceof Array}(r))return "array";if(function(r){if(r.constructor&&"function"==typeof r.constructor.isBuffer)return r.constructor.isBuffer(r);return !1}(r))return "buffer";if(function(r){try{if("number"==typeof r.length&&"function"==typeof r.callee)return !0}catch(r){if(-1!==r.message.indexOf("callee"))return !0}return !1}(r))return "arguments";if(function(r){return r instanceof Date||"function"==typeof r.toDateString&&"function"==typeof r.getDate&&"function"==typeof r.setDate}(r))return "date";if(function(r){return r instanceof Error||"string"==typeof r.message&&r.constructor&&"number"==typeof r.constructor.stackTraceLimit}(r))return "error";if(function(r){return r instanceof RegExp||"string"==typeof r.flags&&"boolean"==typeof r.ignoreCase&&"boolean"==typeof r.multiline&&"boolean"==typeof r.global}(r))return "regexp";switch(o(r)){case"Symbol":return "symbol";case"Promise":return "promise";case"WeakMap":return "weakmap";case"WeakSet":return "weakset";case"Map":return "map";case"Set":return "set";case"Int8Array":return "int8array";case"Uint8Array":return "uint8array";case"Uint8ClampedArray":return "uint8clampedarray";case"Int16Array":return "int16array";case"Uint16Array":return "uint16array";case"Int32Array":return "int32array";case"Uint32Array":return "uint32array";case"Float32Array":return "float32array";case"Float64Array":return "float64array"}if(function(r){return "function"==typeof r.throw&&"function"==typeof r.return&&"function"==typeof r.next}(r))return "generator";switch(t=n.call(r)){case"[object Object]":return "object";case"[object Map Iterator]":return "mapiterator";case"[object Set Iterator]":return "setiterator";case"[object String Iterator]":return "stringiterator";case"[object Array Iterator]":return "arrayiterator"}return t.slice(8,-1).toLowerCase().replace(/\s/g,"")};function o(r){return r.constructor?r.constructor.name:null}function f(r,t){var e=2<arguments.length&&void 0!==arguments[2]?arguments[2]:["option"];return s(r,t,e),y(r,t,e),function(a,i,u){var r=c(i),t=c(a);if("object"===r){if("object"!==t)throw new Error("[Type Error]: '".concat(u.join("."),"' require 'object' type, but got '").concat(t,"'"));Object.keys(i).forEach(function(r){var t=a[r],e=i[r],n=u.slice();n.push(r),s(t,e,n),y(t,e,n),f(t,e,n);});}if("array"===r){if("array"!==t)throw new Error("[Type Error]: '".concat(u.join("."),"' require 'array' type, but got '").concat(t,"'"));a.forEach(function(r,t){var e=a[t],n=i[t]||i[0],o=u.slice();o.push(t),s(e,n,o),y(e,n,o),f(e,n,o);});}}(r,t,e),r}function s(r,t,e){if("string"===c(t)){var n=c(r);if("?"===t[0]&&(t=t.slice(1)+"|undefined"),!(-1<t.indexOf("|")?t.split("|").map(function(r){return r.toLowerCase().trim()}).filter(Boolean).some(function(r){return n===r}):t.toLowerCase().trim()===n))throw new Error("[Type Error]: '".concat(e.join("."),"' require '").concat(t,"' type, but got '").concat(n,"'"))}}function y(r,t,e){if("function"===c(t)){var n=t(r,c(r),e);if(!0!==n){var o=c(n);throw "string"===o?new Error(n):"error"===o?n:new Error("[Validator Error]: The scheme for '".concat(e.join("."),"' validator require return true, but got '").concat(n,"'"))}}}return f.kindOf=c,f});
 	});
 
-	var _durationTimeConversion_1_0_5_durationTimeConversion = createCommonjsModule(function (module, exports) {
-	(function (global, factory) {
-	  (module.exports = factory())
-	    ;
-	})(commonjsGlobal, function () {
-	  function checkTime(time) {
-	    return /^(\d+):([0-5][0-9]):([0-5][0-9])(\.\d{1,3})?$/.test(time);
-	  }
-
-	  function checkDuration(duration) {
-	    duration = String(duration);
-	    return /^(\d+)(\.\d{1,3})?$/.test(duration);
-	  }
-
-	  function padEnd(str, targetLength, padString) {
-	    if (str.length > targetLength) {
-	      return String(str);
-	    } else {
-	      targetLength = targetLength - str.length;
-	      if (targetLength > padString.length) {
-	        padString += padString.repeat(targetLength / padString.length);
-	      }
-	      return String(str) + padString.slice(0, targetLength);
-	    }
-	  }
-
-	  return {
-	    d2t: function (duration) {
-	      duration = parseFloat(Number(duration).toFixed(3));
-	      if (checkDuration(duration)) {
-	        var date = new Date(null);
-	        var arr = String(duration).split(".");
-	        var s = arr[0];
-	        var ms = arr[1] ? padEnd(arr[1], 3, "0") : 0;
-	        date.setSeconds(Number(s));
-	        date.setMilliseconds(Number(ms));
-	        return date.toISOString().substr(11, 12);
-	      } else {
-	        throw new Error("The format of the duration is incorrect: " + duration);
-	      }
-	    },
-	    t2d: function (time) {
-	      if (checkTime(time)) {
-	        var arr = time.split(".");
-	        var left = arr[0].split(":") || [];
-	        var right = padEnd(arr[1] || "0", 3, "0");
-	        var ms = Number(right) / 1000;
-
-	        var h = Number(left[left.length - 3] || 0) * 3600;
-	        var m = Number(left[left.length - 2] || 0) * 60;
-	        var s = Number(left[left.length - 1] || 0);
-	        return h + m + s + ms;
-	      } else {
-	        throw new Error("The format of the time is incorrect: " + time);
-	      }
-	    },
-	  };
-	});
-	});
-
 	var Emitter = /*#__PURE__*/function () {
 	  function Emitter() {
 	    _classCallCheck(this, Emitter);
@@ -507,6 +447,18 @@
 	function clamp(num, a, b) {
 	  return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
 	}
+	function throttle$1(func, delay, context) {
+	  var prev = Date.now();
+	  return function () {
+	    var args = arguments;
+	    var now = Date.now();
+
+	    if (now - prev >= delay) {
+	      func.apply(context, args);
+	      prev = Date.now();
+	    }
+	  };
+	}
 
 	var Template = /*#__PURE__*/function () {
 	  function Template(wf) {
@@ -622,6 +574,7 @@
 	    this.canvas = wf.template.canvas;
 	    this.ctx = this.canvas.getContext('bitmaprenderer');
 	    this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";var canvas=null,ctx=null,gridNum=0,gridGap=0,beginTime=0,density=1,sampleRate=44100,channelData=new Float32Array;function secondToTime(){var a=0<arguments.length&&arguments[0]!==void 0?arguments[0]:0,b=Math.floor(a/3600),c=Math.floor((a-3600*b)/60),d=Math.floor(a-3600*b-60*c);return(0<b?[b,c,d]:[c,d]).map(function add0(a){return 10>a?\"0\".concat(a):a+\"\"}).join(\":\")}function clamp(c,d,a){return Math.max(Math.min(c,Math.max(d,a)),Math.min(d,a))}function drawBackground(a){var b=a.options,c=b.backgroundColor,d=b.paddingColor,e=b.padding,f=canvas,g=f.width,h=f.height;ctx.clearRect(0,0,g,h),ctx.fillStyle=c,ctx.fillRect(0,0,g,h),ctx.fillStyle=d,ctx.fillRect(0,0,e*gridGap,h),ctx.fillRect(g-e*gridGap,0,e*gridGap,h)}function drawGrid(a){var b=a.options,c=b.gridColor,d=b.pixelRatio,e=canvas,f=e.width,g=e.height;ctx.fillStyle=c;for(var h=0;h<gridNum;h+=density)ctx.fillRect(gridGap*h,0,d,g);for(var i=0;i<g/gridGap;i+=density)ctx.fillRect(0,gridGap*i,f,d)}function drawRuler(a){var b=a.options,c=b.rulerColor,d=b.pixelRatio,e=b.padding,f=b.rulerAtTop,g=canvas,h=g.height,i=11,j=15,k=30;ctx.font=\"\".concat(i*d,\"px Arial\"),ctx.fillStyle=c;for(var l=-1,m=0;m<gridNum;m+=1)m&&m>=e&&m<=gridNum-e&&0==(m-e)%10?(l+=1,ctx.fillRect(gridGap*m,f?0:h-j*d,d,j*d),0==(m-e)%(10*density)&&ctx.fillText(secondToTime(beginTime+l),gridGap*m-2*(i*d)+d,f?k*d:h-k*d+i)):m&&0==(m-e)%5&&ctx.fillRect(gridGap*m,f?0:h-j/2*d,d,j/2*d)}function drawWave(a){for(var b=a.currentTime,c=a.options,d=c.progress,e=c.waveColor,f=c.progressColor,g=c.duration,h=c.padding,j=c.waveScale,k=canvas,l=k.width,m=k.height,n=m/2,o=l-2*(gridGap*h),p=clamp(beginTime*sampleRate,0,1/0),q=clamp((beginTime+g)*sampleRate,p,1/0),r=Math.floor((q-p)/o),s=h*gridGap+10*((b-beginTime)*gridGap),t=0,u=0,v=1,w=-1,x=p;x<q;x+=1){t+=1;var y=channelData[x]||0;if(y<v?v=y:y>w&&(w=y),t>=r&&u<o){u+=1;var z=gridGap*h+u;ctx.fillStyle=d&&s>=z?f:e,ctx.fillRect(z,(1+v*j)*n,1,Math.max(1,(w-v)*n*j)),t=0,v=1,w=-1}}}function drawCursor(a){var b=a.currentTime,c=a.options,d=c.cursorColor,e=c.pixelRatio,f=c.padding,g=canvas,h=g.height;ctx.fillStyle=d;var i=f*gridGap+10*((b-beginTime)*gridGap);ctx.fillRect(i,0,e,h)}self.onmessage=function(a){var b=a.data,c=b.type,d=b.data;if(\"INIT\"===c&&(canvas=new OffscreenCanvas(d.width,d.height),ctx=canvas.getContext(\"2d\")),\"CHANNE_DATA\"===c&&(sampleRate=d.sampleRate,channelData=d.channelData),\"UPDATE\"===c){var e=d.currentTime,f=d.options,g=f.cursor,h=f.grid,i=f.ruler,j=f.wave,k=f.duration,l=f.padding,m=canvas,n=m.width,o=m.height;gridNum=10*k+2*l,gridGap=n/gridNum,beginTime=Math.floor(e/k)*k,density={1:5,2:4,3:3,4:3,5:2,6:2,7:2,8:2}[Math.floor(gridGap)]||1,drawBackground(d),h&&drawGrid(d),i&&drawRuler(d),j&&drawWave(d),g&&drawCursor(d),postMessage({type:\"RENDER\",date:{padding:l,duration:k,gridGap:gridGap,gridNum:gridNum,beginTime:beginTime,width:n,height:o}}),postMessage({type:\"DRAW\",data:canvas.transferToImageBitmap()})}},\"undefined\"!=typeof exports&&(exports.onmessage=self.onmessage);"])));
+	    this.update = throttle$1(this.update, 50, this);
 	    wf.events.proxy(this.worker, 'message', function (event) {
 	      var _event$data = event.data,
 	          type = _event$data.type,
@@ -1583,7 +1536,7 @@
 	  }, {
 	    key: "duration",
 	    get: function get() {
-	      return this.options.mediaElement ? this.options.mediaElement.duration : _durationTimeConversion_1_0_5_durationTimeConversion.t2d('99:59:59.999');
+	      return this.options.mediaElement ? this.options.mediaElement.duration : 24 * 60 * 60;
 	    }
 	  }, {
 	    key: "hasChannelData",
