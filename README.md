@@ -66,12 +66,13 @@ JS
 ```js
 var wf = new WFPlayer({
     container: document.querySelector('#waveform'),
+    mediaElement: document.querySelector('#video'),
 });
 
 wf.load(document.querySelector('#video'));
 
 // or
-wf.load(document.querySelector('#audio'));
+wf.load('path/to/audio.mp3');
 ```
 
 ## API
@@ -85,6 +86,9 @@ var wf = new WFPlayer({
 
     // Media element like: video tag or audio tag
     mediaElement: null,
+
+    // Whether use web worker
+    useWorker: true,
 
     // Whether to display wave
     wave: true,
@@ -121,15 +125,6 @@ var wf = new WFPlayer({
 
     // Whether to display ruler at the top
     rulerAtTop: true,
-
-    // Indicates whether to do http fetching with cookies
-    withCredentials: false,
-
-    // Indicates whether to enable CORS for http fetching
-    cors: false,
-
-    // Initialize http headers
-    headers: {},
 
     // Pixel ratio
     pixelRatio: window.devicePixelRatio,
@@ -188,51 +183,6 @@ Destroy instance:
 
 ```js
 wf.destroy();
-```
-
-### Instance event
-
-| Name          | Description                                                 |
-| ------------- | ----------------------------------------------------------- |
-| `load`        | Start loading                                               |
-| `options`     | Received new options                                        |
-| `click`       | Click on the canvas to return to the click time             |
-| `contextmenu` | Right click on the canvas to return to the click time       |
-| `resize`      | Canvas adaptive size                                        |
-| `playing`     | Playing animation                                           |
-| `decodeing`   | Decoding and returning the proportion that has been decoded |
-| `loadStart`   | Start loading resources                                     |
-| `loadEnd`     | The resource is loaded                                      |
-| `downloading` | The proportion of loading and returning loading             |
-| `audiobuffer` | Decoded audio data                                          |
-| `channelData` | Decoded audio channelData data                              |
-
-Example:
-
-```js
-wf.on('decodeing', function(percentage) {
-    console.log(percentage);
-});
-```
-
-### Class methods and properties
-
-Get all instances:
-
-```js
-WFPlayer.instances;
-```
-
-Get the version:
-
-```js
-WFPlayer.version;
-```
-
-Get the env:
-
-```js
-WFPlayer.env;
 ```
 
 ## Donations
