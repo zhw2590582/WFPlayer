@@ -6,16 +6,16 @@ export default class Events {
 
     proxy(target, name, callback, option = {}) {
         if (Array.isArray(name)) {
-            name.forEach(item => this.proxy(target, item, callback, option));
+            return name.map((item) => this.proxy(target, item, callback, option));
         } else {
             target.addEventListener(name, callback, option);
-            this.destroyEvents.push(() => {
-                target.removeEventListener(name, callback, option);
-            });
+            const destroyEvent = () => target.removeEventListener(name, callback, option);
+            this.destroyEvents.push(destroyEvent);
+            return destroyEvent;
         }
     }
 
     destroy() {
-        this.destroyEvents.forEach(event => event());
+        this.destroyEvents.forEach((event) => event());
     }
 }

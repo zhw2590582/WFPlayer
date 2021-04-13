@@ -11,7 +11,6 @@ export default class Drawer {
 
         if (useWorker && window.OffscreenCanvas) {
             this.worker = new Worker('./worker.js');
-
             this.ctx = this.canvas.getContext('bitmaprenderer');
 
             this.wf.events.proxy(this.worker, 'message', (event) => {

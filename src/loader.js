@@ -7,12 +7,10 @@ export default class Loader {
         this.loadSize = 0;
         this.data = new Uint8Array();
         this.reader = null;
-        this.abortController = null;
     }
 
     load(url) {
         this.destroy();
-        this.abortController = new AbortController();
         this.wf.emit('loadStart');
         return fetch(url)
             .then((response) => {
@@ -56,10 +54,6 @@ export default class Loader {
         if (this.reader) {
             this.reader.cancel();
             this.reader = null;
-        }
-        if (this.abortController) {
-            this.abortController.abort();
-            this.abortController = null;
         }
     }
 }

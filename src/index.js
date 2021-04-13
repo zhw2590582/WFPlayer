@@ -112,11 +112,7 @@ export default class WFPlayer extends Emitter {
     }
 
     get duration() {
-        return this.options.mediaElement ? this.options.mediaElement.duration : 24 * 60 * 60;
-    }
-
-    get hasChannelData() {
-        return !!this.decoder.channelData.byteLength;
+        return this.options.mediaElement ? this.options.mediaElement.duration : Infinity;
     }
 
     get playing() {
@@ -162,14 +158,17 @@ export default class WFPlayer extends Emitter {
             this.emit('load');
             return this;
         }
+
         if (target instanceof HTMLVideoElement || target instanceof HTMLAudioElement) {
             this.options.mediaElement = target;
             target = target.src;
         }
+
         errorHandle(
             typeof target === 'string' && target.trim(),
             `The load target is not a string. If you are loading a mediaElement, make sure the mediaElement.src is not empty.`,
         );
+
         this.loader.load(target);
         this.emit('load');
         return this;
@@ -186,8 +185,10 @@ export default class WFPlayer extends Emitter {
     }
 
     changeChannel(channel) {
-        this.setOptions({ channel });
         this.decoder.changeChannel(channel);
+        this.setOptions({ channel });
+        this.drawer.update();
+        return this;
     }
 
     exportImage() {

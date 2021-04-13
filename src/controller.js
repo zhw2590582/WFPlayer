@@ -32,7 +32,7 @@ export default class Controller {
             events: { proxy },
             options: { mediaElement },
         } = this.wf;
-        proxy(canvas, ['click', 'contextmenu'], event => {
+        proxy(canvas, ['click', 'contextmenu'], (event) => {
             const time = this.getTimeFromEvent(event);
             this.wf.emit(event.type, time, event);
             if (mediaElement && mediaElement.currentTime !== time) {
@@ -49,11 +49,15 @@ export default class Controller {
             events: { proxy },
         } = this.wf;
 
-        const throttleResize = throttle(() => {
-            template.update();
-            drawer.update();
-            this.wf.emit('resize');
-        }, 500, this);
+        const throttleResize = throttle(
+            () => {
+                template.update();
+                drawer.update();
+                this.wf.emit('resize');
+            },
+            500,
+            this,
+        );
 
         proxy(window, ['resize', 'orientationchange'], () => {
             throttleResize();

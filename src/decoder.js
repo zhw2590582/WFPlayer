@@ -38,7 +38,7 @@ export default class Decoder {
     }
 
     changeChannel(channel) {
-        this.channelData = this.audiobuffer.getChannelData(channel);
+        this.channelData = this.audiobuffer.getChannelData(channel) || new Float32Array();
         this.wf.emit('channelData', {
             channelData: this.channelData,
             sampleRate: this.audiobuffer.sampleRate,

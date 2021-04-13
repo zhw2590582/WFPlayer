@@ -281,14 +281,18 @@
 	      var option = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 
 	      if (Array.isArray(name)) {
-	        name.forEach(function (item) {
+	        return name.map(function (item) {
 	          return _this.proxy(target, item, callback, option);
 	        });
 	      } else {
 	        target.addEventListener(name, callback, option);
-	        this.destroyEvents.push(function () {
-	          target.removeEventListener(name, callback, option);
-	        });
+
+	        var destroyEvent = function destroyEvent() {
+	          return target.removeEventListener(name, callback, option);
+	        };
+
+	        this.destroyEvents.push(destroyEvent);
+	        return destroyEvent;
 	      }
 	    }
 	  }, {
@@ -425,10 +429,7 @@
 	  return WFPlayerError;
 	}( /*#__PURE__*/_wrapNativeSuper(Error));
 	function errorHandle(condition, msg) {
-	  if (!condition) {
-	    throw new WFPlayerError(msg);
-	  }
-
+	  if (!condition) throw new WFPlayerError(msg);
 	  return condition;
 	}
 	function mergeBuffer() {
@@ -485,7 +486,6 @@
 	        errorHandle(this.wf.constructor.instances.every(function (wf) {
 	          return wf.options.container !== container;
 	        }), 'Cannot mount multiple instances on the same dom element, please destroy the previous instance first.');
-	        errorHandle(clientWidth && clientHeight, 'The width and height of the container cannot be 0');
 	        container.innerHTML = '';
 	        this.canvas = document.createElement('canvas');
 	        this.canvas.width = clientWidth * pixelRatio;
@@ -948,7 +948,7 @@
 	  }, {
 	    key: "changeChannel",
 	    value: function changeChannel(channel) {
-	      this.channelData = this.audiobuffer.getChannelData(channel);
+	      this.channelData = this.audiobuffer.getChannelData(channel) || new Float32Array();
 	      this.wf.emit('channelData', {
 	        channelData: this.channelData,
 	        sampleRate: this.audiobuffer.sampleRate
@@ -974,7 +974,6 @@
 	    this.loadSize = 0;
 	    this.data = new Uint8Array();
 	    this.reader = null;
-	    this.abortController = null;
 	  }
 
 	  _createClass(Loader, [{
@@ -983,7 +982,6 @@
 	      var _this = this;
 
 	      this.destroy();
-	      this.abortController = new AbortController();
 	      this.wf.emit('loadStart');
 	      return fetch(url).then(function (response) {
 	        if (response.body && typeof response.body.getReader === 'function') {
@@ -1046,11 +1044,6 @@
 	      if (this.reader) {
 	        this.reader.cancel();
 	        this.reader = null;
-	      }
-
-	      if (this.abortController) {
-	        this.abortController.abort();
-	        this.abortController = null;
 	      }
 	    }
 	  }]);
@@ -1219,12 +1212,7 @@
 	  }, {
 	    key: "duration",
 	    get: function get() {
-	      return this.options.mediaElement ? this.options.mediaElement.duration : 24 * 60 * 60;
-	    }
-	  }, {
-	    key: "hasChannelData",
-	    get: function get() {
-	      return !!this.decoder.channelData.byteLength;
+	      return this.options.mediaElement ? this.options.mediaElement.duration : Infinity;
 	    }
 	  }, {
 	    key: "playing",
@@ -1290,10 +1278,12 @@
 	  }, {
 	    key: "changeChannel",
 	    value: function changeChannel(channel) {
+	      this.decoder.changeChannel(channel);
 	      this.setOptions({
 	        channel: channel
 	      });
-	      this.decoder.changeChannel(channel);
+	      this.drawer.update();
+	      return this;
 	    }
 	  }, {
 	    key: "exportImage",

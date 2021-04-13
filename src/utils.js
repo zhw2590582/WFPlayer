@@ -6,9 +6,7 @@ export class WFPlayerError extends Error {
 }
 
 export function errorHandle(condition, msg) {
-    if (!condition) {
-        throw new WFPlayerError(msg);
-    }
+    if (!condition) throw new WFPlayerError(msg);
     return condition;
 }
 
@@ -24,16 +22,6 @@ export function mergeBuffer(...buffers) {
 
 export function clamp(num, a, b) {
     return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
-}
-
-export function setStyle(element, key, value) {
-    if (typeof key === 'object') {
-        Object.keys(key).forEach((item) => {
-            setStyle(element, item, key[item]);
-        });
-    }
-    element.style[key] = value;
-    return element;
 }
 
 export function throttle(func, delay, context) {
