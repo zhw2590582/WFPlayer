@@ -1271,7 +1271,7 @@
 	      }
 
 	      this.options = optionValidator(_objectSpread(_objectSpread(_objectSpread({}, WFPlayer.default), this.options), options), WFPlayer.scheme);
-	      this.emit('option', this.options);
+	      this.emit('options', this.options);
 	      this.update();
 	      return this;
 	    }
