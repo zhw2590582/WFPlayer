@@ -213,7 +213,7 @@ self.onmessage = function onmessage(event) {
         if (isWorker) {
             self.postMessage({
                 type: 'RENDER',
-                date: config,
+                data: config,
             });
 
             self.postMessage({
