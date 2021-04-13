@@ -35,6 +35,7 @@ export default class Decoder {
             channelData: this.channelData,
             sampleRate: this.audiobuffer.sampleRate,
         });
+        this.wf.update();
     }
 
     changeChannel(channel) {
@@ -43,6 +44,7 @@ export default class Decoder {
             channelData: this.channelData,
             sampleRate: this.audiobuffer.sampleRate,
         });
+        this.wf.update();
     }
 
     destroy() {

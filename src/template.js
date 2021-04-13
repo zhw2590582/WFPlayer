@@ -1,18 +1,27 @@
-import { errorHandle } from './utils';
+import { errorHandle, throttle } from './utils';
 
 export default class Template {
     constructor(wf) {
         this.wf = wf;
         this.canvas = null;
+        const { refreshRate } = wf.options;
         this.update();
+        this.update = throttle(this.update, refreshRate, this);
     }
 
     update() {
         const { container, pixelRatio } = this.wf.options;
         const { clientWidth, clientHeight } = container;
+        const width = clientWidth * pixelRatio;
+        const height = clientHeight * pixelRatio;
+
         if (this.canvas) {
-            this.canvas.width = clientWidth * pixelRatio;
-            this.canvas.height = clientHeight * pixelRatio;
+            if (this.canvas.width !== width) {
+                this.canvas.width = width;
+            }
+            if (this.canvas.height !== height) {
+                this.canvas.height = height;
+            }
         } else {
             errorHandle(
                 this.wf.constructor.instances.every((wf) => wf.options.container !== container),
@@ -20,8 +29,8 @@ export default class Template {
             );
             container.innerHTML = '';
             this.canvas = document.createElement('canvas');
-            this.canvas.width = clientWidth * pixelRatio;
-            this.canvas.height = clientHeight * pixelRatio;
+            this.canvas.width = width;
+            this.canvas.height = height;
             this.canvas.style.width = '100%';
             this.canvas.style.height = '100%';
             container.appendChild(this.canvas);

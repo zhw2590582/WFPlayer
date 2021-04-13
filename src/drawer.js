@@ -37,19 +37,12 @@ export default class Drawer {
             });
         }
 
-        wf.on('options', () => {
-            this.update();
-        });
-
         wf.on('channelData', ({ channelData, sampleRate }) => {
             this.worker.postMessage({
                 type: 'CHANNE_DATA',
                 data: { channelData, sampleRate },
             });
-            this.update();
         });
-
-        this.update();
     }
 
     update() {

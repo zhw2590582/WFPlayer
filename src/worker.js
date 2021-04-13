@@ -198,6 +198,7 @@ self.onmessage = function onmessage(event) {
             drawCursor(data);
         }
 
+        const { byteLength } = channelData;
         const config = {
             padding,
             duration,
@@ -208,6 +209,8 @@ self.onmessage = function onmessage(event) {
             density,
             width,
             height,
+            sampleRate,
+            byteLength,
         };
 
         if (isWorker) {

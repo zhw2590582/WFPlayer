@@ -102,6 +102,8 @@ export default class WFPlayer extends Emitter {
         this.controller = new Controller(this);
         this.loader = new Loader(this);
 
+        this.update();
+
         id += 1;
         this.id = id;
         instances.push(this);
@@ -148,7 +150,7 @@ export default class WFPlayer extends Emitter {
             WFPlayer.scheme,
         );
 
-        this.emit('options', this.options);
+        this.update();
         return this;
     }
 
@@ -186,19 +188,27 @@ export default class WFPlayer extends Emitter {
         if (this.options.mediaElement && this.options.mediaElement.currentTime !== this._currentTime) {
             this.options.mediaElement.currentTime = this._currentTime;
         }
-        this.drawer.update();
+        this.update();
         return this;
     }
 
     changeChannel(channel) {
         this.decoder.changeChannel(channel);
         this.setOptions({ channel });
-        this.drawer.update();
+        this.update();
         return this;
     }
 
     exportImage() {
         this.template.exportImage();
+        return this;
+    }
+
+    update() {
+        if (this.template && this.drawer) {
+            this.template.update();
+            this.drawer.update();
+        }
         return this;
     }
 

@@ -470,7 +470,9 @@
 
 	    this.wf = wf;
 	    this.canvas = null;
+	    var refreshRate = wf.options.refreshRate;
 	    this.update();
+	    this.update = throttle(this.update, refreshRate, this);
 	  }
 
 	  _createClass(Template, [{
@@ -481,18 +483,25 @@
 	          pixelRatio = _this$wf$options.pixelRatio;
 	      var clientWidth = container.clientWidth,
 	          clientHeight = container.clientHeight;
+	      var width = clientWidth * pixelRatio;
+	      var height = clientHeight * pixelRatio;
 
 	      if (this.canvas) {
-	        this.canvas.width = clientWidth * pixelRatio;
-	        this.canvas.height = clientHeight * pixelRatio;
+	        if (this.canvas.width !== width) {
+	          this.canvas.width = width;
+	        }
+
+	        if (this.canvas.height !== height) {
+	          this.canvas.height = height;
+	        }
 	      } else {
 	        errorHandle(this.wf.constructor.instances.every(function (wf) {
 	          return wf.options.container !== container;
 	        }), 'Cannot mount multiple instances on the same dom element, please destroy the previous instance first.');
 	        container.innerHTML = '';
 	        this.canvas = document.createElement('canvas');
-	        this.canvas.width = clientWidth * pixelRatio;
-	        this.canvas.height = clientHeight * pixelRatio;
+	        this.canvas.width = width;
+	        this.canvas.height = height;
 	        this.canvas.style.width = '100%';
 	        this.canvas.style.height = '100%';
 	        container.appendChild(this.canvas);
@@ -790,6 +799,8 @@
 	        drawCursor(data);
 	      }
 
+	      var _channelData = channelData,
+	          byteLength = _channelData.byteLength;
 	      var config = {
 	        padding: padding,
 	        duration: duration,
@@ -799,7 +810,9 @@
 	        currentTime: currentTime,
 	        density: density,
 	        width: width,
-	        height: height
+	        height: height,
+	        sampleRate: sampleRate,
+	        byteLength: byteLength
 	      };
 
 	      if (isWorker) {
@@ -841,7 +854,7 @@
 	    this.update = throttle(this.update, refreshRate, this);
 
 	    if (useWorker && window.OffscreenCanvas && window.Worker) {
-	      this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";var isWorker=self.document===void 0,wf=null,canvas=null,ctx=null,gridNum=0,gridGap=0,beginTime=0,density=1,sampleRate=44100,channelData=new Float32Array;function secondToTime(a){var b=Math.floor(a/3600),c=Math.floor((a-3600*b)/60),d=Math.floor(a-3600*b-60*c);return[b,c,d].map(function add0(a){return 10>a?\"0\".concat(a):a+\"\"}).join(\":\")}function clamp(c,d,a){return Math.max(Math.min(c,Math.max(d,a)),Math.min(d,a))}function getDensity(a){var b=a.options.pixelRatio;ctx.font=\"\".concat(11*b,\"px Arial\");var c=ctx.measureText(\"99:99:99\").width;return function a(b){var d=gridGap*b/(1.5*c);return 1<d?Math.floor(b/10):a(b+10)}(10)}function drawBackground(a){var b=a.options,c=b.backgroundColor,d=b.paddingColor,e=b.padding,f=canvas,g=f.width,h=f.height;ctx.clearRect(0,0,g,h),ctx.fillStyle=c,ctx.fillRect(0,0,g,h),ctx.fillStyle=d,ctx.fillRect(0,0,e*gridGap,h),ctx.fillRect(g-e*gridGap,0,e*gridGap,h)}function drawGrid(a){var b=a.options,c=b.gridColor,d=b.pixelRatio,e=canvas,f=e.width,g=e.height;ctx.fillStyle=c;for(var h=0;h<gridNum;h+=density)ctx.fillRect(gridGap*h,0,d,g);for(var i=0;i<g/gridGap;i+=density)ctx.fillRect(0,gridGap*i,f,d)}function drawRuler(a){var b=a.options,c=b.rulerColor,d=b.pixelRatio,e=b.padding,f=b.rulerAtTop,g=canvas,h=g.height,i=11,j=15,k=30;ctx.font=\"\".concat(i*d,\"px Arial\"),ctx.fillStyle=c;for(var l=-1,m=0;m<gridNum;m+=1)m&&m>=e&&m<=gridNum-e&&0==(m-e)%10?(l+=1,ctx.fillRect(gridGap*m,f?0:h-j*d,d,j*d),0==(m-e)%(10*density)&&ctx.fillText(secondToTime(beginTime+l),gridGap*m-2*(i*d)+d,f?k*d:h-k*d+i)):m&&0==(m-e)%5&&ctx.fillRect(gridGap*m,f?0:h-j/2*d,d,j/2*d)}function drawWave(a){for(var b=a.currentTime,c=a.options,d=c.progress,e=c.waveColor,f=c.progressColor,g=c.duration,h=c.padding,j=c.waveScale,k=canvas,l=k.width,m=k.height,n=m/2,o=l-2*(gridGap*h),p=clamp(beginTime*sampleRate,0,1/0),q=clamp((beginTime+g)*sampleRate,p,1/0),r=Math.floor((q-p)/o),s=h*gridGap+10*((b-beginTime)*gridGap),t=0,u=0,v=1,w=-1,x=p;x<q;x+=1){t+=1;var y=channelData[x]||0;if(y<v?v=y:y>w&&(w=y),t>=r&&u<o){u+=1;var z=gridGap*h+u;ctx.fillStyle=d&&s>=z?f:e,ctx.fillRect(z,(1+v*j)*n,1,Math.max(1,(w-v)*n*j)),t=0,v=1,w=-1}}}function drawCursor(a){var b=a.currentTime,c=a.options,d=c.cursorColor,e=c.pixelRatio,f=c.padding,g=canvas,h=g.height;ctx.fillStyle=d;var i=f*gridGap+10*((b-beginTime)*gridGap);ctx.fillRect(i,0,e,h)}self.onmessage=function(a){var b=a.data,c=b.type,d=b.data;if(\"INIT\"===c&&(isWorker?canvas=new OffscreenCanvas(d.width,d.height):(wf=d.wf,canvas=d.canvas),ctx=canvas.getContext(\"2d\")),\"CHANNE_DATA\"===c&&(sampleRate=d.sampleRate,channelData=d.channelData),\"UPDATE\"===c){var e=d.currentTime,f=d.width,g=d.height,h=d.options,i=h.cursor,j=h.grid,k=h.ruler,l=h.wave,m=h.duration,n=h.padding;canvas.width!==f&&(canvas.width=f),canvas.height!==g&&(canvas.height=g),gridNum=10*m+2*n,gridGap=f/gridNum,beginTime=Math.floor(e/m)*m,density=getDensity(d),drawBackground(d),j&&drawGrid(d),k&&drawRuler(d),l&&drawWave(d),i&&drawCursor(d);var o={padding:n,duration:m,gridGap:gridGap,gridNum:gridNum,beginTime:beginTime,currentTime:e,density:density,width:f,height:g};isWorker?(self.postMessage({type:\"RENDER\",data:o}),self.postMessage({type:\"DRAW\",data:canvas.transferToImageBitmap()})):wf.emit(\"render\",o)}},\"undefined\"==typeof exports||isWorker||(exports.postMessage=function(a){self.onmessage({data:a})});"])));
+	      this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";var isWorker=self.document===void 0,wf=null,canvas=null,ctx=null,gridNum=0,gridGap=0,beginTime=0,density=1,sampleRate=44100,channelData=new Float32Array;function secondToTime(a){var b=Math.floor(a/3600),c=Math.floor((a-3600*b)/60),d=Math.floor(a-3600*b-60*c);return[b,c,d].map(function add0(a){return 10>a?\"0\".concat(a):a+\"\"}).join(\":\")}function clamp(c,d,a){return Math.max(Math.min(c,Math.max(d,a)),Math.min(d,a))}function getDensity(a){var b=a.options.pixelRatio;ctx.font=\"\".concat(11*b,\"px Arial\");var c=ctx.measureText(\"99:99:99\").width;return function a(b){var d=gridGap*b/(1.5*c);return 1<d?Math.floor(b/10):a(b+10)}(10)}function drawBackground(a){var b=a.options,c=b.backgroundColor,d=b.paddingColor,e=b.padding,f=canvas,g=f.width,h=f.height;ctx.clearRect(0,0,g,h),ctx.fillStyle=c,ctx.fillRect(0,0,g,h),ctx.fillStyle=d,ctx.fillRect(0,0,e*gridGap,h),ctx.fillRect(g-e*gridGap,0,e*gridGap,h)}function drawGrid(a){var b=a.options,c=b.gridColor,d=b.pixelRatio,e=canvas,f=e.width,g=e.height;ctx.fillStyle=c;for(var h=0;h<gridNum;h+=density)ctx.fillRect(gridGap*h,0,d,g);for(var i=0;i<g/gridGap;i+=density)ctx.fillRect(0,gridGap*i,f,d)}function drawRuler(a){var b=a.options,c=b.rulerColor,d=b.pixelRatio,e=b.padding,f=b.rulerAtTop,g=canvas,h=g.height,i=11,j=15,k=30;ctx.font=\"\".concat(i*d,\"px Arial\"),ctx.fillStyle=c;for(var l=-1,m=0;m<gridNum;m+=1)m&&m>=e&&m<=gridNum-e&&0==(m-e)%10?(l+=1,ctx.fillRect(gridGap*m,f?0:h-j*d,d,j*d),0==(m-e)%(10*density)&&ctx.fillText(secondToTime(beginTime+l),gridGap*m-2*(i*d)+d,f?k*d:h-k*d+i)):m&&0==(m-e)%5&&ctx.fillRect(gridGap*m,f?0:h-j/2*d,d,j/2*d)}function drawWave(a){for(var b=a.currentTime,c=a.options,d=c.progress,e=c.waveColor,f=c.progressColor,g=c.duration,h=c.padding,j=c.waveScale,k=canvas,l=k.width,m=k.height,n=m/2,o=l-2*(gridGap*h),p=clamp(beginTime*sampleRate,0,1/0),q=clamp((beginTime+g)*sampleRate,p,1/0),r=Math.floor((q-p)/o),s=h*gridGap+10*((b-beginTime)*gridGap),t=0,u=0,v=1,w=-1,x=p;x<q;x+=1){t+=1;var y=channelData[x]||0;if(y<v?v=y:y>w&&(w=y),t>=r&&u<o){u+=1;var z=gridGap*h+u;ctx.fillStyle=d&&s>=z?f:e,ctx.fillRect(z,(1+v*j)*n,1,Math.max(1,(w-v)*n*j)),t=0,v=1,w=-1}}}function drawCursor(a){var b=a.currentTime,c=a.options,d=c.cursorColor,e=c.pixelRatio,f=c.padding,g=canvas,h=g.height;ctx.fillStyle=d;var i=f*gridGap+10*((b-beginTime)*gridGap);ctx.fillRect(i,0,e,h)}self.onmessage=function(a){var b=a.data,c=b.type,d=b.data;if(\"INIT\"===c&&(isWorker?canvas=new OffscreenCanvas(d.width,d.height):(wf=d.wf,canvas=d.canvas),ctx=canvas.getContext(\"2d\")),\"CHANNE_DATA\"===c&&(sampleRate=d.sampleRate,channelData=d.channelData),\"UPDATE\"===c){var e=d.currentTime,f=d.width,g=d.height,h=d.options,i=h.cursor,j=h.grid,k=h.ruler,l=h.wave,m=h.duration,n=h.padding;canvas.width!==f&&(canvas.width=f),canvas.height!==g&&(canvas.height=g),gridNum=10*m+2*n,gridGap=f/gridNum,beginTime=Math.floor(e/m)*m,density=getDensity(d),drawBackground(d),j&&drawGrid(d),k&&drawRuler(d),l&&drawWave(d),i&&drawCursor(d);var o=channelData,p=o.byteLength,q={padding:n,duration:m,gridGap:gridGap,gridNum:gridNum,beginTime:beginTime,currentTime:e,density:density,width:f,height:g,sampleRate:sampleRate,byteLength:p};isWorker?(self.postMessage({type:\"RENDER\",data:q}),self.postMessage({type:\"DRAW\",data:canvas.transferToImageBitmap()})):wf.emit(\"render\",q)}},\"undefined\"==typeof exports||isWorker||(exports.postMessage=function(a){self.onmessage({data:a})});"])));
 	      this.ctx = this.canvas.getContext('bitmaprenderer');
 	      this.wf.events.proxy(this.worker, 'message', function (event) {
 	        var _event$data = event.data,
@@ -868,9 +881,6 @@
 	      });
 	    }
 
-	    wf.on('options', function () {
-	      _this.update();
-	    });
 	    wf.on('channelData', function (_ref) {
 	      var channelData = _ref.channelData,
 	          sampleRate = _ref.sampleRate;
@@ -882,10 +892,7 @@
 	          sampleRate: sampleRate
 	        }
 	      });
-
-	      _this.update();
 	    });
-	    this.update();
 	  }
 
 	  _createClass(Drawer, [{
@@ -965,6 +972,7 @@
 	        channelData: this.channelData,
 	        sampleRate: this.audiobuffer.sampleRate
 	      });
+	      this.wf.update();
 	    }
 	  }, {
 	    key: "changeChannel",
@@ -974,6 +982,7 @@
 	        channelData: this.channelData,
 	        sampleRate: this.audiobuffer.sampleRate
 	      });
+	      this.wf.update();
 	    }
 	  }, {
 	    key: "destroy",
@@ -1125,7 +1134,7 @@
 	          mediaElement.currentTime = time;
 	        }
 
-	        _this2.wf.drawer.update();
+	        _this2.wf.update();
 	      });
 	    }
 	  }, {
@@ -1133,13 +1142,9 @@
 	    value: function resizeInit() {
 	      var _this3 = this;
 
-	      var _this$wf3 = this.wf,
-	          template = _this$wf3.template,
-	          drawer = _this$wf3.drawer,
-	          proxy = _this$wf3.events.proxy;
+	      var proxy = this.wf.events.proxy;
 	      var throttleResize = throttle(function () {
-	        template.update();
-	        drawer.update();
+	        _this3.wf.update();
 
 	        _this3.wf.emit('resize');
 	      }, 500, this);
@@ -1150,26 +1155,27 @@
 	  }, {
 	    key: "playInit",
 	    value: function playInit() {
-	      var _this$wf4 = this.wf,
-	          drawer = _this$wf4.drawer,
-	          proxy = _this$wf4.events.proxy,
-	          mediaElement = _this$wf4.options.mediaElement;
+	      var _this4 = this;
+
+	      var _this$wf3 = this.wf,
+	          proxy = _this$wf3.events.proxy,
+	          mediaElement = _this$wf3.options.mediaElement;
 	      if (!mediaElement) return;
 	      proxy(mediaElement, 'seeked', function () {
-	        drawer.update();
+	        _this4.wf.update();
 	      });
 	      (function loop() {
-	        var _this4 = this;
+	        var _this5 = this;
 
 	        this.playTimer = requestAnimationFrame(function () {
-	          if (_this4.wf.playing) {
-	            drawer.update();
+	          if (_this5.wf.playing) {
+	            _this5.wf.update();
 
-	            _this4.wf.emit('playing', mediaElement.currentTime);
+	            _this5.wf.emit('playing', mediaElement.currentTime);
 	          }
 
-	          if (!_this4.wf.isDestroy) {
-	            loop.call(_this4);
+	          if (!_this5.wf.isDestroy) {
+	            loop.call(_this5);
 	          }
 	        });
 	      }).call(this);
@@ -1219,6 +1225,9 @@
 	    _this.drawer = new Drawer(_assertThisInitialized(_this));
 	    _this.controller = new Controller(_assertThisInitialized(_this));
 	    _this.loader = new Loader(_assertThisInitialized(_this));
+
+	    _this.update();
+
 	    id += 1;
 	    _this.id = id;
 	    instances.push(_assertThisInitialized(_this));
@@ -1261,7 +1270,7 @@
 	      }
 
 	      this.options = optionValidator(_objectSpread(_objectSpread(_objectSpread({}, WFPlayer.default), this.options), options), WFPlayer.scheme);
-	      this.emit('options', this.options);
+	      this.update();
 	      return this;
 	    }
 	  }, {
@@ -1299,7 +1308,7 @@
 	        this.options.mediaElement.currentTime = this._currentTime;
 	      }
 
-	      this.drawer.update();
+	      this.update();
 	      return this;
 	    }
 	  }, {
@@ -1309,13 +1318,23 @@
 	      this.setOptions({
 	        channel: channel
 	      });
-	      this.drawer.update();
+	      this.update();
 	      return this;
 	    }
 	  }, {
 	    key: "exportImage",
 	    value: function exportImage() {
 	      this.template.exportImage();
+	      return this;
+	    }
+	  }, {
+	    key: "update",
+	    value: function update() {
+	      if (this.template && this.drawer) {
+	        this.template.update();
+	        this.drawer.update();
+	      }
+
 	      return this;
 	    }
 	  }, {

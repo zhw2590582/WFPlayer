@@ -37,21 +37,16 @@ export default class Controller {
             if (mediaElement && mediaElement.currentTime !== time) {
                 mediaElement.currentTime = time;
             }
-            this.wf.drawer.update();
+            this.wf.update();
         });
     }
 
     resizeInit() {
-        const {
-            template,
-            drawer,
-            events: { proxy },
-        } = this.wf;
+        const { proxy } = this.wf.events;
 
         const throttleResize = throttle(
             () => {
-                template.update();
-                drawer.update();
+                this.wf.update();
                 this.wf.emit('resize');
             },
             500,
@@ -65,20 +60,19 @@ export default class Controller {
 
     playInit() {
         const {
-            drawer,
             events: { proxy },
             options: { mediaElement },
         } = this.wf;
         if (!mediaElement) return;
 
         proxy(mediaElement, 'seeked', () => {
-            drawer.update();
+            this.wf.update();
         });
 
         (function loop() {
             this.playTimer = requestAnimationFrame(() => {
                 if (this.wf.playing) {
-                    drawer.update();
+                    this.wf.update();
                     this.wf.emit('playing', mediaElement.currentTime);
                 }
 
