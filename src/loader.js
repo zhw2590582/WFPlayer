@@ -44,6 +44,7 @@ export default class Loader {
                     this.wf.emit('loading', uint8);
                     this.wf.emit('loadEnd');
                 }
+                return arrayBuffer;
             });
     }
 

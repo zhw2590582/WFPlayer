@@ -1,15 +1,12 @@
-import { throttle } from './utils';
-
 export default class Decoder {
     constructor(wf) {
         this.wf = wf;
         this.audioCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 2, 44100);
-        this.throttleDecodeAudioData = throttle(this.decodeAudioData, 1000, this);
         this.audiobuffer = this.audioCtx.createBuffer(1, 2, 44100);
         this.channelData = new Float32Array();
 
         this.wf.on('loading', (uint8) => {
-            this.throttleDecodeAudioData(uint8);
+            this.decodeAudioData(uint8);
         });
     }
 

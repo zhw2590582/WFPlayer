@@ -13,7 +13,7 @@ $version.innerHTML = 'Beta ' + WFPlayer.version;
 
 var art = new Artplayer({
     container: '.artplayer',
-    url: '/your-name.mp4',
+    url: '/sample.mp4',
     autoSize: true,
     loop: true,
     moreVideoAttr: {

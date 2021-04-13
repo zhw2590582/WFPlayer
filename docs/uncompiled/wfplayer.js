@@ -938,11 +938,10 @@
 
 	    this.wf = wf;
 	    this.audioCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 2, 44100);
-	    this.throttleDecodeAudioData = throttle(this.decodeAudioData, 1000, this);
 	    this.audiobuffer = this.audioCtx.createBuffer(1, 2, 44100);
 	    this.channelData = new Float32Array();
 	    this.wf.on('loading', function (uint8) {
-	      _this.throttleDecodeAudioData(uint8);
+	      _this.decodeAudioData(uint8);
 	    });
 	  }
 
@@ -1062,6 +1061,8 @@
 
 	          _this.wf.emit('loadEnd');
 	        }
+
+	        return arrayBuffer;
 	      });
 	    }
 	  }, {
@@ -1358,7 +1359,7 @@
 	  }, {
 	    key: "version",
 	    get: function get() {
-	      return '2.0.1';
+	      return '2.0.4';
 	    }
 	  }, {
 	    key: "env",
