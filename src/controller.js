@@ -1,5 +1,4 @@
-import { throttle } from './utils';
-import { clamp } from './utils';
+import { throttle, clamp } from './utils';
 
 export default class Controller {
     constructor(wf) {

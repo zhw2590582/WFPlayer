@@ -22,6 +22,18 @@ function clamp(num, a, b) {
     return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
 }
 
+function getDensity(data) {
+    const { pixelRatio } = data.options;
+    const fontSize = 11;
+    ctx.font = `${fontSize * pixelRatio}px Arial`;
+    const rulerWidth = ctx.measureText('99:99:99').width;
+    return (function loop(second) {
+        const rate = (gridGap * second) / (rulerWidth * 1.5);
+        if (rate > 1) return Math.floor(second / 10);
+        return loop(second + 10);
+    })(10);
+}
+
 function drawBackground(data) {
     const { backgroundColor, paddingColor, padding } = data.options;
     const { width, height } = canvas;
@@ -135,12 +147,11 @@ self.onmessage = function onmessage(event) {
     if (type === 'INIT') {
         if (isWorker) {
             canvas = new OffscreenCanvas(data.width, data.height);
-            ctx = canvas.getContext('2d');
         } else {
             wf = data.wf;
             canvas = data.canvas;
-            ctx = canvas.getContext('2d');
         }
+        ctx = canvas.getContext('2d');
     }
 
     if (type === 'CHANNE_DATA') {
@@ -167,18 +178,7 @@ self.onmessage = function onmessage(event) {
         gridNum = duration * 10 + padding * 2;
         gridGap = width / gridNum;
         beginTime = Math.floor(currentTime / duration) * duration;
-
-        density =
-            {
-                1: 5,
-                2: 4,
-                3: 3,
-                4: 3,
-                5: 2,
-                6: 2,
-                7: 2,
-                8: 2,
-            }[Math.floor(gridGap)] || 1;
+        density = getDensity(data);
 
         drawBackground(data);
 
@@ -204,6 +204,7 @@ self.onmessage = function onmessage(event) {
             gridGap,
             gridNum,
             beginTime,
+            density,
             width,
             height,
         };

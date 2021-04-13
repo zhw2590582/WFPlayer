@@ -26,8 +26,7 @@ export function clamp(num, a, b) {
 
 export function throttle(func, delay, context) {
     let prev = Date.now();
-    return function () {
-        const args = arguments;
+    return (...args) => {
         const now = Date.now();
         if (now - prev >= delay) {
             func.apply(context, args);

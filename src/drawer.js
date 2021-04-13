@@ -9,7 +9,7 @@ export default class Drawer {
         const { refreshRate, useWorker } = wf.options;
         this.update = throttle(this.update, refreshRate, this);
 
-        if (useWorker && window.OffscreenCanvas) {
+        if (useWorker && window.OffscreenCanvas && window.Worker) {
             this.worker = new Worker('./worker.js');
             this.ctx = this.canvas.getContext('bitmaprenderer');
 

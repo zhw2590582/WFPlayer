@@ -11,7 +11,8 @@
     "rules": {
         "no-param-reassign": 0,
         "no-bitwise": 0,
-        "no-underscore-dangle": 0
+        "no-underscore-dangle": 0,
+        "no-restricted-globals": 0
     },
     "parserOptions": {
         "sourceType": "module"

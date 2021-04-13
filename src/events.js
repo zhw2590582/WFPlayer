@@ -7,12 +7,12 @@ export default class Events {
     proxy(target, name, callback, option = {}) {
         if (Array.isArray(name)) {
             return name.map((item) => this.proxy(target, item, callback, option));
-        } else {
-            target.addEventListener(name, callback, option);
-            const destroyEvent = () => target.removeEventListener(name, callback, option);
-            this.destroyEvents.push(destroyEvent);
-            return destroyEvent;
         }
+
+        target.addEventListener(name, callback, option);
+        const destroyEvent = () => target.removeEventListener(name, callback, option);
+        this.destroyEvents.push(destroyEvent);
+        return destroyEvent;
     }
 
     destroy() {
