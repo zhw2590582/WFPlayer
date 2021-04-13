@@ -90,6 +90,9 @@ var wf = new WFPlayer({
     // Whether use web worker
     useWorker: true,
 
+    // Thw refresh rate
+    refreshRate: 50,
+
     // Whether to display wave
     wave: true,
 
@@ -183,6 +186,83 @@ Destroy instance:
 
 ```js
 wf.destroy();
+```
+
+## Common Problem
+
+#### When decoding a video to an audio waveform, it will cause insufficient browser memory.
+
+If the video volume is too large, it will cause the front-end decoding difficult. Best practice is to use the server's `FFMPEG`, convert the video into audio format `MP3`.
+
+`-ac` is the number of channels, `-ar` is a sample rate:
+
+Back End
+
+```bash
+ffmpeg -i path/to/video.mp4 -ac 1 -ar 8000 path/to/audio.mp3
+```
+
+HTML
+
+```html
+<div id="waveform" style="width: 1000px; height: 300px"></div>
+<video id="video" src="path/to/video.mp4"></video>
+```
+
+JS
+
+```js
+var wf = new WFPlayer({
+    container: document.querySelector('#waveform'),
+    mediaElement: document.querySelector('#video'),
+});
+
+wf.load('path/to/audio.mp3');
+
+// or
+fetch('path/to/audio.mp3')
+    .then((res) => res.arrayBuffer())
+    .then((arrayBuffer) => {
+        const uint8 = new Uint8Array(arrayBuffer);
+        wf.decoder.decodeAudioData(uint8);
+    });
+```
+
+#### If you really don't want to use the server to transfer, I recommend to use `@ffmpeg/ffmpeg`：
+
+```bash
+npm i -S @ffmpeg/ffmpeg
+```
+
+HTML
+
+```html
+<div id="waveform" style="width: 1000px; height: 300px"></div>
+<video id="video" src="path/to/video.mp4"></video>
+<input type="file" id="file" />
+```
+
+JS
+
+```js
+import FFmpeg from '@ffmpeg/ffmpeg';
+
+const wf = new WFPlayer({
+    container: document.querySelector('#waveform'),
+    mediaElement: document.querySelector('#video'),
+});
+
+document.getElementById('file').addEventListener('change', async (event) => {
+    const file = event.target.files[0];
+    const { createFFmpeg, fetchFile } = FFmpeg;
+    const ffmpeg = createFFmpeg({ log: true });
+    await ffmpeg.load();
+    ffmpeg.FS('writeFile', file.name, await fetchFile(file));
+    await ffmpeg.run('-i', file.name, '-ac', '1', '-ar', '8000', 'audio.mp3);
+    const uint8 = ffmpeg.FS('readFile', 'audio.mp3);
+
+    await wf.decoder.decodeAudioData(uint8);
+})
 ```
 
 ## Donations
