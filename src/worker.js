@@ -79,7 +79,7 @@ function drawRuler(data) {
             second += 1;
             ctx.fillRect(x, rulerAtTop ? 0 : height - fontHeight * pixelRatio, pixelRatio, fontHeight * pixelRatio);
             const time = beginTime + second;
-            if ((index - padding) % (density * 10) === 0 && time > 0) {
+            if ((index - padding) % (density * 10) === 0 && time >= 0) {
                 ctx.fillText(
                     secondToTime(time),
                     x - fontSize * pixelRatio * 2 + pixelRatio,
