@@ -471,13 +471,13 @@
 	    this.wf = wf;
 	    this.canvas = null;
 	    var refreshRate = wf.options.refreshRate;
-	    this.update();
-	    this.update = throttle(this.update, refreshRate, this);
+	    this.update = throttle(this.init, refreshRate, this);
+	    this.init();
 	  }
 
 	  _createClass(Template, [{
-	    key: "update",
-	    value: function update() {
+	    key: "init",
+	    value: function init() {
 	      var _this$wf$options = this.wf.options,
 	          container = _this$wf$options.container,
 	          pixelRatio = _this$wf$options.pixelRatio;
@@ -752,15 +752,15 @@
 	      ctx = canvas.getContext('2d');
 	    }
 
-	    if (type === 'CHANNE_DATA') {
+	    if (type === 'DECODE') {
 	      sampleRate = data.sampleRate;
 	      channelData = data.channelData;
 	    }
 
 	    if (type === 'UPDATE') {
-	      var currentTime = data.currentTime,
-	          width = data.width,
+	      var width = data.width,
 	          height = data.height,
+	          currentTime = data.currentTime,
 	          _data$options6 = data.options,
 	          cursor = _data$options6.cursor,
 	          grid = _data$options6.grid,
@@ -817,15 +817,14 @@
 
 	      if (isWorker) {
 	        self.postMessage({
-	          type: 'RENDER',
-	          data: config
-	        });
-	        self.postMessage({
-	          type: 'DRAW',
-	          data: canvas.transferToImageBitmap()
+	          type: 'UPFATE',
+	          data: {
+	            config: config,
+	            imageBitmap: canvas.transferToImageBitmap()
+	          }
 	        });
 	      } else {
-	        wf.emit('render', config);
+	        wf.emit('update', config);
 	      }
 	    }
 	  };
@@ -854,14 +853,18 @@
 	    this.update = throttle(this.update, refreshRate, this);
 
 	    if (useWorker && window.OffscreenCanvas && window.Worker) {
-	      this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";var isWorker=self.document===void 0,wf=null,canvas=null,ctx=null,gridNum=0,gridGap=0,beginTime=0,density=1,sampleRate=44100,channelData=new Float32Array;function secondToTime(a){var b=Math.floor(a/3600),c=Math.floor((a-3600*b)/60),d=Math.floor(a-3600*b-60*c);return[b,c,d].map(function add0(a){return 10>a?\"0\".concat(a):a+\"\"}).join(\":\")}function clamp(c,d,a){return Math.max(Math.min(c,Math.max(d,a)),Math.min(d,a))}function getDensity(a){var b=a.options.pixelRatio;ctx.font=\"\".concat(11*b,\"px Arial\");var c=ctx.measureText(\"99:99:99\").width;return function a(b){var d=gridGap*b/(1.5*c);return 1<d?Math.floor(b/10):a(b+10)}(10)}function drawBackground(a){var b=a.options,c=b.backgroundColor,d=b.paddingColor,e=b.padding,f=canvas,g=f.width,h=f.height;ctx.clearRect(0,0,g,h),ctx.fillStyle=c,ctx.fillRect(0,0,g,h),ctx.fillStyle=d,ctx.fillRect(0,0,e*gridGap,h),ctx.fillRect(g-e*gridGap,0,e*gridGap,h)}function drawGrid(a){var b=a.options,c=b.gridColor,d=b.pixelRatio,e=canvas,f=e.width,g=e.height;ctx.fillStyle=c;for(var h=0;h<gridNum;h+=density)ctx.fillRect(gridGap*h,0,d,g);for(var i=0;i<g/gridGap;i+=density)ctx.fillRect(0,gridGap*i,f,d)}function drawRuler(a){var b=a.options,c=b.rulerColor,d=b.pixelRatio,e=b.padding,f=b.rulerAtTop,g=canvas,h=g.height,i=11,j=15,k=30;ctx.font=\"\".concat(i*d,\"px Arial\"),ctx.fillStyle=c;for(var l=-1,m=0;m<gridNum;m+=1)m&&m>=e&&m<=gridNum-e&&0==(m-e)%10?(l+=1,ctx.fillRect(gridGap*m,f?0:h-j*d,d,j*d),0==(m-e)%(10*density)&&ctx.fillText(secondToTime(beginTime+l),gridGap*m-2*(i*d)+d,f?k*d:h-k*d+i)):m&&0==(m-e)%5&&ctx.fillRect(gridGap*m,f?0:h-j/2*d,d,j/2*d)}function drawWave(a){for(var b=a.currentTime,c=a.options,d=c.progress,e=c.waveColor,f=c.progressColor,g=c.duration,h=c.padding,j=c.waveScale,k=canvas,l=k.width,m=k.height,n=m/2,o=l-2*(gridGap*h),p=clamp(beginTime*sampleRate,0,1/0),q=clamp((beginTime+g)*sampleRate,p,1/0),r=Math.floor((q-p)/o),s=h*gridGap+10*((b-beginTime)*gridGap),t=0,u=0,v=1,w=-1,x=p;x<q;x+=1){t+=1;var y=channelData[x]||0;if(y<v?v=y:y>w&&(w=y),t>=r&&u<o){u+=1;var z=gridGap*h+u;ctx.fillStyle=d&&s>=z?f:e,ctx.fillRect(z,(1+v*j)*n,1,Math.max(1,(w-v)*n*j)),t=0,v=1,w=-1}}}function drawCursor(a){var b=a.currentTime,c=a.options,d=c.cursorColor,e=c.pixelRatio,f=c.padding,g=canvas,h=g.height;ctx.fillStyle=d;var i=f*gridGap+10*((b-beginTime)*gridGap);ctx.fillRect(i,0,e,h)}self.onmessage=function(a){var b=a.data,c=b.type,d=b.data;if(\"INIT\"===c&&(isWorker?canvas=new OffscreenCanvas(d.width,d.height):(wf=d.wf,canvas=d.canvas),ctx=canvas.getContext(\"2d\")),\"CHANNE_DATA\"===c&&(sampleRate=d.sampleRate,channelData=d.channelData),\"UPDATE\"===c){var e=d.currentTime,f=d.width,g=d.height,h=d.options,i=h.cursor,j=h.grid,k=h.ruler,l=h.wave,m=h.duration,n=h.padding;canvas.width!==f&&(canvas.width=f),canvas.height!==g&&(canvas.height=g),gridNum=10*m+2*n,gridGap=f/gridNum,beginTime=Math.floor(e/m)*m,density=getDensity(d),drawBackground(d),j&&drawGrid(d),k&&drawRuler(d),l&&drawWave(d),i&&drawCursor(d);var o=channelData,p=o.byteLength,q={padding:n,duration:m,gridGap:gridGap,gridNum:gridNum,beginTime:beginTime,currentTime:e,density:density,width:f,height:g,sampleRate:sampleRate,byteLength:p};isWorker?(self.postMessage({type:\"RENDER\",data:q}),self.postMessage({type:\"DRAW\",data:canvas.transferToImageBitmap()})):wf.emit(\"render\",q)}},\"undefined\"==typeof exports||isWorker||(exports.postMessage=function(a){self.onmessage({data:a})});"])));
+	      this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";var isWorker=self.document===void 0,wf=null,canvas=null,ctx=null,gridNum=0,gridGap=0,beginTime=0,density=1,sampleRate=44100,channelData=new Float32Array;function secondToTime(a){var b=Math.floor(a/3600),c=Math.floor((a-3600*b)/60),d=Math.floor(a-3600*b-60*c);return[b,c,d].map(function add0(a){return 10>a?\"0\".concat(a):a+\"\"}).join(\":\")}function clamp(c,d,a){return Math.max(Math.min(c,Math.max(d,a)),Math.min(d,a))}function getDensity(a){var b=a.options.pixelRatio;ctx.font=\"\".concat(11*b,\"px Arial\");var c=ctx.measureText(\"99:99:99\").width;return function a(b){var d=gridGap*b/(1.5*c);return 1<d?Math.floor(b/10):a(b+10)}(10)}function drawBackground(a){var b=a.options,c=b.backgroundColor,d=b.paddingColor,e=b.padding,f=canvas,g=f.width,h=f.height;ctx.clearRect(0,0,g,h),ctx.fillStyle=c,ctx.fillRect(0,0,g,h),ctx.fillStyle=d,ctx.fillRect(0,0,e*gridGap,h),ctx.fillRect(g-e*gridGap,0,e*gridGap,h)}function drawGrid(a){var b=a.options,c=b.gridColor,d=b.pixelRatio,e=canvas,f=e.width,g=e.height;ctx.fillStyle=c;for(var h=0;h<gridNum;h+=density)ctx.fillRect(gridGap*h,0,d,g);for(var i=0;i<g/gridGap;i+=density)ctx.fillRect(0,gridGap*i,f,d)}function drawRuler(a){var b=a.options,c=b.rulerColor,d=b.pixelRatio,e=b.padding,f=b.rulerAtTop,g=canvas,h=g.height,i=11,j=15,k=30;ctx.font=\"\".concat(i*d,\"px Arial\"),ctx.fillStyle=c;for(var l=-1,m=0;m<gridNum;m+=1)m&&m>=e&&m<=gridNum-e&&0==(m-e)%10?(l+=1,ctx.fillRect(gridGap*m,f?0:h-j*d,d,j*d),0==(m-e)%(10*density)&&ctx.fillText(secondToTime(beginTime+l),gridGap*m-2*(i*d)+d,f?k*d:h-k*d+i)):m&&0==(m-e)%5&&ctx.fillRect(gridGap*m,f?0:h-j/2*d,d,j/2*d)}function drawWave(a){for(var b=a.currentTime,c=a.options,d=c.progress,e=c.waveColor,f=c.progressColor,g=c.duration,h=c.padding,j=c.waveScale,k=canvas,l=k.width,m=k.height,n=m/2,o=l-2*(gridGap*h),p=clamp(beginTime*sampleRate,0,1/0),q=clamp((beginTime+g)*sampleRate,p,1/0),r=Math.floor((q-p)/o),s=h*gridGap+10*((b-beginTime)*gridGap),t=0,u=0,v=1,w=-1,x=p;x<q;x+=1){t+=1;var y=channelData[x]||0;if(y<v?v=y:y>w&&(w=y),t>=r&&u<o){u+=1;var z=gridGap*h+u;ctx.fillStyle=d&&s>=z?f:e,ctx.fillRect(z,(1+v*j)*n,1,Math.max(1,(w-v)*n*j)),t=0,v=1,w=-1}}}function drawCursor(a){var b=a.currentTime,c=a.options,d=c.cursorColor,e=c.pixelRatio,f=c.padding,g=canvas,h=g.height;ctx.fillStyle=d;var i=f*gridGap+10*((b-beginTime)*gridGap);ctx.fillRect(i,0,e,h)}self.onmessage=function(a){var b=a.data,c=b.type,d=b.data;if(\"INIT\"===c&&(isWorker?canvas=new OffscreenCanvas(d.width,d.height):(wf=d.wf,canvas=d.canvas),ctx=canvas.getContext(\"2d\")),\"DECODE\"===c&&(sampleRate=d.sampleRate,channelData=d.channelData),\"UPDATE\"===c){var e=d.width,f=d.height,g=d.currentTime,h=d.options,i=h.cursor,j=h.grid,k=h.ruler,l=h.wave,m=h.duration,n=h.padding;canvas.width!==e&&(canvas.width=e),canvas.height!==f&&(canvas.height=f),gridNum=10*m+2*n,gridGap=e/gridNum,beginTime=Math.floor(g/m)*m,density=getDensity(d),drawBackground(d),j&&drawGrid(d),k&&drawRuler(d),l&&drawWave(d),i&&drawCursor(d);var o=channelData,p=o.byteLength,q={padding:n,duration:m,gridGap:gridGap,gridNum:gridNum,beginTime:beginTime,currentTime:g,density:density,width:e,height:f,sampleRate:sampleRate,byteLength:p};isWorker?self.postMessage({type:\"UPFATE\",data:{config:q,imageBitmap:canvas.transferToImageBitmap()}}):wf.emit(\"update\",q)}},\"undefined\"==typeof exports||isWorker||(exports.postMessage=function(a){self.onmessage({data:a})});"])));
 	      this.ctx = this.canvas.getContext('bitmaprenderer');
 	      this.wf.events.proxy(this.worker, 'message', function (event) {
 	        var _event$data = event.data,
 	            type = _event$data.type,
 	            data = _event$data.data;
-	        if (type === 'RENDER') _this.wf.emit('render', data);
-	        if (type === 'DRAW') _this.ctx.transferFromImageBitmap(data);
+
+	        if (type === 'UPFATE') {
+	          _this.wf.emit('update', data.config);
+
+	          _this.ctx.transferFromImageBitmap(data.imageBitmap);
+	        }
 	      });
 	      this.worker.postMessage({
 	        type: 'INIT',
@@ -881,12 +884,12 @@
 	      });
 	    }
 
-	    wf.on('channelData', function (_ref) {
+	    wf.on('decode', function (_ref) {
 	      var channelData = _ref.channelData,
 	          sampleRate = _ref.sampleRate;
 
 	      _this.worker.postMessage({
-	        type: 'CHANNE_DATA',
+	        type: 'DECODE',
 	        data: {
 	          channelData: channelData,
 	          sampleRate: sampleRate
@@ -932,27 +935,22 @@
 
 	var Decoder = /*#__PURE__*/function () {
 	  function Decoder(wf) {
-	    var _this = this;
-
 	    _classCallCheck(this, Decoder);
 
 	    this.wf = wf;
 	    this.audioCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 2, 44100);
 	    this.audiobuffer = this.audioCtx.createBuffer(1, 2, 44100);
 	    this.channelData = new Float32Array();
-	    this.wf.on('loading', function (uint8) {
-	      _this.decodeAudioData(uint8);
-	    });
 	  }
 
 	  _createClass(Decoder, [{
 	    key: "decodeAudioData",
 	    value: function decodeAudioData(uint8) {
-	      var _this2 = this;
+	      var _this = this;
 
 	      return new Promise(function (resolve, reject) {
-	        _this2.audioCtx.decodeAudioData(uint8.buffer, function (audiobuffer) {
-	          _this2.decodeSuccess(audiobuffer);
+	        _this.audioCtx.decodeAudioData(uint8.buffer, function (audiobuffer) {
+	          _this.decodeSuccess(audiobuffer);
 
 	          resolve(audiobuffer);
 	        }, function (err) {
@@ -964,12 +962,11 @@
 	    key: "decodeSuccess",
 	    value: function decodeSuccess(audiobuffer) {
 	      this.audiobuffer = audiobuffer;
-	      this.wf.emit('audiobuffer', this.audiobuffer);
-	      this.wf.emit('decodeing', this.audiobuffer.duration / this.wf.duration);
 	      this.channelData = audiobuffer.getChannelData(this.wf.options.channel);
-	      this.wf.emit('channelData', {
+	      this.wf.emit('decode', {
 	        channelData: this.channelData,
-	        sampleRate: this.audiobuffer.sampleRate
+	        sampleRate: this.audiobuffer.sampleRate,
+	        duration: this.audiobuffer.duration
 	      });
 	      this.wf.update();
 	    }
@@ -977,9 +974,10 @@
 	    key: "changeChannel",
 	    value: function changeChannel(channel) {
 	      this.channelData = this.audiobuffer.getChannelData(channel) || new Float32Array();
-	      this.wf.emit('channelData', {
+	      this.wf.emit('decode', {
 	        channelData: this.channelData,
-	        sampleRate: this.audiobuffer.sampleRate
+	        sampleRate: this.audiobuffer.sampleRate,
+	        duration: this.audiobuffer.duration
 	      });
 	      this.wf.update();
 	    }
@@ -1011,13 +1009,9 @@
 	      var _this = this;
 
 	      this.destroy();
-	      this.wf.emit('loadStart');
 	      return fetch(url).then(function (response) {
 	        if (response.body && typeof response.body.getReader === 'function') {
 	          _this.fileSize = Number(response.headers.get('content-length'));
-
-	          _this.wf.emit('fileSize', _this.fileSize);
-
 	          _this.reader = response.body.getReader();
 	          return function read() {
 	            var _this2 = this;
@@ -1025,20 +1019,17 @@
 	            return this.reader.read().then(function (_ref) {
 	              var done = _ref.done,
 	                  value = _ref.value;
-
-	              if (done) {
-	                _this2.wf.emit('loadEnd');
-
-	                return null;
-	              }
-
+	              if (done) return null;
 	              _this2.loadSize += value.byteLength;
-
-	              _this2.wf.emit('downloading', _this2.loadSize / _this2.fileSize);
-
 	              _this2.data = mergeBuffer(_this2.data, value);
 
-	              _this2.wf.emit('loading', _this2.data.slice());
+	              _this2.wf.decoder.decodeAudioData(_this2.data.slice());
+
+	              _this2.wf.emit('load', {
+	                fileSize: _this2.fileSize,
+	                loadSize: _this2.loadSize,
+	                data: _this2.data
+	              });
 
 	              return read.call(_this2);
 	            });
@@ -1048,18 +1039,17 @@
 	        return response.arrayBuffer();
 	      }).then(function (arrayBuffer) {
 	        if (arrayBuffer && arrayBuffer.byteLength) {
-	          var uint8 = new Uint8Array(arrayBuffer);
-	          _this.fileSize = uint8.byteLength;
+	          _this.data = new Uint8Array(arrayBuffer);
+	          _this.fileSize = _this.data.byteLength;
+	          _this.loadSize = _this.data.byteLength;
 
-	          _this.wf.emit('fileSize', _this.fileSize);
+	          _this.wf.decoder.decodeAudioData(_this.data);
 
-	          _this.loadSize = uint8.byteLength;
-
-	          _this.wf.emit('downloading', _this.loadSize / _this.fileSize);
-
-	          _this.wf.emit('loading', uint8);
-
-	          _this.wf.emit('loadEnd');
+	          _this.wf.emit('load', {
+	            fileSize: _this.fileSize,
+	            loadSize: _this.loadSize,
+	            data: _this.data
+	          });
 	        }
 
 	        return arrayBuffer;
@@ -1090,13 +1080,14 @@
 
 	    this.wf = wf;
 	    this.playTimer = null;
-	    this.wf.on('load', function () {
+
+	    this.init = function () {
 	      _this.clickInit();
 
 	      _this.resizeInit();
 
 	      _this.playInit();
-	    });
+	    };
 	  }
 
 	  _createClass(Controller, [{
@@ -1271,7 +1262,6 @@
 	      }
 
 	      this.options = optionValidator(_objectSpread(_objectSpread(_objectSpread({}, WFPlayer.default), this.options), options), WFPlayer.scheme);
-	      this.emit('options', this.options);
 	      this.update();
 	      return this;
 	    }
@@ -1280,13 +1270,13 @@
 	    value: function load(target) {
 	      if (target && typeof target.getChannelData === 'function') {
 	        this.decoder.decodeSuccess(target);
-	        this.emit('load');
+	        this.controller.init();
 	        return this;
 	      }
 
 	      if (target && target.buffer) {
 	        this.decoder.decodeAudioData(target);
-	        this.emit('load');
+	        this.controller.init();
 	        return this;
 	      }
 
@@ -1297,7 +1287,7 @@
 
 	      errorHandle(typeof target === 'string' && target.trim(), "The load target is not a string. If you are loading a mediaElement, make sure the mediaElement.src is not empty.");
 	      this.loader.load(target);
-	      this.emit('load');
+	      this.controller.init();
 	      return this;
 	    }
 	  }, {
@@ -1360,7 +1350,7 @@
 	  }, {
 	    key: "version",
 	    get: function get() {
-	      return '2.0.4';
+	      return '2.0.5';
 	    }
 	  }, {
 	    key: "env",

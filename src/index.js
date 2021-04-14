@@ -150,7 +150,6 @@ export default class WFPlayer extends Emitter {
             WFPlayer.scheme,
         );
 
-        this.emit('options', this.options);
         this.update();
         return this;
     }
@@ -158,13 +157,13 @@ export default class WFPlayer extends Emitter {
     load(target) {
         if (target && typeof target.getChannelData === 'function') {
             this.decoder.decodeSuccess(target);
-            this.emit('load');
+            this.controller.init();
             return this;
         }
 
         if (target && target.buffer) {
             this.decoder.decodeAudioData(target);
-            this.emit('load');
+            this.controller.init();
             return this;
         }
 
@@ -179,7 +178,7 @@ export default class WFPlayer extends Emitter {
         );
 
         this.loader.load(target);
-        this.emit('load');
+        this.controller.init();
         return this;
     }
 

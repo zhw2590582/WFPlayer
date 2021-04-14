@@ -15,8 +15,10 @@ export default class Drawer {
 
             this.wf.events.proxy(this.worker, 'message', (event) => {
                 const { type, data } = event.data;
-                if (type === 'RENDER') this.wf.emit('render', data);
-                if (type === 'DRAW') this.ctx.transferFromImageBitmap(data);
+                if (type === 'UPFATE') {
+                    this.wf.emit('update', data.config);
+                    this.ctx.transferFromImageBitmap(data.imageBitmap);
+                }
             });
 
             this.worker.postMessage({
@@ -37,9 +39,9 @@ export default class Drawer {
             });
         }
 
-        wf.on('channelData', ({ channelData, sampleRate }) => {
+        wf.on('decode', ({ channelData, sampleRate }) => {
             this.worker.postMessage({
-                type: 'CHANNE_DATA',
+                type: 'DECODE',
                 data: { channelData, sampleRate },
             });
         });

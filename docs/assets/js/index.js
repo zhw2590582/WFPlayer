@@ -1,75 +1,31 @@
+var $video = document.querySelector('.video');
 var $version = document.querySelector('.version');
 var $open = document.querySelector('.open');
 var $download = document.querySelector('.download');
-var $filesize = document.querySelector('.filesize');
-var $numberOfChannels = document.querySelector('.numberOfChannels');
-var $sampleRate = document.querySelector('.sampleRate');
-var $downloading = document.querySelector('.downloading');
-var $decodeing = document.querySelector('.decodeing');
 var $pickers = Array.from(document.querySelectorAll('.color-picker'));
 var $range = Array.from(document.querySelectorAll('.range input'));
 
 $version.innerHTML = 'Beta ' + WFPlayer.version;
 
-var art = new Artplayer({
-    container: '.artplayer',
-    url: '/sample.mp4',
-    autoSize: true,
-    loop: true,
-    moreVideoAttr: {
-        crossOrigin: 'anonymous',
-    },
-});
-
 var wf = null;
-
 function initWFPlayer() {
+    if (wf) wf.destroy();
     wf = new WFPlayer({
         container: '.waveform',
-        cors: true,
     });
-
-    wf.on('fileSize', function (fileSize) {
-        $filesize.innerHTML = (fileSize / 1024 / 1024).toFixed(3) + ' M';
-    });
-
-    wf.on('downloading', function (value) {
-        $downloading.innerHTML = ((value === Infinity ? 0 : value) * 100).toFixed(3) + ' %';
-    });
-
-    wf.on('decodeing', function (value) {
-        $decodeing.innerHTML = (value * 100 || 0).toFixed(3) + ' %';
-    });
-
-    wf.on('audiobuffer', function (audiobuffer) {
-        $numberOfChannels.innerHTML = audiobuffer.numberOfChannels;
-        $sampleRate.innerHTML = audiobuffer.sampleRate;
-    });
+    wf.load($video);
 }
 
 initWFPlayer();
-art.on('ready', function () {
-    art.seek = 3;
-    wf.seek(3);
-    wf.load(art.template.$video);
-});
-
-art.on('seek', function () {
-    wf.seek(art.currentTime);
-});
 
 $open.addEventListener('change', function () {
     var file = $open.files[0];
     if (file) {
-        var $video = document.createElement('video');
         var canPlayType = $video.canPlayType(file.type);
         if (canPlayType === 'maybe' || canPlayType === 'probably') {
             var url = URL.createObjectURL(file);
-            art.player.switchUrl(url, file.name).then(() => {
-                wf.destroy();
-                initWFPlayer();
-                wf.load(art.template.$video);
-            });
+            $video.src = url;
+            initWFPlayer();
         } else {
             alert('This file format is not supported');
         }

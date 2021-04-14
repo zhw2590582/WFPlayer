@@ -5,11 +5,11 @@ export default class Template {
         this.wf = wf;
         this.canvas = null;
         const { refreshRate } = wf.options;
-        this.update();
-        this.update = throttle(this.update, refreshRate, this);
+        this.update = throttle(this.init, refreshRate, this);
+        this.init();
     }
 
-    update() {
+    init() {
         const { container, pixelRatio } = this.wf.options;
         const { clientWidth, clientHeight } = container;
         const width = clientWidth * pixelRatio;

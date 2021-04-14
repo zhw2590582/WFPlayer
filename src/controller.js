@@ -4,11 +4,11 @@ export default class Controller {
     constructor(wf) {
         this.wf = wf;
         this.playTimer = null;
-        this.wf.on('load', () => {
+        this.init = () => {
             this.clickInit();
             this.resizeInit();
             this.playInit();
-        });
+        };
     }
 
     getTimeFromEvent(event) {

@@ -4,10 +4,6 @@ export default class Decoder {
         this.audioCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 2, 44100);
         this.audiobuffer = this.audioCtx.createBuffer(1, 2, 44100);
         this.channelData = new Float32Array();
-
-        this.wf.on('loading', (uint8) => {
-            this.decodeAudioData(uint8);
-        });
     }
 
     decodeAudioData(uint8) {
@@ -25,21 +21,21 @@ export default class Decoder {
 
     decodeSuccess(audiobuffer) {
         this.audiobuffer = audiobuffer;
-        this.wf.emit('audiobuffer', this.audiobuffer);
-        this.wf.emit('decodeing', this.audiobuffer.duration / this.wf.duration);
         this.channelData = audiobuffer.getChannelData(this.wf.options.channel);
-        this.wf.emit('channelData', {
+        this.wf.emit('decode', {
             channelData: this.channelData,
             sampleRate: this.audiobuffer.sampleRate,
+            duration: this.audiobuffer.duration,
         });
         this.wf.update();
     }
 
     changeChannel(channel) {
         this.channelData = this.audiobuffer.getChannelData(channel) || new Float32Array();
-        this.wf.emit('channelData', {
+        this.wf.emit('decode', {
             channelData: this.channelData,
             sampleRate: this.audiobuffer.sampleRate,
+            duration: this.audiobuffer.duration,
         });
         this.wf.update();
     }

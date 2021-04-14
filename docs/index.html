@@ -38,30 +38,6 @@
         </header>
         <section class="main">
             <div class="left">
-                <div class="item infos">
-                    <div class="info">
-                        <div class="name">File Size :</div>
-                        <div class="controller filesize">0 M</div>
-                    </div>
-                    <div class="info">
-                        <div class="name">Number Of Channels :</div>
-                        <div class="controller numberOfChannels">0</div>
-                    </div>
-                    <div class="info">
-                        <div class="name">Sample Rate :</div>
-                        <div class="controller sampleRate">0</div>
-                    </div>
-                </div>
-                <div class="item infos">
-                    <div class="info">
-                        <div class="name">Downloading :</div>
-                        <div class="controller downloading">0 %</div>
-                    </div>
-                    <div class="info">
-                        <div class="name">Decodeing :</div>
-                        <div class="controller decodeing">0 %</div>
-                    </div>
-                </div>
                 <div class="item">
                     <div class="name">Wave Color :</div>
                     <div class="controller">
@@ -127,13 +103,12 @@
                 </div>
             </div>
             <div class="right">
-                <div class="artplayer"></div>
+                <video class="video" src="/sample.mp4" controls height="360"></video>
             </div>
         </section>
         <footer class="waveform"></footer>
     </div>
     <script src="./uncompiled/wfplayer.js"></script>
-    <script src="./assets/js/artplayer.js"></script>
     <script src="./assets/js/pickr.js"></script>
     <script src="./assets/js/powerange.js"></script>
     <script src="./assets/js/index.js"></script>

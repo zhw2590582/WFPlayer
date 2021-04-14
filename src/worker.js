@@ -154,16 +154,16 @@ self.onmessage = function onmessage(event) {
         ctx = canvas.getContext('2d');
     }
 
-    if (type === 'CHANNE_DATA') {
+    if (type === 'DECODE') {
         sampleRate = data.sampleRate;
         channelData = data.channelData;
     }
 
     if (type === 'UPDATE') {
         const {
-            currentTime,
             width,
             height,
+            currentTime,
             options: { cursor, grid, ruler, wave, duration, padding },
         } = data;
 
@@ -215,16 +215,14 @@ self.onmessage = function onmessage(event) {
 
         if (isWorker) {
             self.postMessage({
-                type: 'RENDER',
-                data: config,
-            });
-
-            self.postMessage({
-                type: 'DRAW',
-                data: canvas.transferToImageBitmap(),
+                type: 'UPFATE',
+                data: {
+                    config,
+                    imageBitmap: canvas.transferToImageBitmap(),
+                },
             });
         } else {
-            wf.emit('render', config);
+            wf.emit('update', config);
         }
     }
 };
