@@ -1350,7 +1350,7 @@
 	  }, {
 	    key: "version",
 	    get: function get() {
-	      return '2.0.5';
+	      return '2.0.6';
 	    }
 	  }, {
 	    key: "env",
