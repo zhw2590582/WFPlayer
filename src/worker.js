@@ -78,15 +78,13 @@ function drawRuler(data) {
         if (index && index >= padding && index <= gridNum + 10 && (index - padding) % 10 === 0) {
             second += 1;
             ctx.fillRect(x, rulerAtTop ? 0 : height - fontHeight * pixelRatio, pixelRatio, fontHeight * pixelRatio);
-            if ((index - padding) % (density * 10) === 0) {
-                const time = beginTime + second;
-                if (time >= 0) {
-                    ctx.fillText(
-                        secondToTime(time),
-                        x - fontSize * pixelRatio * 2 + pixelRatio,
-                        rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize,
-                    );
-                }
+            const time = beginTime + second;
+            if ((index - padding) % (density * 10) === 0 && time > 0) {
+                ctx.fillText(
+                    secondToTime(time),
+                    x - fontSize * pixelRatio * 2 + pixelRatio,
+                    rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize,
+                );
             }
         } else if (index && (index - padding) % 5 === 0) {
             ctx.fillRect(
