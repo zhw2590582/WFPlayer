@@ -11,6 +11,7 @@ var wf = null;
 function initWFPlayer() {
     if (wf) wf.destroy();
     wf = new WFPlayer({
+        scrollable: true,
         container: '.waveform',
     });
     wf.load($video);

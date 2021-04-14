@@ -632,16 +632,22 @@
 	  }
 
 	  function drawGrid(data) {
+	    var currentTime = data.currentTime;
 	    var _data$options2 = data.options,
 	        gridColor = _data$options2.gridColor,
-	        pixelRatio = _data$options2.pixelRatio;
+	        pixelRatio = _data$options2.pixelRatio,
+	        scrollable = _data$options2.scrollable;
 	    var _canvas2 = canvas,
 	        width = _canvas2.width,
 	        height = _canvas2.height;
 	    ctx.fillStyle = gridColor;
 
 	    for (var index = 0; index < gridNum; index += density) {
-	      ctx.fillRect(gridGap * index, 0, pixelRatio, height);
+	      if (scrollable) {
+	        ctx.fillRect(gridGap * index - (currentTime - parseInt(currentTime, 10)) * gridGap * 10, 0, pixelRatio, height);
+	      } else {
+	        ctx.fillRect(gridGap * index, 0, pixelRatio, height);
+	      }
 	    }
 
 	    for (var _index = 0; _index < height / gridGap; _index += density) {
@@ -650,11 +656,13 @@
 	  }
 
 	  function drawRuler(data) {
+	    var currentTime = data.currentTime;
 	    var _data$options3 = data.options,
 	        rulerColor = _data$options3.rulerColor,
 	        pixelRatio = _data$options3.pixelRatio,
 	        padding = _data$options3.padding,
-	        rulerAtTop = _data$options3.rulerAtTop;
+	        rulerAtTop = _data$options3.rulerAtTop,
+	        scrollable = _data$options3.scrollable;
 	    var _canvas3 = canvas,
 	        height = _canvas3.height;
 	    var fontSize = 11;
@@ -667,13 +675,32 @@
 	    for (var index = 0; index < gridNum; index += 1) {
 	      if (index && index >= padding && index <= gridNum - padding && (index - padding) % 10 === 0) {
 	        second += 1;
-	        ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - fontHeight * pixelRatio, pixelRatio, fontHeight * pixelRatio);
+
+	        if (scrollable) {
+	          ctx.fillRect(gridGap * index - (currentTime - parseInt(currentTime, 10)) * gridGap * 10, rulerAtTop ? 0 : height - fontHeight * pixelRatio, pixelRatio, fontHeight * pixelRatio);
+	        } else {
+	          ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - fontHeight * pixelRatio, pixelRatio, fontHeight * pixelRatio);
+	        }
 
 	        if ((index - padding) % (density * 10) === 0) {
-	          ctx.fillText(secondToTime(beginTime + second), gridGap * index - fontSize * pixelRatio * 2 + pixelRatio, rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize);
+	          if (scrollable) {
+	            var time = beginTime + second;
+
+	            if (time >= 0) {
+	              var text = secondToTime(time).split('.')[0];
+	              var x = gridGap * index - (currentTime - parseInt(currentTime, 10)) * gridGap * 10 - fontSize * pixelRatio * 2 + pixelRatio;
+	              ctx.fillText(text, x, rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize);
+	            }
+	          } else {
+	            ctx.fillText(secondToTime(beginTime + second), gridGap * index - fontSize * pixelRatio * 2 + pixelRatio, rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize);
+	          }
 	        }
 	      } else if (index && (index - padding) % 5 === 0) {
-	        ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - fontHeight / 2 * pixelRatio, pixelRatio, fontHeight / 2 * pixelRatio);
+	        if (scrollable) {
+	          ctx.fillRect(gridGap * index - (currentTime - parseInt(currentTime, 10)) * gridGap * 10, rulerAtTop ? 0 : height - fontHeight / 2 * pixelRatio, pixelRatio, fontHeight / 2 * pixelRatio);
+	        } else {
+	          ctx.fillRect(gridGap * index, rulerAtTop ? 0 : height - fontHeight / 2 * pixelRatio, pixelRatio, fontHeight / 2 * pixelRatio);
+	        }
 	      }
 	    }
 	  }
@@ -686,16 +713,17 @@
 	        progressColor = _data$options4.progressColor,
 	        duration = _data$options4.duration,
 	        padding = _data$options4.padding,
-	        waveScale = _data$options4.waveScale;
+	        waveScale = _data$options4.waveScale,
+	        scrollable = _data$options4.scrollable;
 	    var _canvas4 = canvas,
 	        width = _canvas4.width,
 	        height = _canvas4.height;
 	    var middle = height / 2;
 	    var waveWidth = width - gridGap * padding * 2;
-	    var startIndex = clamp(beginTime * sampleRate, 0, Infinity);
-	    var endIndex = clamp((beginTime + duration) * sampleRate, startIndex, Infinity);
+	    var startIndex = Math.floor(beginTime * sampleRate);
+	    var endIndex = Math.floor(clamp((beginTime + duration) * sampleRate, startIndex, Infinity));
 	    var step = Math.floor((endIndex - startIndex) / waveWidth);
-	    var cursorX = padding * gridGap + (currentTime - beginTime) * gridGap * 10;
+	    var cursorX = scrollable ? Math.floor(width / 2) : padding * gridGap + (currentTime - beginTime) * gridGap * 10;
 	    var stepIndex = 0;
 	    var xIndex = 0;
 	    var min = 1;
@@ -728,12 +756,19 @@
 	        _data$options5 = data.options,
 	        cursorColor = _data$options5.cursorColor,
 	        pixelRatio = _data$options5.pixelRatio,
-	        padding = _data$options5.padding;
+	        padding = _data$options5.padding,
+	        scrollable = _data$options5.scrollable;
 	    var _canvas5 = canvas,
-	        height = _canvas5.height;
+	        height = _canvas5.height,
+	        width = _canvas5.width;
 	    ctx.fillStyle = cursorColor;
-	    var x = padding * gridGap + (currentTime - beginTime) * gridGap * 10;
-	    ctx.fillRect(x, 0, pixelRatio, height);
+
+	    if (scrollable) {
+	      ctx.fillRect(width / 2, 0, pixelRatio, height);
+	    } else {
+	      var x = padding * gridGap + (currentTime - beginTime) * gridGap * 10;
+	      ctx.fillRect(x, 0, pixelRatio, height);
+	    }
 	  }
 
 	  self.onmessage = function onmessage(event) {
@@ -767,7 +802,8 @@
 	          ruler = _data$options6.ruler,
 	          wave = _data$options6.wave,
 	          duration = _data$options6.duration,
-	          padding = _data$options6.padding;
+	          padding = _data$options6.padding,
+	          scrollable = _data$options6.scrollable;
 
 	      if (canvas.width !== width) {
 	        canvas.width = width;
@@ -779,7 +815,7 @@
 
 	      gridNum = duration * 10 + padding * 2;
 	      gridGap = width / gridNum;
-	      beginTime = Math.floor(currentTime / duration) * duration;
+	      beginTime = scrollable ? currentTime - duration / 2 : Math.floor(currentTime / duration) * duration;
 	      density = getDensity(data);
 	      drawBackground(data);
 
@@ -853,7 +889,7 @@
 	    this.update = throttle(this.update, refreshRate, this);
 
 	    if (useWorker && window.OffscreenCanvas && window.Worker) {
-	      this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";var isWorker=self.document===void 0,wf=null,canvas=null,ctx=null,gridNum=0,gridGap=0,beginTime=0,density=1,sampleRate=44100,channelData=new Float32Array;function secondToTime(a){var b=Math.floor(a/3600),c=Math.floor((a-3600*b)/60),d=Math.floor(a-3600*b-60*c);return[b,c,d].map(function add0(a){return 10>a?\"0\".concat(a):a+\"\"}).join(\":\")}function clamp(c,d,a){return Math.max(Math.min(c,Math.max(d,a)),Math.min(d,a))}function getDensity(a){var b=a.options.pixelRatio;ctx.font=\"\".concat(11*b,\"px Arial\");var c=ctx.measureText(\"99:99:99\").width;return function a(b){var d=gridGap*b/(1.5*c);return 1<d?Math.floor(b/10):a(b+10)}(10)}function drawBackground(a){var b=a.options,c=b.backgroundColor,d=b.paddingColor,e=b.padding,f=canvas,g=f.width,h=f.height;ctx.clearRect(0,0,g,h),ctx.fillStyle=c,ctx.fillRect(0,0,g,h),ctx.fillStyle=d,ctx.fillRect(0,0,e*gridGap,h),ctx.fillRect(g-e*gridGap,0,e*gridGap,h)}function drawGrid(a){var b=a.options,c=b.gridColor,d=b.pixelRatio,e=canvas,f=e.width,g=e.height;ctx.fillStyle=c;for(var h=0;h<gridNum;h+=density)ctx.fillRect(gridGap*h,0,d,g);for(var i=0;i<g/gridGap;i+=density)ctx.fillRect(0,gridGap*i,f,d)}function drawRuler(a){var b=a.options,c=b.rulerColor,d=b.pixelRatio,e=b.padding,f=b.rulerAtTop,g=canvas,h=g.height,i=11,j=15,k=30;ctx.font=\"\".concat(i*d,\"px Arial\"),ctx.fillStyle=c;for(var l=-1,m=0;m<gridNum;m+=1)m&&m>=e&&m<=gridNum-e&&0==(m-e)%10?(l+=1,ctx.fillRect(gridGap*m,f?0:h-j*d,d,j*d),0==(m-e)%(10*density)&&ctx.fillText(secondToTime(beginTime+l),gridGap*m-2*(i*d)+d,f?k*d:h-k*d+i)):m&&0==(m-e)%5&&ctx.fillRect(gridGap*m,f?0:h-j/2*d,d,j/2*d)}function drawWave(a){for(var b=a.currentTime,c=a.options,d=c.progress,e=c.waveColor,f=c.progressColor,g=c.duration,h=c.padding,j=c.waveScale,k=canvas,l=k.width,m=k.height,n=m/2,o=l-2*(gridGap*h),p=clamp(beginTime*sampleRate,0,1/0),q=clamp((beginTime+g)*sampleRate,p,1/0),r=Math.floor((q-p)/o),s=h*gridGap+10*((b-beginTime)*gridGap),t=0,u=0,v=1,w=-1,x=p;x<q;x+=1){t+=1;var y=channelData[x]||0;if(y<v?v=y:y>w&&(w=y),t>=r&&u<o){u+=1;var z=gridGap*h+u;ctx.fillStyle=d&&s>=z?f:e,ctx.fillRect(z,(1+v*j)*n,1,Math.max(1,(w-v)*n*j)),t=0,v=1,w=-1}}}function drawCursor(a){var b=a.currentTime,c=a.options,d=c.cursorColor,e=c.pixelRatio,f=c.padding,g=canvas,h=g.height;ctx.fillStyle=d;var i=f*gridGap+10*((b-beginTime)*gridGap);ctx.fillRect(i,0,e,h)}self.onmessage=function(a){var b=a.data,c=b.type,d=b.data;if(\"INIT\"===c&&(isWorker?canvas=new OffscreenCanvas(d.width,d.height):(wf=d.wf,canvas=d.canvas),ctx=canvas.getContext(\"2d\")),\"DECODE\"===c&&(sampleRate=d.sampleRate,channelData=d.channelData),\"UPDATE\"===c){var e=d.width,f=d.height,g=d.currentTime,h=d.options,i=h.cursor,j=h.grid,k=h.ruler,l=h.wave,m=h.duration,n=h.padding;canvas.width!==e&&(canvas.width=e),canvas.height!==f&&(canvas.height=f),gridNum=10*m+2*n,gridGap=e/gridNum,beginTime=Math.floor(g/m)*m,density=getDensity(d),drawBackground(d),j&&drawGrid(d),k&&drawRuler(d),l&&drawWave(d),i&&drawCursor(d);var o=channelData,p=o.byteLength,q={padding:n,duration:m,gridGap:gridGap,gridNum:gridNum,beginTime:beginTime,currentTime:g,density:density,width:e,height:f,sampleRate:sampleRate,byteLength:p};isWorker?self.postMessage({type:\"UPFATE\",data:{config:q,imageBitmap:canvas.transferToImageBitmap()}}):wf.emit(\"update\",q)}},\"undefined\"==typeof exports||isWorker||(exports.postMessage=function(a){self.onmessage({data:a})});"])));
+	      this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";var isWorker=self.document===void 0,wf=null,canvas=null,ctx=null,gridNum=0,gridGap=0,beginTime=0,density=1,sampleRate=44100,channelData=new Float32Array;function secondToTime(a){var b=Math.floor(a/3600),c=Math.floor((a-3600*b)/60),d=Math.floor(a-3600*b-60*c);return[b,c,d].map(function add0(a){return 10>a?\"0\".concat(a):a+\"\"}).join(\":\")}function clamp(c,d,a){return Math.max(Math.min(c,Math.max(d,a)),Math.min(d,a))}function getDensity(a){var b=a.options.pixelRatio;ctx.font=\"\".concat(11*b,\"px Arial\");var c=ctx.measureText(\"99:99:99\").width;return function a(b){var d=gridGap*b/(1.5*c);return 1<d?Math.floor(b/10):a(b+10)}(10)}function drawBackground(a){var b=a.options,c=b.backgroundColor,d=b.paddingColor,e=b.padding,f=canvas,g=f.width,h=f.height;ctx.clearRect(0,0,g,h),ctx.fillStyle=c,ctx.fillRect(0,0,g,h),ctx.fillStyle=d,ctx.fillRect(0,0,e*gridGap,h),ctx.fillRect(g-e*gridGap,0,e*gridGap,h)}function drawGrid(a){var b=a.currentTime,c=a.options,d=c.gridColor,e=c.pixelRatio,f=c.scrollable,g=canvas,h=g.width,i=g.height;ctx.fillStyle=d;for(var j=0;j<gridNum;j+=density)f?ctx.fillRect(gridGap*j-10*((b-parseInt(b,10))*gridGap),0,e,i):ctx.fillRect(gridGap*j,0,e,i);for(var k=0;k<i/gridGap;k+=density)ctx.fillRect(0,gridGap*k,h,e)}function drawRuler(a){var b=a.currentTime,c=a.options,d=c.rulerColor,e=c.pixelRatio,f=c.padding,g=c.rulerAtTop,h=c.scrollable,i=canvas,j=i.height,k=11,l=15,m=30;ctx.font=\"\".concat(k*e,\"px Arial\"),ctx.fillStyle=d;for(var n=-1,o=0;o<gridNum;o+=1)if(!(o&&o>=f&&o<=gridNum-f&&0==(o-f)%10))o&&0==(o-f)%5&&(h?ctx.fillRect(gridGap*o-10*((b-parseInt(b,10))*gridGap),g?0:j-l/2*e,e,l/2*e):ctx.fillRect(gridGap*o,g?0:j-l/2*e,e,l/2*e));else if(n+=1,h?ctx.fillRect(gridGap*o-10*((b-parseInt(b,10))*gridGap),g?0:j-l*e,e,l*e):ctx.fillRect(gridGap*o,g?0:j-l*e,e,l*e),0==(o-f)%(10*density))if(h){var r=beginTime+n;if(0<=r){var p=secondToTime(r).split(\".\")[0],q=gridGap*o-10*((b-parseInt(b,10))*gridGap)-2*(k*e)+e;ctx.fillText(p,q,g?m*e:j-m*e+k)}}else ctx.fillText(secondToTime(beginTime+n),gridGap*o-2*(k*e)+e,g?m*e:j-m*e+k)}function drawWave(a){for(var b=a.currentTime,c=a.options,d=c.progress,e=c.waveColor,f=c.progressColor,g=c.duration,h=c.padding,j=c.waveScale,k=c.scrollable,l=canvas,m=l.width,n=l.height,o=n/2,p=m-2*(gridGap*h),q=Math.floor(beginTime*sampleRate),r=Math.floor(clamp((beginTime+g)*sampleRate,q,1/0)),s=Math.floor((r-q)/p),t=k?Math.floor(m/2):h*gridGap+10*((b-beginTime)*gridGap),u=0,v=0,w=1,x=-1,y=q;y<r;y+=1){u+=1;var z=channelData[y]||0;if(z<w?w=z:z>x&&(x=z),u>=s&&v<p){v+=1;var A=gridGap*h+v;ctx.fillStyle=d&&t>=A?f:e,ctx.fillRect(A,(1+w*j)*o,1,Math.max(1,(x-w)*o*j)),u=0,w=1,x=-1}}}function drawCursor(a){var b=a.currentTime,c=a.options,d=c.cursorColor,e=c.pixelRatio,f=c.padding,g=c.scrollable,h=canvas,i=h.height,j=h.width;if(ctx.fillStyle=d,g)ctx.fillRect(j/2,0,e,i);else{var k=f*gridGap+10*((b-beginTime)*gridGap);ctx.fillRect(k,0,e,i)}}self.onmessage=function(a){var b=a.data,c=b.type,d=b.data;if(\"INIT\"===c&&(isWorker?canvas=new OffscreenCanvas(d.width,d.height):(wf=d.wf,canvas=d.canvas),ctx=canvas.getContext(\"2d\")),\"DECODE\"===c&&(sampleRate=d.sampleRate,channelData=d.channelData),\"UPDATE\"===c){var e=d.width,f=d.height,g=d.currentTime,h=d.options,i=h.cursor,j=h.grid,k=h.ruler,l=h.wave,m=h.duration,n=h.padding,o=h.scrollable;canvas.width!==e&&(canvas.width=e),canvas.height!==f&&(canvas.height=f),gridNum=10*m+2*n,gridGap=e/gridNum,beginTime=o?g-m/2:Math.floor(g/m)*m,density=getDensity(d),drawBackground(d),j&&drawGrid(d),k&&drawRuler(d),l&&drawWave(d),i&&drawCursor(d);var p=channelData,q=p.byteLength,r={padding:n,duration:m,gridGap:gridGap,gridNum:gridNum,beginTime:beginTime,currentTime:g,density:density,width:e,height:f,sampleRate:sampleRate,byteLength:q};isWorker?self.postMessage({type:\"UPFATE\",data:{config:r,imageBitmap:canvas.transferToImageBitmap()}}):wf.emit(\"update\",r)}},\"undefined\"==typeof exports||isWorker||(exports.postMessage=function(a){self.onmessage({data:a})});"])));
 	      this.ctx = this.canvas.getContext('bitmaprenderer');
 	      this.wf.events.proxy(this.worker, 'message', function (event) {
 	        var _event$data = event.data,
@@ -1377,6 +1413,7 @@
 	        ruler: true,
 	        rulerColor: 'rgba(255, 255, 255, 0.5)',
 	        rulerAtTop: true,
+	        scrollable: false,
 	        refreshRate: 50,
 	        channel: 0,
 	        duration: 10,
@@ -1414,7 +1451,8 @@
 	        ruler: 'boolean',
 	        rulerColor: 'string',
 	        rulerAtTop: 'boolean',
-	        refreshRate: checkNum('channel', 16, 1000, true),
+	        scrollable: 'boolean',
+	        refreshRate: checkNum('refreshRate', 16, 1000, true),
 	        channel: checkNum('channel', 0, 5, true),
 	        duration: checkNum('duration', 1, 100, true),
 	        padding: checkNum('padding', 1, 100, true),

@@ -46,11 +46,21 @@ function drawBackground(data) {
 }
 
 function drawGrid(data) {
-    const { gridColor, pixelRatio } = data.options;
+    const { currentTime } = data;
+    const { gridColor, pixelRatio, scrollable } = data.options;
     const { width, height } = canvas;
     ctx.fillStyle = gridColor;
     for (let index = 0; index < gridNum; index += density) {
-        ctx.fillRect(gridGap * index, 0, pixelRatio, height);
+        if (scrollable) {
+            ctx.fillRect(
+                gridGap * index - (currentTime - parseInt(currentTime, 10)) * gridGap * 10,
+                0,
+                pixelRatio,
+                height,
+            );
+        } else {
+            ctx.fillRect(gridGap * index, 0, pixelRatio, height);
+        }
     }
     for (let index = 0; index < height / gridGap; index += density) {
         ctx.fillRect(0, gridGap * index, width, pixelRatio);
@@ -58,7 +68,8 @@ function drawGrid(data) {
 }
 
 function drawRuler(data) {
-    const { rulerColor, pixelRatio, padding, rulerAtTop } = data.options;
+    const { currentTime } = data;
+    const { rulerColor, pixelRatio, padding, rulerAtTop, scrollable } = data.options;
     const { height } = canvas;
     const fontSize = 11;
     const fontHeight = 15;
@@ -69,26 +80,62 @@ function drawRuler(data) {
     for (let index = 0; index < gridNum; index += 1) {
         if (index && index >= padding && index <= gridNum - padding && (index - padding) % 10 === 0) {
             second += 1;
-            ctx.fillRect(
-                gridGap * index,
-                rulerAtTop ? 0 : height - fontHeight * pixelRatio,
-                pixelRatio,
-                fontHeight * pixelRatio,
-            );
-            if ((index - padding) % (density * 10) === 0) {
-                ctx.fillText(
-                    secondToTime(beginTime + second),
-                    gridGap * index - fontSize * pixelRatio * 2 + pixelRatio,
-                    rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize,
+            if (scrollable) {
+                ctx.fillRect(
+                    gridGap * index - (currentTime - parseInt(currentTime, 10)) * gridGap * 10,
+                    rulerAtTop ? 0 : height - fontHeight * pixelRatio,
+                    pixelRatio,
+                    fontHeight * pixelRatio,
+                );
+            } else {
+                ctx.fillRect(
+                    gridGap * index,
+                    rulerAtTop ? 0 : height - fontHeight * pixelRatio,
+                    pixelRatio,
+                    fontHeight * pixelRatio,
                 );
             }
+
+            if ((index - padding) % (density * 10) === 0) {
+                if (scrollable) {
+                    const time = beginTime + second;
+                    if (time >= 0) {
+                        const text = secondToTime(time).split('.')[0];
+                        const x =
+                            gridGap * index -
+                            (currentTime - parseInt(currentTime, 10)) * gridGap * 10 -
+                            fontSize * pixelRatio * 2 +
+                            pixelRatio;
+                        ctx.fillText(
+                            text,
+                            x,
+                            rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize,
+                        );
+                    }
+                } else {
+                    ctx.fillText(
+                        secondToTime(beginTime + second),
+                        gridGap * index - fontSize * pixelRatio * 2 + pixelRatio,
+                        rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize,
+                    );
+                }
+            }
         } else if (index && (index - padding) % 5 === 0) {
-            ctx.fillRect(
-                gridGap * index,
-                rulerAtTop ? 0 : height - (fontHeight / 2) * pixelRatio,
-                pixelRatio,
-                (fontHeight / 2) * pixelRatio,
-            );
+            if (scrollable) {
+                ctx.fillRect(
+                    gridGap * index - (currentTime - parseInt(currentTime, 10)) * gridGap * 10,
+                    rulerAtTop ? 0 : height - (fontHeight / 2) * pixelRatio,
+                    pixelRatio,
+                    (fontHeight / 2) * pixelRatio,
+                );
+            } else {
+                ctx.fillRect(
+                    gridGap * index,
+                    rulerAtTop ? 0 : height - (fontHeight / 2) * pixelRatio,
+                    pixelRatio,
+                    (fontHeight / 2) * pixelRatio,
+                );
+            }
         }
     }
 }
@@ -96,15 +143,15 @@ function drawRuler(data) {
 function drawWave(data) {
     const {
         currentTime,
-        options: { progress, waveColor, progressColor, duration, padding, waveScale },
+        options: { progress, waveColor, progressColor, duration, padding, waveScale, scrollable },
     } = data;
     const { width, height } = canvas;
     const middle = height / 2;
     const waveWidth = width - gridGap * padding * 2;
-    const startIndex = clamp(beginTime * sampleRate, 0, Infinity);
-    const endIndex = clamp((beginTime + duration) * sampleRate, startIndex, Infinity);
+    const startIndex = Math.floor(beginTime * sampleRate);
+    const endIndex = Math.floor(clamp((beginTime + duration) * sampleRate, startIndex, Infinity));
     const step = Math.floor((endIndex - startIndex) / waveWidth);
-    const cursorX = padding * gridGap + (currentTime - beginTime) * gridGap * 10;
+    const cursorX = scrollable ? Math.floor(width / 2) : padding * gridGap + (currentTime - beginTime) * gridGap * 10;
 
     let stepIndex = 0;
     let xIndex = 0;
@@ -133,12 +180,16 @@ function drawWave(data) {
 function drawCursor(data) {
     const {
         currentTime,
-        options: { cursorColor, pixelRatio, padding },
+        options: { cursorColor, pixelRatio, padding, scrollable },
     } = data;
-    const { height } = canvas;
+    const { height, width } = canvas;
     ctx.fillStyle = cursorColor;
-    const x = padding * gridGap + (currentTime - beginTime) * gridGap * 10;
-    ctx.fillRect(x, 0, pixelRatio, height);
+    if (scrollable) {
+        ctx.fillRect(width / 2, 0, pixelRatio, height);
+    } else {
+        const x = padding * gridGap + (currentTime - beginTime) * gridGap * 10;
+        ctx.fillRect(x, 0, pixelRatio, height);
+    }
 }
 
 self.onmessage = function onmessage(event) {
@@ -164,7 +215,7 @@ self.onmessage = function onmessage(event) {
             width,
             height,
             currentTime,
-            options: { cursor, grid, ruler, wave, duration, padding },
+            options: { cursor, grid, ruler, wave, duration, padding, scrollable },
         } = data;
 
         if (canvas.width !== width) {
@@ -177,7 +228,7 @@ self.onmessage = function onmessage(event) {
 
         gridNum = duration * 10 + padding * 2;
         gridGap = width / gridNum;
-        beginTime = Math.floor(currentTime / duration) * duration;
+        beginTime = scrollable ? currentTime - duration / 2 : Math.floor(currentTime / duration) * duration;
         density = getDensity(data);
 
         drawBackground(data);
