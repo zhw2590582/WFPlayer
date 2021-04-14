@@ -75,18 +75,18 @@ function drawRuler(data) {
         const x = scrollable
             ? gridGap * index - (currentTime - parseInt(currentTime, 10)) * gridGap * 10
             : gridGap * index;
-        if (index && index >= padding && index <= gridNum + 10 && (index - padding) % 10 === 0) {
+        if ((index - padding) % 10 === 0) {
             second += 1;
             ctx.fillRect(x, rulerAtTop ? 0 : height - fontHeight * pixelRatio, pixelRatio, fontHeight * pixelRatio);
-            const time = beginTime + second;
-            if ((index - padding) % (density * 10) === 0 && time >= 0) {
+            const time = Math.floor(beginTime + second);
+            if (time % density === 0 && time >= 0) {
                 ctx.fillText(
                     secondToTime(time),
                     x - fontSize * pixelRatio * 2 + pixelRatio,
                     rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize,
                 );
             }
-        } else if (index && (index - padding) % 5 === 0) {
+        } else if ((index - padding) % 5 === 0) {
             ctx.fillRect(
                 x,
                 rulerAtTop ? 0 : height - (fontHeight / 2) * pixelRatio,
