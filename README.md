@@ -1,6 +1,5 @@
 # WFPlayer
 
-[![Build Status](https://www.travis-ci.org/zhw2590582/WFPlayer.svg?branch=master)](https://www.travis-ci.org/zhw2590582/WFPlayer)
 ![version](https://badgen.net/npm/v/wfplayer)
 ![license](https://badgen.net/npm/license/wfplayer)
 ![size](https://badgen.net/bundlephobia/minzip/wfplayer)

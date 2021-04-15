@@ -2,6 +2,7 @@ var $video = document.querySelector('.video');
 var $version = document.querySelector('.version');
 var $open = document.querySelector('.open');
 var $download = document.querySelector('.download');
+var $scrollable = document.querySelector('.scrollable');
 var $pickers = Array.from(document.querySelectorAll('.color-picker'));
 var $range = Array.from(document.querySelectorAll('.range input'));
 
@@ -12,6 +13,7 @@ function initWFPlayer() {
     if (wf) wf.destroy();
     wf = new WFPlayer({
         container: '.waveform',
+        scrollable: $scrollable.checked,
     });
     wf.load($video);
 }
@@ -34,6 +36,12 @@ $open.addEventListener('change', function () {
 
 $download.addEventListener('click', function () {
     wf.exportImage();
+});
+
+$scrollable.addEventListener('change', function () {
+    wf.setOptions({
+        scrollable: $scrollable.checked,
+    });
 });
 
 $pickers.forEach(function ($el) {
