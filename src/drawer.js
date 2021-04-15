@@ -56,7 +56,7 @@ export default class Drawer {
 
         this.worker.postMessage({
             type: 'UPDATE',
-            data: { options, currentTime, width, height },
+            data: { ...options, currentTime, width, height },
         });
     }
 

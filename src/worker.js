@@ -23,7 +23,7 @@ function clamp(num, a, b) {
 }
 
 function getDensity(data) {
-    const { pixelRatio } = data.options;
+    const { pixelRatio } = data;
     const fontSize = 11;
     ctx.font = `${fontSize * pixelRatio}px Arial`;
     const rulerWidth = ctx.measureText('99:99:99').width;
@@ -35,8 +35,7 @@ function getDensity(data) {
 }
 
 function drawBackground(data) {
-    const { backgroundColor, paddingColor, padding } = data.options;
-    const { width, height } = canvas;
+    const { width, height, backgroundColor, paddingColor, padding } = data;
     ctx.clearRect(0, 0, width, height);
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, width, height);
@@ -46,9 +45,7 @@ function drawBackground(data) {
 }
 
 function drawGrid(data) {
-    const { currentTime } = data;
-    const { gridColor, pixelRatio, scrollable } = data.options;
-    const { width, height } = canvas;
+    const { width, height, currentTime, gridColor, pixelRatio, scrollable } = data;
     ctx.fillStyle = gridColor;
     for (let index = 0; index < gridNum + 10; index += density) {
         const x = scrollable
@@ -62,9 +59,7 @@ function drawGrid(data) {
 }
 
 function drawRuler(data) {
-    const { currentTime } = data;
-    const { rulerColor, pixelRatio, padding, rulerAtTop, scrollable } = data.options;
-    const { height } = canvas;
+    const { height, currentTime, rulerColor, pixelRatio, padding, rulerAtTop, scrollable } = data;
     const fontSize = 11;
     const fontHeight = 15;
     const fontTop = 30;
@@ -99,10 +94,17 @@ function drawRuler(data) {
 
 function drawWave(data) {
     const {
+        width,
+        height,
         currentTime,
-        options: { progress, waveColor, progressColor, duration, padding, waveScale, scrollable },
+        progress,
+        waveColor,
+        progressColor,
+        duration,
+        padding,
+        waveScale,
+        scrollable,
     } = data;
-    const { width, height } = canvas;
     const middle = height / 2;
     const waveWidth = width - gridGap * padding * 2;
     const startIndex = Math.floor(beginTime * sampleRate);
@@ -134,11 +136,7 @@ function drawWave(data) {
 }
 
 function drawCursor(data) {
-    const {
-        currentTime,
-        options: { cursorColor, pixelRatio, padding, scrollable },
-    } = data;
-    const { height, width } = canvas;
+    const { height, width, currentTime, cursorColor, pixelRatio, padding, scrollable } = data;
     ctx.fillStyle = cursorColor;
     const x = scrollable ? width / 2 : padding * gridGap + (currentTime - beginTime) * gridGap * 10;
     ctx.fillRect(x, 0, pixelRatio, height);
@@ -163,12 +161,7 @@ self.onmessage = function onmessage(event) {
     }
 
     if (type === 'UPDATE') {
-        const {
-            width,
-            height,
-            currentTime,
-            options: { cursor, grid, ruler, wave, duration, padding, scrollable },
-        } = data;
+        const { width, height, currentTime, cursor, grid, ruler, wave, duration, padding, scrollable } = data;
 
         if (canvas.width !== width) {
             canvas.width = width;
@@ -203,16 +196,13 @@ self.onmessage = function onmessage(event) {
 
         const { byteLength } = channelData;
         const config = {
-            width,
-            height,
-            currentTime,
             gridNum,
             gridGap,
             beginTime,
             density,
             sampleRate,
             byteLength,
-            ...data.options,
+            ...data,
         };
 
         if (isWorker) {

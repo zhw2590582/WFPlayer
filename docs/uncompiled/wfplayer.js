@@ -576,6 +576,9 @@
 
 	var _objectWithoutProperties = unwrapExports(objectWithoutProperties);
 
+	function ownKeys$2(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+	function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$2(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$2(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 	var worker = createCommonjsModule(function (module, exports) {
 	  var isWorker = self.document === undefined;
 	  var wf = null;
@@ -604,7 +607,7 @@
 	  }
 
 	  function getDensity(data) {
-	    var pixelRatio = data.options.pixelRatio;
+	    var pixelRatio = data.pixelRatio;
 	    var fontSize = 11;
 	    ctx.font = "".concat(fontSize * pixelRatio, "px Arial");
 	    var rulerWidth = ctx.measureText('99:99:99').width;
@@ -616,13 +619,11 @@
 	  }
 
 	  function drawBackground(data) {
-	    var _data$options = data.options,
-	        backgroundColor = _data$options.backgroundColor,
-	        paddingColor = _data$options.paddingColor,
-	        padding = _data$options.padding;
-	    var _canvas = canvas,
-	        width = _canvas.width,
-	        height = _canvas.height;
+	    var width = data.width,
+	        height = data.height,
+	        backgroundColor = data.backgroundColor,
+	        paddingColor = data.paddingColor,
+	        padding = data.padding;
 	    ctx.clearRect(0, 0, width, height);
 	    ctx.fillStyle = backgroundColor;
 	    ctx.fillRect(0, 0, width, height);
@@ -632,14 +633,12 @@
 	  }
 
 	  function drawGrid(data) {
-	    var currentTime = data.currentTime;
-	    var _data$options2 = data.options,
-	        gridColor = _data$options2.gridColor,
-	        pixelRatio = _data$options2.pixelRatio,
-	        scrollable = _data$options2.scrollable;
-	    var _canvas2 = canvas,
-	        width = _canvas2.width,
-	        height = _canvas2.height;
+	    var width = data.width,
+	        height = data.height,
+	        currentTime = data.currentTime,
+	        gridColor = data.gridColor,
+	        pixelRatio = data.pixelRatio,
+	        scrollable = data.scrollable;
 	    ctx.fillStyle = gridColor;
 
 	    for (var index = 0; index < gridNum + 10; index += density) {
@@ -653,15 +652,13 @@
 	  }
 
 	  function drawRuler(data) {
-	    var currentTime = data.currentTime;
-	    var _data$options3 = data.options,
-	        rulerColor = _data$options3.rulerColor,
-	        pixelRatio = _data$options3.pixelRatio,
-	        padding = _data$options3.padding,
-	        rulerAtTop = _data$options3.rulerAtTop,
-	        scrollable = _data$options3.scrollable;
-	    var _canvas3 = canvas,
-	        height = _canvas3.height;
+	    var height = data.height,
+	        currentTime = data.currentTime,
+	        rulerColor = data.rulerColor,
+	        pixelRatio = data.pixelRatio,
+	        padding = data.padding,
+	        rulerAtTop = data.rulerAtTop,
+	        scrollable = data.scrollable;
 	    var fontSize = 11;
 	    var fontHeight = 15;
 	    var fontTop = 30;
@@ -687,18 +684,16 @@
 	  }
 
 	  function drawWave(data) {
-	    var currentTime = data.currentTime,
-	        _data$options4 = data.options,
-	        progress = _data$options4.progress,
-	        waveColor = _data$options4.waveColor,
-	        progressColor = _data$options4.progressColor,
-	        duration = _data$options4.duration,
-	        padding = _data$options4.padding,
-	        waveScale = _data$options4.waveScale,
-	        scrollable = _data$options4.scrollable;
-	    var _canvas4 = canvas,
-	        width = _canvas4.width,
-	        height = _canvas4.height;
+	    var width = data.width,
+	        height = data.height,
+	        currentTime = data.currentTime,
+	        progress = data.progress,
+	        waveColor = data.waveColor,
+	        progressColor = data.progressColor,
+	        duration = data.duration,
+	        padding = data.padding,
+	        waveScale = data.waveScale,
+	        scrollable = data.scrollable;
 	    var middle = height / 2;
 	    var waveWidth = width - gridGap * padding * 2;
 	    var startIndex = Math.floor(beginTime * sampleRate);
@@ -733,15 +728,13 @@
 	  }
 
 	  function drawCursor(data) {
-	    var currentTime = data.currentTime,
-	        _data$options5 = data.options,
-	        cursorColor = _data$options5.cursorColor,
-	        pixelRatio = _data$options5.pixelRatio,
-	        padding = _data$options5.padding,
-	        scrollable = _data$options5.scrollable;
-	    var _canvas5 = canvas,
-	        height = _canvas5.height,
-	        width = _canvas5.width;
+	    var height = data.height,
+	        width = data.width,
+	        currentTime = data.currentTime,
+	        cursorColor = data.cursorColor,
+	        pixelRatio = data.pixelRatio,
+	        padding = data.padding,
+	        scrollable = data.scrollable;
 	    ctx.fillStyle = cursorColor;
 	    var x = scrollable ? width / 2 : padding * gridGap + (currentTime - beginTime) * gridGap * 10;
 	    ctx.fillRect(x, 0, pixelRatio, height);
@@ -772,14 +765,13 @@
 	      var width = data.width,
 	          height = data.height,
 	          currentTime = data.currentTime,
-	          _data$options6 = data.options,
-	          cursor = _data$options6.cursor,
-	          grid = _data$options6.grid,
-	          ruler = _data$options6.ruler,
-	          wave = _data$options6.wave,
-	          duration = _data$options6.duration,
-	          padding = _data$options6.padding,
-	          scrollable = _data$options6.scrollable;
+	          cursor = data.cursor,
+	          grid = data.grid,
+	          ruler = data.ruler,
+	          wave = data.wave,
+	          duration = data.duration,
+	          padding = data.padding,
+	          scrollable = data.scrollable;
 
 	      if (canvas.width !== width) {
 	        canvas.width = width;
@@ -813,19 +805,15 @@
 
 	      var _channelData = channelData,
 	          byteLength = _channelData.byteLength;
-	      var config = {
-	        padding: padding,
-	        duration: duration,
-	        gridGap: gridGap,
+
+	      var config = _objectSpread$2({
 	        gridNum: gridNum,
+	        gridGap: gridGap,
 	        beginTime: beginTime,
-	        currentTime: currentTime,
 	        density: density,
-	        width: width,
-	        height: height,
 	        sampleRate: sampleRate,
 	        byteLength: byteLength
-	      };
+	      }, data);
 
 	      if (isWorker) {
 	        self.postMessage({
@@ -851,6 +839,10 @@
 	});
 	worker.postMessage;
 
+	function ownKeys$1(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+	function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$1(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$1(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
 	var Drawer = /*#__PURE__*/function () {
 	  function Drawer(wf) {
 	    var _this = this;
@@ -865,7 +857,7 @@
 	    this.update = throttle(this.update, refreshRate, this);
 
 	    if (useWorker && window.OffscreenCanvas && window.Worker) {
-	      this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";var isWorker=self.document===void 0,wf=null,canvas=null,ctx=null,gridNum=0,gridGap=0,beginTime=0,density=1,sampleRate=44100,channelData=new Float32Array;function secondToTime(a){var b=Math.floor(a/3600),c=Math.floor((a-3600*b)/60),d=Math.floor(a-3600*b-60*c);return[b,c,d].map(function add0(a){return 10>a?\"0\".concat(a):a+\"\"}).join(\":\")}function clamp(c,d,a){return Math.max(Math.min(c,Math.max(d,a)),Math.min(d,a))}function getDensity(a){var b=a.options.pixelRatio;ctx.font=\"\".concat(11*b,\"px Arial\");var c=ctx.measureText(\"99:99:99\").width;return function a(b){var d=gridGap*b/(1.5*c);return 1<d?Math.floor(b/10):a(b+10)}(10)}function drawBackground(a){var b=a.options,c=b.backgroundColor,d=b.paddingColor,e=b.padding,f=canvas,g=f.width,h=f.height;ctx.clearRect(0,0,g,h),ctx.fillStyle=c,ctx.fillRect(0,0,g,h),ctx.fillStyle=d,ctx.fillRect(0,0,e*gridGap,h),ctx.fillRect(g-e*gridGap,0,e*gridGap,h)}function drawGrid(a){var b=a.currentTime,c=a.options,d=c.gridColor,e=c.pixelRatio,f=c.scrollable,g=canvas,h=g.width,i=g.height;ctx.fillStyle=d;for(var j,k=0;k<gridNum+10;k+=density)j=f?gridGap*k-10*((b-parseInt(b,10))*gridGap):gridGap*k,ctx.fillRect(j,0,e,i);for(var l=0;l<i/gridGap;l+=density)ctx.fillRect(0,gridGap*l,h,e)}function drawRuler(a){var b=a.currentTime,c=a.options,d=c.rulerColor,e=c.pixelRatio,f=c.padding,g=c.rulerAtTop,h=c.scrollable,i=canvas,j=i.height,k=11,l=15,m=30;ctx.font=\"\".concat(k*e,\"px Arial\"),ctx.fillStyle=d;for(var n,o=-1,p=0;p<gridNum+10;p+=1)if(n=h?gridGap*p-10*((b-parseInt(b,10))*gridGap):gridGap*p,0==(p-f)%10){o+=1,ctx.fillRect(n,g?0:j-l*e,e,l*e);var q=Math.floor(beginTime+o);0==q%density&&0<=q&&ctx.fillText(secondToTime(q),n-2*(k*e)+e,g?m*e:j-m*e+k)}else 0==(p-f)%5&&ctx.fillRect(n,g?0:j-l/2*e,e,l/2*e)}function drawWave(a){for(var b=a.currentTime,c=a.options,d=c.progress,e=c.waveColor,f=c.progressColor,g=c.duration,h=c.padding,j=c.waveScale,k=c.scrollable,l=canvas,m=l.width,n=l.height,o=n/2,p=m-2*(gridGap*h),q=Math.floor(beginTime*sampleRate),r=Math.floor(clamp((beginTime+g)*sampleRate,q,1/0)),s=Math.floor((r-q)/p),t=k?m/2:h*gridGap+10*((b-beginTime)*gridGap),u=0,v=0,w=1,x=-1,y=q;y<r;y+=1){u+=1;var z=channelData[y]||0;if(z<w?w=z:z>x&&(x=z),u>=s&&v<p){v+=1;var A=gridGap*h+v;ctx.fillStyle=d&&t>=A?f:e,ctx.fillRect(A,(1+w*j)*o,1,Math.max(1,(x-w)*o*j)),u=0,w=1,x=-1}}}function drawCursor(a){var b=a.currentTime,c=a.options,d=c.cursorColor,e=c.pixelRatio,f=c.padding,g=c.scrollable,h=canvas,i=h.height,j=h.width;ctx.fillStyle=d;var k=g?j/2:f*gridGap+10*((b-beginTime)*gridGap);ctx.fillRect(k,0,e,i)}self.onmessage=function(a){var b=a.data,c=b.type,d=b.data;if(\"INIT\"===c&&(isWorker?canvas=new OffscreenCanvas(d.width,d.height):(wf=d.wf,canvas=d.canvas),ctx=canvas.getContext(\"2d\")),\"DECODE\"===c&&(sampleRate=d.sampleRate,channelData=d.channelData),\"UPDATE\"===c){var e=d.width,f=d.height,g=d.currentTime,h=d.options,i=h.cursor,j=h.grid,k=h.ruler,l=h.wave,m=h.duration,n=h.padding,o=h.scrollable;canvas.width!==e&&(canvas.width=e),canvas.height!==f&&(canvas.height=f),gridNum=10*m+2*n,gridGap=e/gridNum,beginTime=o?g-m/2:Math.floor(g/m)*m,density=getDensity(d),drawBackground(d),j&&drawGrid(d),k&&drawRuler(d),l&&drawWave(d),i&&drawCursor(d);var p=channelData,q=p.byteLength,r={padding:n,duration:m,gridGap:gridGap,gridNum:gridNum,beginTime:beginTime,currentTime:g,density:density,width:e,height:f,sampleRate:sampleRate,byteLength:q};isWorker?self.postMessage({type:\"UPFATE\",data:{config:r,imageBitmap:canvas.transferToImageBitmap()}}):wf.emit(\"update\",r)}},\"undefined\"==typeof exports||isWorker||(exports.postMessage=function(a){self.onmessage({data:a})});"])));
+	      this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";function ownKeys(a,b){var c=Object.keys(a);if(Object.getOwnPropertySymbols){var d=Object.getOwnPropertySymbols(a);b&&(d=d.filter(function(b){return Object.getOwnPropertyDescriptor(a,b).enumerable})),c.push.apply(c,d)}return c}function _objectSpread(a){for(var b,c=1;c<arguments.length;c++)b=null==arguments[c]?{}:arguments[c],c%2?ownKeys(Object(b),!0).forEach(function(c){_defineProperty(a,c,b[c])}):Object.getOwnPropertyDescriptors?Object.defineProperties(a,Object.getOwnPropertyDescriptors(b)):ownKeys(Object(b)).forEach(function(c){Object.defineProperty(a,c,Object.getOwnPropertyDescriptor(b,c))});return a}function _defineProperty(a,b,c){return b in a?Object.defineProperty(a,b,{value:c,enumerable:!0,configurable:!0,writable:!0}):a[b]=c,a}var isWorker=self.document===void 0,wf=null,canvas=null,ctx=null,gridNum=0,gridGap=0,beginTime=0,density=1,sampleRate=44100,channelData=new Float32Array;function secondToTime(a){var b=Math.floor(a/3600),c=Math.floor((a-3600*b)/60),d=Math.floor(a-3600*b-60*c);return[b,c,d].map(function add0(a){return 10>a?\"0\".concat(a):a+\"\"}).join(\":\")}function clamp(c,d,a){return Math.max(Math.min(c,Math.max(d,a)),Math.min(d,a))}function getDensity(a){var b=a.pixelRatio;ctx.font=\"\".concat(11*b,\"px Arial\");var c=ctx.measureText(\"99:99:99\").width;return function a(b){var d=gridGap*b/(1.5*c);return 1<d?Math.floor(b/10):a(b+10)}(10)}function drawBackground(a){var b=a.width,c=a.height,d=a.backgroundColor,e=a.paddingColor,f=a.padding;ctx.clearRect(0,0,b,c),ctx.fillStyle=d,ctx.fillRect(0,0,b,c),ctx.fillStyle=e,ctx.fillRect(0,0,f*gridGap,c),ctx.fillRect(b-f*gridGap,0,f*gridGap,c)}function drawGrid(a){var b=a.width,c=a.height,d=a.currentTime,e=a.gridColor,f=a.pixelRatio,g=a.scrollable;ctx.fillStyle=e;for(var h,i=0;i<gridNum+10;i+=density)h=g?gridGap*i-10*((d-parseInt(d,10))*gridGap):gridGap*i,ctx.fillRect(h,0,f,c);for(var j=0;j<c/gridGap;j+=density)ctx.fillRect(0,gridGap*j,b,f)}function drawRuler(a){var b=a.height,c=a.currentTime,d=a.rulerColor,e=a.pixelRatio,f=a.padding,g=a.rulerAtTop,h=a.scrollable,i=11,j=15,k=30;ctx.font=\"\".concat(i*e,\"px Arial\"),ctx.fillStyle=d;for(var l,m=-1,n=0;n<gridNum+10;n+=1)if(l=h?gridGap*n-10*((c-parseInt(c,10))*gridGap):gridGap*n,0==(n-f)%10){m+=1,ctx.fillRect(l,g?0:b-j*e,e,j*e);var o=Math.floor(beginTime+m);0==o%density&&0<=o&&ctx.fillText(secondToTime(o),l-2*(i*e)+e,g?k*e:b-k*e+i)}else 0==(n-f)%5&&ctx.fillRect(l,g?0:b-j/2*e,e,j/2*e)}function drawWave(a){for(var b=a.width,c=a.height,d=a.currentTime,e=a.progress,f=a.waveColor,g=a.progressColor,h=a.duration,j=a.padding,k=a.waveScale,l=a.scrollable,m=c/2,n=b-2*(gridGap*j),o=Math.floor(beginTime*sampleRate),p=Math.floor(clamp((beginTime+h)*sampleRate,o,1/0)),q=Math.floor((p-o)/n),r=l?b/2:j*gridGap+10*((d-beginTime)*gridGap),s=0,t=0,u=1,v=-1,w=o;w<p;w+=1){s+=1;var x=channelData[w]||0;if(x<u?u=x:x>v&&(v=x),s>=q&&t<n){t+=1;var y=gridGap*j+t;ctx.fillStyle=e&&r>=y?g:f,ctx.fillRect(y,(1+u*k)*m,1,Math.max(1,(v-u)*m*k)),s=0,u=1,v=-1}}}function drawCursor(a){var b=a.height,c=a.width,d=a.currentTime,e=a.cursorColor,f=a.pixelRatio,g=a.padding,h=a.scrollable;ctx.fillStyle=e;var i=h?c/2:g*gridGap+10*((d-beginTime)*gridGap);ctx.fillRect(i,0,f,b)}self.onmessage=function(a){var b=a.data,c=b.type,d=b.data;if(\"INIT\"===c&&(isWorker?canvas=new OffscreenCanvas(d.width,d.height):(wf=d.wf,canvas=d.canvas),ctx=canvas.getContext(\"2d\")),\"DECODE\"===c&&(sampleRate=d.sampleRate,channelData=d.channelData),\"UPDATE\"===c){var e=d.width,f=d.height,g=d.currentTime,h=d.cursor,i=d.grid,j=d.ruler,k=d.wave,l=d.duration,m=d.padding,n=d.scrollable;canvas.width!==e&&(canvas.width=e),canvas.height!==f&&(canvas.height=f),gridNum=10*l+2*m,gridGap=e/gridNum,beginTime=n?g-l/2:Math.floor(g/l)*l,density=getDensity(d),drawBackground(d),i&&drawGrid(d),j&&drawRuler(d),k&&drawWave(d),h&&drawCursor(d);var o=channelData,p=o.byteLength,q=_objectSpread({gridNum:gridNum,gridGap:gridGap,beginTime:beginTime,density:density,sampleRate:sampleRate,byteLength:p},d);isWorker?self.postMessage({type:\"UPFATE\",data:{config:q,imageBitmap:canvas.transferToImageBitmap()}}):wf.emit(\"update\",q)}},\"undefined\"==typeof exports||isWorker||(exports.postMessage=function(a){self.onmessage({data:a})});"])));
 	      this.ctx = this.canvas.getContext('bitmaprenderer');
 	      this.wf.events.proxy(this.worker, 'message', function (event) {
 	        var _event$data = event.data,
@@ -925,12 +917,11 @@
 	          height = _this$canvas.height;
 	      this.worker.postMessage({
 	        type: 'UPDATE',
-	        data: {
-	          options: options,
+	        data: _objectSpread$1(_objectSpread$1({}, options), {}, {
 	          currentTime: currentTime,
 	          width: width,
 	          height: height
-	        }
+	        })
 	      });
 	    }
 	  }, {
@@ -1319,7 +1310,7 @@
 	  }, {
 	    key: "version",
 	    get: function get() {
-	      return '2.0.6';
+	      return '2.0.7';
 	    }
 	  }, {
 	    key: "env",
