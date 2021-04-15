@@ -203,17 +203,16 @@ self.onmessage = function onmessage(event) {
 
         const { byteLength } = channelData;
         const config = {
-            padding,
-            duration,
-            gridGap,
-            gridNum,
-            beginTime,
-            currentTime,
-            density,
             width,
             height,
+            currentTime,
+            gridNum,
+            gridGap,
+            beginTime,
+            density,
             sampleRate,
             byteLength,
+            ...data.options,
         };
 
         if (isWorker) {
