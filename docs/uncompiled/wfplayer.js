@@ -1094,8 +1094,6 @@
 	    this.playTimer = null;
 
 	    this.init = function () {
-	      _this.clickInit();
-
 	      _this.resizeInit();
 
 	      _this.playInit();
@@ -1103,55 +1101,16 @@
 	  }
 
 	  _createClass(Controller, [{
-	    key: "getTimeFromEvent",
-	    value: function getTimeFromEvent(event) {
-	      var _this$wf = this.wf,
-	          currentTime = _this$wf.currentTime,
-	          canvas = _this$wf.template.canvas,
-	          _this$wf$options = _this$wf.options,
-	          duration = _this$wf$options.duration,
-	          padding = _this$wf$options.padding,
-	          container = _this$wf$options.container,
-	          pixelRatio = _this$wf$options.pixelRatio;
-	      var gridNum = duration * 10 + padding * 2;
-	      var gridGap = canvas.width / gridNum;
-	      var left = clamp(event.pageX - container.offsetLeft - padding * gridGap / pixelRatio, 0, Infinity);
-	      var beginTime = Math.floor(currentTime / duration) * duration;
-	      var time = beginTime + clamp(left / gridGap * pixelRatio / 10, 0, duration);
-	      return time;
-	    }
-	  }, {
-	    key: "clickInit",
-	    value: function clickInit() {
-	      var _this2 = this;
-
-	      var _this$wf2 = this.wf,
-	          canvas = _this$wf2.template.canvas,
-	          proxy = _this$wf2.events.proxy,
-	          mediaElement = _this$wf2.options.mediaElement;
-	      proxy(canvas, ['click', 'contextmenu'], function (event) {
-	        var time = _this2.getTimeFromEvent(event);
-
-	        _this2.wf.emit(event.type, time, event);
-
-	        if (mediaElement && mediaElement.currentTime !== time) {
-	          mediaElement.currentTime = time;
-	        }
-
-	        _this2.wf.update();
-	      });
-	    }
-	  }, {
 	    key: "resizeInit",
 	    value: function resizeInit() {
-	      var _this3 = this;
+	      var _this2 = this;
 
 	      var proxy = this.wf.events.proxy;
 	      var throttleResize = throttle(function () {
-	        _this3.wf.update();
+	        _this2.wf.update();
 
-	        _this3.wf.emit('resize');
-	      }, 500, this);
+	        _this2.wf.emit('resize');
+	      }, 200, this);
 	      proxy(window, ['resize', 'orientationchange'], function () {
 	        throttleResize();
 	      });
@@ -1159,27 +1118,25 @@
 	  }, {
 	    key: "playInit",
 	    value: function playInit() {
-	      var _this4 = this;
+	      var _this3 = this;
 
-	      var _this$wf3 = this.wf,
-	          proxy = _this$wf3.events.proxy,
-	          mediaElement = _this$wf3.options.mediaElement;
+	      var _this$wf = this.wf,
+	          proxy = _this$wf.events.proxy,
+	          mediaElement = _this$wf.options.mediaElement;
 	      if (!mediaElement) return;
-	      proxy(mediaElement, 'seeked', function () {
-	        _this4.wf.update();
+	      proxy(mediaElement, ['seeked', 'seeking', 'canplay'], function () {
+	        _this3.wf.update();
 	      });
 	      (function loop() {
-	        var _this5 = this;
+	        var _this4 = this;
 
 	        this.playTimer = requestAnimationFrame(function () {
-	          if (_this5.wf.playing) {
-	            _this5.wf.update();
-
-	            _this5.wf.emit('playing', mediaElement.currentTime);
+	          if (_this4.wf.playing) {
+	            _this4.wf.update();
 	          }
 
-	          if (!_this5.wf.isDestroy) {
-	            loop.call(_this5);
+	          if (!_this4.wf.isDestroy) {
+	            loop.call(_this4);
 	          }
 	        });
 	      }).call(this);
