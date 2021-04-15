@@ -2,6 +2,7 @@ var $video = document.querySelector('.video');
 var $version = document.querySelector('.version');
 var $open = document.querySelector('.open');
 var $download = document.querySelector('.download');
+var $log = document.querySelector('.log');
 var $scrollable = document.querySelector('.scrollable');
 var $pickers = Array.from(document.querySelectorAll('.color-picker'));
 var $range = Array.from(document.querySelectorAll('.range input'));
@@ -9,25 +10,43 @@ var $range = Array.from(document.querySelectorAll('.range input'));
 $version.innerHTML = 'Beta ' + WFPlayer.version;
 
 var wf = null;
-function initWFPlayer() {
+function initWFPlayer(url) {
     if (wf) wf.destroy();
     wf = new WFPlayer({
         container: '.waveform',
+        mediaElement: $video,
         scrollable: $scrollable.checked,
     });
-    wf.load($video);
+    wf.load(url);
 }
 
-initWFPlayer();
+initWFPlayer($video.src);
 
-$open.addEventListener('change', function () {
+$open.addEventListener('change', async function () {
     var file = $open.files[0];
     if (file) {
         var canPlayType = $video.canPlayType(file.type);
         if (canPlayType === 'maybe' || canPlayType === 'probably') {
-            var url = URL.createObjectURL(file);
-            $video.src = url;
-            initWFPlayer();
+            $video.src = URL.createObjectURL(file);
+            if (file.size <= 64 * 1024 * 1024) {
+                initWFPlayer($video.src);
+            } else {
+                // https://ffmpegwasm.github.io
+                const { createFFmpeg, fetchFile } = FFmpeg;
+                const ffmpeg = createFFmpeg({ log: true });
+                ffmpeg.setProgress(({ ratio }) => {
+                    $log.textContent = 'Decoding: ' + ratio * 100 + '%';
+                });
+                $log.textContent = 'FFmpeg module loading...';
+                await ffmpeg.load();
+                ffmpeg.FS('writeFile', file.name, await fetchFile(file));
+                const output = `${Date.now()}.mp3`;
+                $log.textContent = 'Decoding...';
+                await ffmpeg.run('-i', file.name, '-ac', '1', '-ar', '8000', output);
+                const uint8 = ffmpeg.FS('readFile', output);
+                $log.textContent = '';
+                initWFPlayer(uint8);
+            }
         } else {
             alert('This file format is not supported');
         }
