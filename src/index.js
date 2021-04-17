@@ -214,6 +214,12 @@ export default class WFPlayer extends Emitter {
         return this;
     }
 
+    reset() {
+        this.decoder.destroy();
+        this.update();
+        return this;
+    }
+
     destroy() {
         this.isDestroy = true;
         this.events.destroy();
