@@ -15,7 +15,7 @@ export default class Drawer {
 
             this.wf.events.proxy(this.worker, 'message', (event) => {
                 const { type, data } = event.data;
-                if (type === 'UPFATE') {
+                if (type === 'UPFATE' && !wf.isDestroy) {
                     this.wf.emit('update', data.config);
                     this.ctx.transferFromImageBitmap(data.imageBitmap);
                 }
