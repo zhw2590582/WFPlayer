@@ -44,6 +44,7 @@ export default class Drawer {
                 type: 'DECODE',
                 data: { channelData, sampleRate },
             });
+            this.update();
         });
     }
 
