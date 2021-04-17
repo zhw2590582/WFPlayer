@@ -216,7 +216,6 @@ export default class WFPlayer extends Emitter {
 
     reset() {
         this.decoder.destroy();
-        this.update();
         return this;
     }
 

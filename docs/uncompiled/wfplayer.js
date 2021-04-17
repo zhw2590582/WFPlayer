@@ -899,6 +899,8 @@
 	          sampleRate: sampleRate
 	        }
 	      });
+
+	      _this.update();
 	    });
 	  }
 
@@ -989,6 +991,12 @@
 	    value: function destroy() {
 	      this.audiobuffer = this.audioCtx.createBuffer(1, 2, 44100);
 	      this.channelData = new Float32Array();
+	      this.wf.emit('decode', {
+	        channelData: this.channelData,
+	        sampleRate: this.audiobuffer.sampleRate,
+	        duration: this.audiobuffer.duration
+	      });
+	      this.wf.update();
 	    }
 	  }]);
 
@@ -1290,6 +1298,12 @@
 	      return this;
 	    }
 	  }, {
+	    key: "reset",
+	    value: function reset() {
+	      this.decoder.destroy();
+	      return this;
+	    }
+	  }, {
 	    key: "destroy",
 	    value: function destroy() {
 	      this.isDestroy = true;
@@ -1310,7 +1324,7 @@
 	  }, {
 	    key: "version",
 	    get: function get() {
-	      return '2.0.7';
+	      return '2.0.8';
 	    }
 	  }, {
 	    key: "env",

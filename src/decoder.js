@@ -43,5 +43,11 @@ export default class Decoder {
     destroy() {
         this.audiobuffer = this.audioCtx.createBuffer(1, 2, 44100);
         this.channelData = new Float32Array();
+        this.wf.emit('decode', {
+            channelData: this.channelData,
+            sampleRate: this.audiobuffer.sampleRate,
+            duration: this.audiobuffer.duration,
+        });
+        this.wf.update();
     }
 }
