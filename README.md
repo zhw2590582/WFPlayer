@@ -89,8 +89,8 @@ var wf = new WFPlayer({
     // Whether use web worker
     useWorker: true,
 
-    // Thw refresh rate
-    refreshRate: 50,
+    // Thw refresh delay time
+    refreshDelay: 50,
 
     // Whether to display wave
     wave: true,

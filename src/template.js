@@ -4,8 +4,8 @@ export default class Template {
     constructor(wf) {
         this.wf = wf;
         this.canvas = null;
-        const { refreshRate } = wf.options;
-        this.update = throttle(this.init, refreshRate, this);
+        const { refreshDelay } = wf.options;
+        this.update = throttle(this.init, refreshDelay, this);
         this.init();
     }
 

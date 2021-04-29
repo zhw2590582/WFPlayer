@@ -6,8 +6,8 @@ export default class Drawer {
         this.wf = wf;
         this.canvas = wf.template.canvas;
 
-        const { refreshRate, useWorker } = wf.options;
-        this.update = throttle(this.update, refreshRate, this);
+        const { refreshDelay, useWorker } = wf.options;
+        this.update = throttle(this.update, refreshDelay, this);
 
         if (useWorker && window.OffscreenCanvas && window.Worker) {
             this.worker = new Worker('./worker.js');
