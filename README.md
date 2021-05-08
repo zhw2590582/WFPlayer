@@ -257,7 +257,7 @@ document.getElementById('file').addEventListener('change', async (event) => {
     const ffmpeg = createFFmpeg({ log: true });
     await ffmpeg.load();
     ffmpeg.FS('writeFile', file.name, await fetchFile(file));
-    await ffmpeg.run('-i', file.name, '-ac', '1', '-ar', '8000', 'audio.mp3);
+    await ffmpeg.run('-i', file.name, '-ac', '1', '-ar', '8000', 'audio.mp3');
     const uint8 = ffmpeg.FS('readFile', 'audio.mp3');
 
     await wf.load(uint8);
