@@ -83,6 +83,9 @@ var wf = new WFPlayer({
     // Mount the audio waveform of the dom
     container: '#waveform',
 
+    // Whether to use scroll mode
+    scrollable: false,
+
     // Media element like: video tag or audio tag
     mediaElement: null,
 
