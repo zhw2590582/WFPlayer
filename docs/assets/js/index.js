@@ -28,25 +28,7 @@ $open.addEventListener('change', async function () {
         var canPlayType = $video.canPlayType(file.type);
         if (canPlayType === 'maybe' || canPlayType === 'probably') {
             $video.src = URL.createObjectURL(file);
-            if (file.size <= 64 * 1024 * 1024) {
-                initWFPlayer($video.src);
-            } else {
-                // https://ffmpegwasm.github.io
-                const { createFFmpeg, fetchFile } = FFmpeg;
-                const ffmpeg = createFFmpeg({ log: true });
-                ffmpeg.setProgress(({ ratio }) => {
-                    $log.textContent = 'Decoding: ' + ratio * 100 + '%';
-                });
-                $log.textContent = 'FFmpeg module loading...';
-                await ffmpeg.load();
-                ffmpeg.FS('writeFile', file.name, await fetchFile(file));
-                const output = `${Date.now()}.mp3`;
-                $log.textContent = 'Decoding...';
-                await ffmpeg.run('-i', file.name, '-ac', '1', '-ar', '8000', output);
-                const uint8 = ffmpeg.FS('readFile', output);
-                $log.textContent = '';
-                initWFPlayer(uint8);
-            }
+            initWFPlayer($video.src);
         } else {
             alert('This file format is not supported');
         }

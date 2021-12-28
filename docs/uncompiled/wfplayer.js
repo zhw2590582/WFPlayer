@@ -470,8 +470,8 @@
 
 	    this.wf = wf;
 	    this.canvas = null;
-	    var refreshRate = wf.options.refreshRate;
-	    this.update = throttle(this.init, refreshRate, this);
+	    var refreshDelay = wf.options.refreshDelay;
+	    this.update = throttle(this.init, refreshDelay, this);
 	    this.init();
 	  }
 
@@ -852,9 +852,9 @@
 	    this.wf = wf;
 	    this.canvas = wf.template.canvas;
 	    var _wf$options = wf.options,
-	        refreshRate = _wf$options.refreshRate,
+	        refreshDelay = _wf$options.refreshDelay,
 	        useWorker = _wf$options.useWorker;
-	    this.update = throttle(this.update, refreshRate, this);
+	    this.update = throttle(this.update, refreshDelay, this);
 
 	    if (useWorker && window.OffscreenCanvas && window.Worker) {
 	      this.worker = new Worker(URL.createObjectURL(new Blob(["\"use strict\";function ownKeys(a,b){var c=Object.keys(a);if(Object.getOwnPropertySymbols){var d=Object.getOwnPropertySymbols(a);b&&(d=d.filter(function(b){return Object.getOwnPropertyDescriptor(a,b).enumerable})),c.push.apply(c,d)}return c}function _objectSpread(a){for(var b,c=1;c<arguments.length;c++)b=null==arguments[c]?{}:arguments[c],c%2?ownKeys(Object(b),!0).forEach(function(c){_defineProperty(a,c,b[c])}):Object.getOwnPropertyDescriptors?Object.defineProperties(a,Object.getOwnPropertyDescriptors(b)):ownKeys(Object(b)).forEach(function(c){Object.defineProperty(a,c,Object.getOwnPropertyDescriptor(b,c))});return a}function _defineProperty(a,b,c){return b in a?Object.defineProperty(a,b,{value:c,enumerable:!0,configurable:!0,writable:!0}):a[b]=c,a}var isWorker=self.document===void 0,wf=null,canvas=null,ctx=null,gridNum=0,gridGap=0,beginTime=0,density=1,sampleRate=44100,channelData=new Float32Array;function secondToTime(a){var b=Math.floor(a/3600),c=Math.floor((a-3600*b)/60),d=Math.floor(a-3600*b-60*c);return[b,c,d].map(function add0(a){return 10>a?\"0\".concat(a):a+\"\"}).join(\":\")}function clamp(c,d,a){return Math.max(Math.min(c,Math.max(d,a)),Math.min(d,a))}function getDensity(a){var b=a.pixelRatio;ctx.font=\"\".concat(11*b,\"px Arial\");var c=ctx.measureText(\"99:99:99\").width;return function a(b){var d=gridGap*b/(1.5*c);return 1<d?Math.floor(b/10):a(b+10)}(10)}function drawBackground(a){var b=a.width,c=a.height,d=a.backgroundColor,e=a.paddingColor,f=a.padding;ctx.clearRect(0,0,b,c),ctx.fillStyle=d,ctx.fillRect(0,0,b,c),ctx.fillStyle=e,ctx.fillRect(0,0,f*gridGap,c),ctx.fillRect(b-f*gridGap,0,f*gridGap,c)}function drawGrid(a){var b=a.width,c=a.height,d=a.currentTime,e=a.gridColor,f=a.pixelRatio,g=a.scrollable;ctx.fillStyle=e;for(var h,i=0;i<gridNum+10;i+=density)h=g?gridGap*i-10*((d-parseInt(d,10))*gridGap):gridGap*i,ctx.fillRect(h,0,f,c);for(var j=0;j<c/gridGap;j+=density)ctx.fillRect(0,gridGap*j,b,f)}function drawRuler(a){var b=a.height,c=a.currentTime,d=a.rulerColor,e=a.pixelRatio,f=a.padding,g=a.rulerAtTop,h=a.scrollable,i=11,j=15,k=30;ctx.font=\"\".concat(i*e,\"px Arial\"),ctx.fillStyle=d;for(var l,m=-1,n=0;n<gridNum+10;n+=1)if(l=h?gridGap*n-10*((c-parseInt(c,10))*gridGap):gridGap*n,0==(n-f)%10){m+=1,ctx.fillRect(l,g?0:b-j*e,e,j*e);var o=Math.floor(beginTime+m);0==o%density&&0<=o&&ctx.fillText(secondToTime(o),l-2*(i*e)+e,g?k*e:b-k*e+i)}else 0==(n-f)%5&&ctx.fillRect(l,g?0:b-j/2*e,e,j/2*e)}function drawWave(a){for(var b=a.width,c=a.height,d=a.currentTime,e=a.progress,f=a.waveColor,g=a.progressColor,h=a.duration,j=a.padding,k=a.waveScale,l=a.scrollable,m=c/2,n=b-2*(gridGap*j),o=Math.floor(beginTime*sampleRate),p=Math.floor(clamp((beginTime+h)*sampleRate,o,1/0)),q=Math.floor((p-o)/n),r=l?b/2:j*gridGap+10*((d-beginTime)*gridGap),s=0,t=0,u=1,v=-1,w=o;w<p;w+=1){s+=1;var x=channelData[w]||0;if(x<u?u=x:x>v&&(v=x),s>=q&&t<n){t+=1;var y=gridGap*j+t;ctx.fillStyle=e&&r>=y?g:f,ctx.fillRect(y,(1+u*k)*m,1,Math.max(1,(v-u)*m*k)),s=0,u=1,v=-1}}}function drawCursor(a){var b=a.height,c=a.width,d=a.currentTime,e=a.cursorColor,f=a.pixelRatio,g=a.padding,h=a.scrollable;ctx.fillStyle=e;var i=h?c/2:g*gridGap+10*((d-beginTime)*gridGap);ctx.fillRect(i,0,f,b)}self.onmessage=function(a){var b=a.data,c=b.type,d=b.data;if(\"INIT\"===c&&(isWorker?canvas=new OffscreenCanvas(d.width,d.height):(wf=d.wf,canvas=d.canvas),ctx=canvas.getContext(\"2d\")),\"DECODE\"===c&&(sampleRate=d.sampleRate,channelData=d.channelData),\"UPDATE\"===c){var e=d.width,f=d.height,g=d.currentTime,h=d.cursor,i=d.grid,j=d.ruler,k=d.wave,l=d.duration,m=d.padding,n=d.scrollable;canvas.width!==e&&(canvas.width=e),canvas.height!==f&&(canvas.height=f),gridNum=10*l+2*m,gridGap=e/gridNum,beginTime=n?g-l/2:Math.floor(g/l)*l,density=getDensity(d),drawBackground(d),i&&drawGrid(d),j&&drawRuler(d),k&&drawWave(d),h&&drawCursor(d);var o=channelData,p=o.byteLength,q=_objectSpread({gridNum:gridNum,gridGap:gridGap,beginTime:beginTime,density:density,sampleRate:sampleRate,byteLength:p},d);isWorker?self.postMessage({type:\"UPFATE\",data:{config:q,imageBitmap:canvas.transferToImageBitmap()}}):wf.emit(\"update\",q)}},\"undefined\"==typeof exports||isWorker||(exports.postMessage=function(a){self.onmessage({data:a})});"])));
@@ -864,7 +864,7 @@
 	            type = _event$data.type,
 	            data = _event$data.data;
 
-	        if (type === 'UPFATE') {
+	        if (type === 'UPFATE' && !wf.isDestroy) {
 	          _this.wf.emit('update', data.config);
 
 	          _this.ctx.transferFromImageBitmap(data.imageBitmap);
@@ -1091,11 +1091,16 @@
 
 	    this.wf = wf;
 	    this.playTimer = null;
+	    this.isInit = false;
 
 	    this.init = function () {
-	      _this.resizeInit();
+	      if (!_this.isInit) {
+	        _this.isInit = true;
 
-	      _this.playInit();
+	        _this.resizeInit();
+
+	        _this.playInit();
+	      }
 	    };
 	  }
 
@@ -1236,24 +1241,28 @@
 	  }, {
 	    key: "load",
 	    value: function load(target) {
+	      // Audiobuffer
 	      if (target && typeof target.getChannelData === 'function') {
 	        this.decoder.decodeSuccess(target);
 	        this.controller.init();
 	        return this;
-	      }
+	      } // Uint8Array
+
 
 	      if (target && target.buffer) {
 	        this.decoder.decodeAudioData(target);
 	        this.controller.init();
 	        return this;
-	      }
+	      } // HTMLVideoElement or HTMLAudioElement
+
 
 	      if (target instanceof HTMLVideoElement || target instanceof HTMLAudioElement) {
 	        this.options.mediaElement = target;
-	        target = target.src;
+	        target = target.currentSrc;
 	      }
 
-	      errorHandle(typeof target === 'string' && target.trim(), "The load target is not a string. If you are loading a mediaElement, make sure the mediaElement.src is not empty.");
+	      errorHandle(typeof target === 'string' && target.trim(), "The load target is not a string. If you are loading a mediaElement, make sure the mediaElement.src is not empty."); // String Url
+
 	      this.loader.load(target);
 	      this.controller.init();
 	      return this;
@@ -1324,7 +1333,7 @@
 	  }, {
 	    key: "version",
 	    get: function get() {
-	      return '2.0.8';
+	      return '2.1.0';
 	    }
 	  }, {
 	    key: "env",
@@ -1352,7 +1361,7 @@
 	        rulerColor: 'rgba(255, 255, 255, 0.5)',
 	        rulerAtTop: true,
 	        scrollable: false,
-	        refreshRate: 50,
+	        refreshDelay: 50,
 	        channel: 0,
 	        duration: 10,
 	        padding: 5,
@@ -1390,7 +1399,7 @@
 	        rulerColor: 'string',
 	        rulerAtTop: 'boolean',
 	        scrollable: 'boolean',
-	        refreshRate: checkNum('refreshRate', 16, 1000, true),
+	        refreshDelay: checkNum('refreshDelay', 16, 1000, true),
 	        channel: checkNum('channel', 0, 5, true),
 	        duration: checkNum('duration', 1, 100, true),
 	        padding: checkNum('padding', 1, 100, true),
