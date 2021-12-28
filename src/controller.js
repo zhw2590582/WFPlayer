@@ -4,9 +4,13 @@ export default class Controller {
     constructor(wf) {
         this.wf = wf;
         this.playTimer = null;
+        this.isInit = false;
         this.init = () => {
-            this.resizeInit();
-            this.playInit();
+            if (!this.isInit) {
+                this.isInit = true;
+                this.resizeInit();
+                this.playInit();
+            }
         };
     }
 

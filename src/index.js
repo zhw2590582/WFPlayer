@@ -157,21 +157,24 @@ export default class WFPlayer extends Emitter {
     }
 
     load(target) {
+        // Audiobuffer
         if (target && typeof target.getChannelData === 'function') {
             this.decoder.decodeSuccess(target);
             this.controller.init();
             return this;
         }
 
+        // Uint8Array
         if (target && target.buffer) {
             this.decoder.decodeAudioData(target);
             this.controller.init();
             return this;
         }
 
+        // HTMLVideoElement or HTMLAudioElement
         if (target instanceof HTMLVideoElement || target instanceof HTMLAudioElement) {
             this.options.mediaElement = target;
-            target = target.src;
+            target = target.currentSrc;
         }
 
         errorHandle(
@@ -179,6 +182,7 @@ export default class WFPlayer extends Emitter {
             `The load target is not a string. If you are loading a mediaElement, make sure the mediaElement.src is not empty.`,
         );
 
+        // String Url
         this.loader.load(target);
         this.controller.init();
         return this;
