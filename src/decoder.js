@@ -14,7 +14,10 @@ export default class Decoder {
                     this.decodeSuccess(audiobuffer);
                     resolve(audiobuffer);
                 },
-                (err) => reject(err),
+                (err) => {
+                    this.wf.emit('decode:error');
+                    reject(err);
+                },
             );
         });
     }
