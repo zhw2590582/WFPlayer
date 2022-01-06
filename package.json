@@ -1,6 +1,6 @@
 {
   "name": "wfplayer",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "WFPlayer.js is an audio waveform generator",
   "main": "dist/wfplayer.js",
   "scripts": {
