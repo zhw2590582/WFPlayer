@@ -8,15 +8,17 @@ export default class Decoder {
 
     decodeAudioData(uint8) {
         return new Promise((resolve, reject) => {
+            this.wf.emit('decode:start', uint8);
             this.audioCtx.decodeAudioData(
                 uint8.buffer,
                 (audiobuffer) => {
+                    this.wf.emit('decode:success', audiobuffer);
                     this.decodeSuccess(audiobuffer);
                     resolve(audiobuffer);
                 },
-                (err) => {
-                    this.wf.emit('decode:error');
-                    reject(err);
+                (error) => {
+                    this.wf.emit('decode:error', error);
+                    reject(error);
                 },
             );
         });
