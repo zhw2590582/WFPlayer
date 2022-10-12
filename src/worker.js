@@ -93,18 +93,8 @@ function drawRuler(data) {
 }
 
 function drawWave(data) {
-    const {
-        width,
-        height,
-        currentTime,
-        progress,
-        waveColor,
-        progressColor,
-        duration,
-        padding,
-        waveScale,
-        scrollable,
-    } = data;
+    const { width, height, currentTime, progress, waveColor, progressColor, duration, padding, waveScale, scrollable } =
+        data;
     const middle = height / 2;
     const waveWidth = width - gridGap * padding * 2;
     const startIndex = Math.floor(beginTime * sampleRate);
@@ -219,8 +209,6 @@ self.onmessage = function onmessage(event) {
     }
 };
 
-if (typeof exports !== 'undefined' && !isWorker) {
-    exports.postMessage = (data) => {
-        self.onmessage({ data });
-    };
-}
+export const postMessage = (data) => {
+    self.onmessage({ data });
+};

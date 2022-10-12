@@ -1,6 +1,6 @@
 import { throttle } from './utils';
 import workerText from 'bundle-text:./worker';
-import worker from './worker';
+import { postMessage } from './worker';
 
 export default class Drawer {
     constructor(wf) {
@@ -30,7 +30,7 @@ export default class Drawer {
                 },
             });
         } else {
-            this.worker = worker;
+            this.worker = { postMessage };
             this.worker.postMessage({
                 type: 'INIT',
                 data: {
@@ -52,8 +52,10 @@ export default class Drawer {
     update() {
         const {
             currentTime,
+            // eslint-disable-next-line no-unused-vars
             options: { container, mediaElement, ...options },
         } = this.wf;
+
         const { width, height } = this.canvas;
 
         this.worker.postMessage({

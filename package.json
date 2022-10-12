@@ -6,7 +6,8 @@
   "main": "dist/wfplayer.js",
   "scripts": {
     "dev": "npx cross-env NODE_ENV=development node ./scripts/dev.js",
-    "build": "npx cross-env NODE_ENV=production node ./scripts/build.js"
+    "build": "npx cross-env NODE_ENV=production node ./scripts/build.js",
+    "test": "npx eslint src"
   },
   "repository": {
     "type": "git",
@@ -33,7 +34,6 @@
     "@parcel/transformer-inline-string": "^2.7.0",
     "@parcel/transformer-less": "^2.7.0",
     "@parcel/transformer-vue": "^2.7.0",
-    "cpy": "^9.0.1",
     "cross-env": "^7.0.3",
     "eslint": "^8.25.0",
     "servor": "^4.0.2"

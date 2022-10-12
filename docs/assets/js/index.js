@@ -16,6 +16,7 @@ function initWFPlayer(url) {
         container: '.waveform',
         mediaElement: $video,
         scrollable: $scrollable.checked,
+        useWorker: true,
     });
     wf.load(url);
 }

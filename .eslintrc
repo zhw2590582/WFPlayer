@@ -1,20 +1,22 @@
 {
-    "parser": "babel-eslint",
-    "extends": [
-        "airbnb-base",
-        "prettier"
-    ],
+    "parser": "@babel/eslint-parser",
+    "extends": "eslint:recommended",
     "env": {
         "browser": true,
         "es6": true
     },
-    "rules": {
-        "no-param-reassign": 0,
-        "no-bitwise": 0,
-        "no-underscore-dangle": 0,
-        "no-restricted-globals": 0
+    "globals": {
+        "require": "readonly",
+        "process": "readonly"
     },
     "parserOptions": {
-        "sourceType": "module"
+        "sourceType": "module",
+        "ecmaVersion": "latest",
+        "requireConfigFile": false,
+        "babelOptions": {
+            "presets": [
+                "@babel/preset-react"
+            ]
+        }
     }
 }
