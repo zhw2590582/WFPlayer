@@ -24,7 +24,7 @@ function initWFPlayer(url) {
     });
 }
 
-initWFPlayer($video.src);
+initWFPlayer('audio.mp3');
 
 $open.addEventListener('change', async function () {
     var file = $open.files[0];
