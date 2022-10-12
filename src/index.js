@@ -16,11 +16,11 @@ export default class WFPlayer extends Emitter {
     }
 
     static get version() {
-        return '__VERSION__';
+        return process.env.APP_VER;
     }
 
     static get env() {
-        return '__ENV__';
+        return process.env.NODE_ENV;
     }
 
     static get default() {
@@ -176,7 +176,7 @@ export default class WFPlayer extends Emitter {
         // HTMLVideoElement or HTMLAudioElement
         if (target instanceof HTMLVideoElement || target instanceof HTMLAudioElement) {
             this.options.mediaElement = target;
-            target = target.currentSrc;
+            target = target.currentSrc || target.src;
         }
 
         errorHandle(

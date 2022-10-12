@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 import servor from 'servor';
 import { fileURLToPath } from 'url';
 import { Parcel } from '@parcel/core';
@@ -29,8 +28,8 @@ const bundler = new Parcel({
         },
     },
     env: {
-        __ENV__: 'development',
-        __VERSION__: version,
+        NODE_ENV: 'development',
+        APP_VER: version,
     },
     additionalReporters: [
         {

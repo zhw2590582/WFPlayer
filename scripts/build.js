@@ -18,8 +18,8 @@ const bundler = new Parcel({
         },
     },
     env: {
-        __ENV__: 'development',
-        __VERSION__: version,
+        NODE_ENV: 'production',
+        APP_VER: version,
     },
 });
 

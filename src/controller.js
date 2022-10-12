@@ -8,10 +8,33 @@ export default class Controller {
         this.init = () => {
             if (!this.isInit) {
                 this.isInit = true;
+                this.clickInit();
                 this.resizeInit();
                 this.playInit();
             }
         };
+    }
+
+    getTimeFromEvent(event) {
+        const {
+            template: { canvas },
+            drawer: {
+                config: { padding, beginTime, gridNum },
+            },
+        } = this.wf;
+        const gridGap = canvas.width / gridNum;
+        return (event.pageX - padding * gridGap) / gridGap / 10 + beginTime;
+    }
+
+    clickInit() {
+        const {
+            template: { canvas },
+            events: { proxy },
+        } = this.wf;
+        proxy(canvas, ['click', 'contextmenu'], (event) => {
+            const time = this.getTimeFromEvent(event);
+            this.wf.emit(event.type, time, event);
+        });
     }
 
     resizeInit() {

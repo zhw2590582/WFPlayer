@@ -19,6 +19,9 @@ function initWFPlayer(url) {
         useWorker: true,
     });
     wf.load(url);
+    wf.on('click', (currentTime) => {
+        $video.currentTime = currentTime;
+    });
 }
 
 initWFPlayer($video.src);
