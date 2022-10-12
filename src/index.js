@@ -237,3 +237,7 @@ export default class WFPlayer extends Emitter {
         return this;
     }
 }
+
+if (typeof window !== 'undefined') {
+    window['WFPlayer'] = WFPlayer;
+}

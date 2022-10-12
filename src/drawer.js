@@ -1,4 +1,5 @@
 import { throttle } from './utils';
+import workerText from 'bundle-text:./worker';
 import worker from './worker';
 
 export default class Drawer {
@@ -10,7 +11,7 @@ export default class Drawer {
         this.update = throttle(this.update, refreshDelay, this);
 
         if (useWorker && window.OffscreenCanvas && window.Worker) {
-            this.worker = new Worker('./worker.js');
+            this.worker = new Worker(URL.createObjectURL(new Blob([workerText])));
             this.ctx = this.canvas.getContext('bitmaprenderer');
 
             this.wf.events.proxy(this.worker, 'message', (event) => {
