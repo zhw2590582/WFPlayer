@@ -190,6 +190,17 @@ export default class WFPlayer extends Emitter {
         return this;
     }
 
+    getCurrentTimeFromEvent(event) {
+        const {
+            template: { canvas },
+            drawer: {
+                config: { padding, beginTime, gridNum },
+            },
+        } = this;
+        const gridGap = canvas.width / gridNum;
+        return (event.pageX - padding * gridGap) / gridGap / 10 + beginTime;
+    }
+
     seek(second) {
         errorHandle(typeof second === 'number', 'seek expects to receive number as a parameter.');
         this._currentTime = clamp(second, 0, this.duration);

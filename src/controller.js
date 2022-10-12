@@ -15,24 +15,13 @@ export default class Controller {
         };
     }
 
-    getTimeFromEvent(event) {
-        const {
-            template: { canvas },
-            drawer: {
-                config: { padding, beginTime, gridNum },
-            },
-        } = this.wf;
-        const gridGap = canvas.width / gridNum;
-        return (event.pageX - padding * gridGap) / gridGap / 10 + beginTime;
-    }
-
     clickInit() {
         const {
             template: { canvas },
             events: { proxy },
         } = this.wf;
         proxy(canvas, ['click', 'contextmenu'], (event) => {
-            const time = this.getTimeFromEvent(event);
+            const time = this.wf.getCurrentTimeFromEvent(event);
             this.wf.emit(event.type, time, event);
         });
     }
