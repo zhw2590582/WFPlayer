@@ -169,7 +169,7 @@ class WFPlayer extends (0, _emitterDefault.default) {
         return instances;
     }
     static get version() {
-        return "2.1.3";
+        return "2.2.0";
     }
     static get env() {
         return "development";
@@ -300,9 +300,12 @@ class WFPlayer extends (0, _emitterDefault.default) {
         return this;
     }
     getCurrentTimeFromEvent(event) {
-        const { template: { canvas  } , drawer: { config: { padding , beginTime , gridNum  } ,  } ,  } = this;
-        const gridGap = canvas.width / gridNum;
-        return (event.pageX - padding * gridGap) / gridGap / 10 + beginTime;
+        const { canvas  } = this.template;
+        const { padding , beginTime , gridGap , pixelRatio  } = this.drawer.config;
+        const left = event.pageX - canvas.getBoundingClientRect().left;
+        const paddingWidth = padding * gridGap / pixelRatio;
+        const offsetLeft = left - paddingWidth;
+        return offsetLeft / (gridGap / pixelRatio * 10) + beginTime;
     }
     seek(second) {
         (0, _utils.errorHandle)(typeof second === "number", "seek expects to receive number as a parameter.");
