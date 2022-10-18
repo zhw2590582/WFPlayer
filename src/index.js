@@ -166,8 +166,6 @@ export default class WFPlayer extends Emitter {
     }
 
     load(target) {
-        this.emit('load', target);
-
         // Audiobuffer
         if (target && typeof target.getChannelData === 'function') {
             this.decoder.decodeSuccess(target);

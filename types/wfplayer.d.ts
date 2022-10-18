@@ -36,24 +36,24 @@ type Config = {
     byteLength: number;
 };
 
-type Events =
-    | 'resize'
-    | 'decode:start'
-    | 'decode:success'
-    | 'decode:error'
-    | 'decode'
-    | 'update'
-    | 'load'
-    | 'scroll'
-    | 'click'
-    | 'contextmenu'
-    | 'grabbing'
-    | 'mousemove'
-    | 'mousedown'
-    | 'mouseup'
-    | 'mouseenter'
-    | 'mouseleave'
-    | (string & Record<never, never>);
+type Events = {
+    resize: [];
+    'decode:start': [uint8: Uint8Array];
+    'decode:success': [audiobuffer: AudioBuffer];
+    'decode:error': [error: Error];
+    decode: [config: { channelData: Float32Array; sampleRate: number; duration: number }];
+    update: [config: WFPlayer['drawer']['config']];
+    load: [config: { fileSize: number; loadSize: number; data: Uint8Array }];
+    scroll: [deltaY: -1 | 1, event: Event];
+    click: [currentTime: number, event: Event];
+    contextmenu: [currentTime: number, event: Event];
+    grabbing: [currentTime: number, event: Event];
+    mousemove: [event: Event];
+    mousedown: [event: Event];
+    mouseup: [event: Event];
+    mouseenter: [event: Event];
+    mouseleave: [event: Event];
+};
 
 declare class WFPlayer {
     constructor(option: Option);
@@ -75,10 +75,10 @@ declare class WFPlayer {
     readonly config: WFPlayer['drawer']['config'];
     readonly proxy: WFPlayer['events']['proxy'];
 
-    on(name: Events, fn: Function, ctx?: object): void;
-    once(name: Events, fn: Function, ctx?: object): void;
-    emit(name: Events): void;
-    off(name: Events, callback?: Function): void;
+    on<T extends keyof Events>(name: T, fn: (...args: Events[T]) => unknown, ctx?: object): unknown;
+    once<T extends keyof Events>(name: T, fn: (...args: Events[T]) => unknown, ctx?: object): unknown;
+    emit<T extends keyof Events>(name: T, ...args: unknown[]): unknown;
+    off<T extends keyof Events>(name: T, callback?: Function): unknown;
 
     setOptions(options: Partial<Option>): WFPlayer;
     load(target: string | Uint8Array | AudioBuffer | HTMLVideoElement | HTMLAudioElement): WFPlayer;
