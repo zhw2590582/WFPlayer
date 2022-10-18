@@ -169,7 +169,7 @@ class WFPlayer extends (0, _emitterDefault.default) {
         return instances;
     }
     static get version() {
-        return "2.2.1";
+        return "2.2.2";
     }
     static get env() {
         return "development";
@@ -232,6 +232,7 @@ class WFPlayer extends (0, _emitterDefault.default) {
         super();
         this._currentTime = 0;
         this.isDestroy = false;
+        this.grabbing = false;
         this.options = {};
         this.setOptions(options);
         this.events = new (0, _eventsDefault.default)(this);
@@ -271,6 +272,8 @@ class WFPlayer extends (0, _emitterDefault.default) {
             ...this.options,
             ...options
         }, WFPlayer.scheme);
+        if (this.options.scrollable) this.options.container.classList.add("wf-scrollable");
+        else this.options.container.classList.remove("wf-scrollable");
         this.update();
         return this;
     }
@@ -1043,6 +1046,7 @@ class Controller {
                 this.resizeInit();
                 this.playInit();
                 this.scrollInit();
+                this.grabInit();
             }
         };
     }
@@ -1090,6 +1094,34 @@ class Controller {
         const { events: { proxy  } , options: { container  } ,  } = this.wf;
         proxy(container, "wheel", (event)=>{
             this.wf.emit("scroll", Math.sign(event.deltaY), event);
+        });
+    }
+    grabInit() {
+        const { events: { proxy  } , options: { container  } ,  } = this.wf;
+        let lastCurrentTime = 0;
+        let lastPageX = 0;
+        proxy(container, "mousedown", (event)=>{
+            if (event.button !== 0) return;
+            this.wf.grabbing = true;
+            const { scrollable  } = this.wf.config;
+            lastCurrentTime = scrollable ? this.wf.currentTime : this.wf.getCurrentTimeFromEvent(event);
+            lastPageX = event.pageX;
+        });
+        proxy(container, "mousemove", (event)=>{
+            if (!this.wf.grabbing) return;
+            container.classList.add("wf-grabbing");
+            const diffWidth = event.pageX - lastPageX;
+            const { gridGap , pixelRatio , scrollable  } = this.wf.config;
+            const diffTime = diffWidth / (gridGap / pixelRatio * 10);
+            const currentTime = lastCurrentTime + (scrollable ? -diffTime : diffTime);
+            this.wf.emit("grabbing", currentTime, event);
+        });
+        proxy(document, "mouseup", ()=>{
+            if (!this.wf.grabbing) return;
+            container.classList.remove("wf-grabbing");
+            this.wf.grabbing = false;
+            lastCurrentTime = 0;
+            lastPageX = 0;
         });
     }
     destroy() {

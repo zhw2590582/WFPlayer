@@ -84,6 +84,7 @@ export default class WFPlayer extends Emitter {
 
         this._currentTime = 0;
         this.isDestroy = false;
+        this.grabbing = false;
         this.options = {};
         this.setOptions(options);
 
@@ -149,6 +150,12 @@ export default class WFPlayer extends Emitter {
             },
             WFPlayer.scheme,
         );
+
+        if (this.options.scrollable) {
+            this.options.container.classList.add('wf-scrollable');
+        } else {
+            this.options.container.classList.remove('wf-scrollable');
+        }
 
         this.update();
         return this;

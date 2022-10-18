@@ -47,6 +47,7 @@ type Events =
     | 'scroll'
     | 'click'
     | 'contextmenu'
+    | 'grabbing'
     | (string & Record<never, never>);
 
 declare class WFPlayer {
@@ -63,6 +64,7 @@ declare class WFPlayer {
     readonly currentTime: number;
     readonly duration: number;
     readonly playing: boolean;
+    readonly grabbing: boolean;
 
     readonly canvas: WFPlayer['template']['canvas'];
     readonly config: WFPlayer['drawer']['config'];

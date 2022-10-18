@@ -12,6 +12,7 @@ export default class Controller {
                 this.resizeInit();
                 this.playInit();
                 this.scrollInit();
+                this.grabInit();
             }
         };
     }
@@ -78,6 +79,42 @@ export default class Controller {
 
         proxy(container, 'wheel', (event) => {
             this.wf.emit('scroll', Math.sign(event.deltaY), event);
+        });
+    }
+
+    grabInit() {
+        const {
+            events: { proxy },
+            options: { container },
+        } = this.wf;
+
+        let lastCurrentTime = 0;
+        let lastPageX = 0;
+
+        proxy(container, 'mousedown', (event) => {
+            if (event.button !== 0) return;
+            this.wf.grabbing = true;
+            const { scrollable } = this.wf.config;
+            lastCurrentTime = scrollable ? this.wf.currentTime : this.wf.getCurrentTimeFromEvent(event);
+            lastPageX = event.pageX;
+        });
+
+        proxy(container, 'mousemove', (event) => {
+            if (!this.wf.grabbing) return;
+            container.classList.add('wf-grabbing');
+            const diffWidth = event.pageX - lastPageX;
+            const { gridGap, pixelRatio, scrollable } = this.wf.config;
+            const diffTime = diffWidth / ((gridGap / pixelRatio) * 10);
+            const currentTime = lastCurrentTime + (scrollable ? -diffTime : diffTime);
+            this.wf.emit('grabbing', currentTime, event);
+        });
+
+        proxy(document, 'mouseup', () => {
+            if (!this.wf.grabbing) return;
+            container.classList.remove('wf-grabbing');
+            this.wf.grabbing = false;
+            lastCurrentTime = 0;
+            lastPageX = 0;
         });
     }
 

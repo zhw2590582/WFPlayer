@@ -19,7 +19,8 @@ function initWFPlayer(url) {
         useWorker: true,
     });
     wf.load(url);
-    wf.on('click', (currentTime) => wf.seek(currentTime));
+    wf.on('click', (currentTime) => !wf.options.scrollable && wf.seek(currentTime));
+    wf.on('grabbing', (currentTime) => wf.seek(currentTime));
     wf.on('scroll', (deltaY) => wf.seek(wf.currentTime + deltaY / 10));
 }
 
