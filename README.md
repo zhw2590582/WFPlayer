@@ -267,6 +267,54 @@ document.getElementById('file').addEventListener('change', async (event) => {
 })
 ```
 
+#### How to add a custom event
+
+```js
+var wf = new WFPlayer({
+    container: document.querySelector('#waveform'),
+    mediaElement: document.querySelector('#video'),
+});
+
+wf.load('path/to/audio.mp3');
+
+// click event
+wf.on('click', (currentTime) => {
+     wf.seek(currentTime)
+});
+
+// grab event
+wf.on('grabbing', (currentTime) => {
+    wf.seek(currentTime)
+});
+
+// scroll event
+wf.on('scroll', (deltaY) => {
+    wf.seek(wf.currentTime + deltaY / 10)
+});
+```
+
+#### How to get currentTime from an event
+
+```js
+var waveform = document.querySelector('#waveform')
+var wf = new WFPlayer({
+    container: waveform,
+    mediaElement: document.querySelector('#video'),
+});
+
+wf.load('path/to/audio.mp3');
+
+waveform.addEventListener('mousemove', event => {
+    const currentTime = this.getCurrentTimeFromEvent(event);
+    console.log(currentTime);
+})
+
+waveform.addEventListener('click', event => {
+    const currentTime = this.getCurrentTimeFromEvent(event);
+    console.log(currentTime);
+})
+```
+
 ## Donations
 
 We accept donations through these channels:
