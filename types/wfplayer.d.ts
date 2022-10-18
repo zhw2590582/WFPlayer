@@ -95,6 +95,7 @@ declare class WFPlayer {
 
     readonly template: {
         canvas: HTMLCanvasElement;
+        cursor: HTMLDivElement;
     };
 
     readonly decoder: {

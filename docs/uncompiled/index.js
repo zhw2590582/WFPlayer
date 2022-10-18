@@ -1050,6 +1050,7 @@ class Controller {
                 this.playInit();
                 this.scrollInit();
                 this.grabInit();
+                this.hoverInit();
             }
         };
     }
@@ -1113,6 +1114,7 @@ class Controller {
             lastPageX = event.pageX;
         });
         proxy(container, "mousemove", (event)=>{
+            this.wf.emit("mousemove", event);
             if (!grabStart) return;
             this.wf.grabbing = true;
             container.classList.add("wf-grabbing");
@@ -1129,6 +1131,22 @@ class Controller {
             grabStart = false;
             lastCurrentTime = 0;
             lastPageX = 0;
+        });
+    }
+    hoverInit() {
+        const { events: { proxy  } , options: { container  } ,  } = this.wf;
+        const $cursor = document.createElement("div");
+        $cursor.style.cssText = `display: none; position: absolute; top: 0; left: 0; width: 1px; height: 100%; background-color: #ffffff; opacity: 0.25;`;
+        container.appendChild($cursor);
+        this.wf.template.cursor = $cursor;
+        this.wf.on("mousemove", (event)=>{
+            $cursor.style.left = event.pageX + "px";
+        });
+        proxy(container, "mouseenter", ()=>{
+            $cursor.style.display = null;
+        });
+        proxy(container, "mouseleave", ()=>{
+            $cursor.style.display = "none";
         });
     }
     destroy() {
