@@ -48,6 +48,11 @@ type Events =
     | 'click'
     | 'contextmenu'
     | 'grabbing'
+    | 'mousemove'
+    | 'mousedown'
+    | 'mouseup'
+    | 'mouseenter'
+    | 'mouseleave'
     | (string & Record<never, never>);
 
 declare class WFPlayer {
@@ -78,6 +83,7 @@ declare class WFPlayer {
     setOptions(options: Partial<Option>): WFPlayer;
     load(target: string | Uint8Array | AudioBuffer | HTMLVideoElement | HTMLAudioElement): WFPlayer;
     getCurrentTimeFromEvent(event: Event): number;
+    getDurationFromWidth(width: number): number;
     seek(second: number): WFPlayer;
     changeChannel(channel: 0 | 1 | 2): WFPlayer;
     exportImage(): WFPlayer;

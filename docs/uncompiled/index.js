@@ -311,7 +311,12 @@ class WFPlayer extends (0, _emitterDefault.default) {
         const left = event.pageX - container.getBoundingClientRect().left;
         const paddingWidth = padding * gridGap / pixelRatio;
         const offsetLeft = left - paddingWidth;
-        return offsetLeft / (gridGap / pixelRatio * 10) + beginTime;
+        const duration = this.getDurationFromWidth(offsetLeft);
+        return duration + beginTime;
+    }
+    getDurationFromWidth(width) {
+        const { gridGap , pixelRatio  } = this.drawer.config;
+        return width / (gridGap / pixelRatio * 10);
     }
     seek(second) {
         (0, _utils.errorHandle)(typeof second === "number", "seek expects to receive number as a parameter.");
@@ -1107,6 +1112,7 @@ class Controller {
         let lastCurrentTime = 0;
         let lastPageX = 0;
         proxy(container, "mousedown", (event)=>{
+            this.wf.emit("mousedown", event);
             if (event.button !== 0) return;
             grabStart = true;
             const { scrollable  } = this.wf.config;
@@ -1118,13 +1124,14 @@ class Controller {
             if (!grabStart) return;
             this.wf.grabbing = true;
             container.classList.add("wf-grabbing");
+            const { scrollable  } = this.wf.config;
             const diffWidth = event.pageX - lastPageX;
-            const { gridGap , pixelRatio , scrollable  } = this.wf.config;
-            const diffTime = diffWidth / (gridGap / pixelRatio * 10);
+            const diffTime = this.wf.getDurationFromWidth(diffWidth);
             const currentTime = lastCurrentTime + (scrollable ? -diffTime : diffTime);
             this.wf.emit("grabbing", currentTime, event);
         });
-        proxy(document, "mouseup", ()=>{
+        proxy(document, "mouseup", (event)=>{
+            this.wf.emit("mouseup", event);
             if (!grabStart) return;
             setTimeout(()=>this.wf.grabbing = false);
             container.classList.remove("wf-grabbing");
@@ -1142,10 +1149,12 @@ class Controller {
         this.wf.on("mousemove", (event)=>{
             $cursor.style.left = event.pageX - container.getBoundingClientRect().left + "px";
         });
-        proxy(container, "mouseenter", ()=>{
+        proxy(container, "mouseenter", (event)=>{
+            this.wf.emit("mouseenter", event);
             $cursor.style.display = null;
         });
-        proxy(container, "mouseleave", ()=>{
+        proxy(container, "mouseleave", (event)=>{
+            this.wf.emit("mouseleave", event);
             $cursor.style.display = "none";
         });
     }

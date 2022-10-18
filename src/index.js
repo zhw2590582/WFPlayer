@@ -205,7 +205,13 @@ export default class WFPlayer extends Emitter {
         const left = event.pageX - container.getBoundingClientRect().left;
         const paddingWidth = (padding * gridGap) / pixelRatio;
         const offsetLeft = left - paddingWidth;
-        return offsetLeft / ((gridGap / pixelRatio) * 10) + beginTime;
+        const duration = this.getDurationFromWidth(offsetLeft);
+        return duration + beginTime;
+    }
+
+    getDurationFromWidth(width) {
+        const { gridGap, pixelRatio } = this.drawer.config;
+        return width / ((gridGap / pixelRatio) * 10);
     }
 
     seek(second) {
