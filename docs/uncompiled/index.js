@@ -1143,7 +1143,7 @@ class Controller {
     hoverInit() {
         const { events: { proxy  } , options: { container  } ,  } = this.wf;
         const $cursor = document.createElement("div");
-        $cursor.style.cssText = `display: none; position: absolute; top: 0; left: 0; width: 1px; height: 100%; background-color: #ffffff; opacity: 0.25;`;
+        $cursor.style.cssText = `position: absolute; top: 0; left: 0; width: 1px; height: 100%; background-color: rgb(255, 255, 255); opacity: 0.25; user-select: none; pointer-events: none; display: none;`;
         container.appendChild($cursor);
         this.wf.template.cursor = $cursor;
         this.wf.on("mousemove", (event)=>{
