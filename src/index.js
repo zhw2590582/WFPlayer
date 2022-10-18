@@ -200,9 +200,9 @@ export default class WFPlayer extends Emitter {
     }
 
     getCurrentTimeFromEvent(event) {
-        const { canvas } = this.template;
+        const { container } = this.options;
         const { padding, beginTime, gridGap, pixelRatio } = this.drawer.config;
-        const left = event.pageX - canvas.getBoundingClientRect().left;
+        const left = event.pageX - container.getBoundingClientRect().left;
         const paddingWidth = (padding * gridGap) / pixelRatio;
         const offsetLeft = left - paddingWidth;
         return offsetLeft / ((gridGap / pixelRatio) * 10) + beginTime;

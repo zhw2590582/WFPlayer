@@ -136,7 +136,7 @@ export default class Controller {
         this.wf.template.cursor = $cursor;
 
         this.wf.on('mousemove', (event) => {
-            $cursor.style.left = event.pageX + 'px';
+            $cursor.style.left = event.pageX - container.getBoundingClientRect().left + 'px';
         });
 
         proxy(container, 'mouseenter', () => {
