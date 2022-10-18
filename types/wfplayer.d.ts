@@ -68,6 +68,7 @@ declare class WFPlayer {
 
     readonly canvas: WFPlayer['template']['canvas'];
     readonly config: WFPlayer['drawer']['config'];
+    readonly proxy: WFPlayer['events']['proxy'];
 
     on(name: Events, fn: Function, ctx?: object): void;
     once(name: Events, fn: Function, ctx?: object): void;
@@ -90,8 +91,6 @@ declare class WFPlayer {
             handler: (event: WindowEventMap[KW] | HTMLElementEventMap[KH] | Event) => void,
             options?: boolean | AddEventListenerOptions,
         ): () => void;
-        hover(element: HTMLElement, mouseenter?: (event: Event) => any, mouseleave?: (event: Event) => any): void;
-        loadImg(element: HTMLImageElement | string): Promise<HTMLImageElement>;
     };
 
     readonly template: {

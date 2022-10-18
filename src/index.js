@@ -131,6 +131,10 @@ export default class WFPlayer extends Emitter {
         return this.drawer.config;
     }
 
+    get proxy() {
+        return this.events.proxy;
+    }
+
     setOptions(options = {}) {
         errorHandle(validator.kindOf(options) === 'object', 'setOptions expects to receive object as a parameter.');
 

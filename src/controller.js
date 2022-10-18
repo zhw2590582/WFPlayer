@@ -24,6 +24,7 @@ export default class Controller {
         } = this.wf;
 
         proxy(container, ['click', 'contextmenu'], (event) => {
+            if (this.wf.grabbing) return;
             const time = this.wf.getCurrentTimeFromEvent(event);
             this.wf.emit(event.type, time, event);
         });
@@ -88,19 +89,21 @@ export default class Controller {
             options: { container },
         } = this.wf;
 
+        let grabStart = false;
         let lastCurrentTime = 0;
         let lastPageX = 0;
 
         proxy(container, 'mousedown', (event) => {
             if (event.button !== 0) return;
-            this.wf.grabbing = true;
+            grabStart = true;
             const { scrollable } = this.wf.config;
             lastCurrentTime = scrollable ? this.wf.currentTime : this.wf.getCurrentTimeFromEvent(event);
             lastPageX = event.pageX;
         });
 
         proxy(container, 'mousemove', (event) => {
-            if (!this.wf.grabbing) return;
+            if (!grabStart) return;
+            this.wf.grabbing = true;
             container.classList.add('wf-grabbing');
             const diffWidth = event.pageX - lastPageX;
             const { gridGap, pixelRatio, scrollable } = this.wf.config;
@@ -110,9 +113,10 @@ export default class Controller {
         });
 
         proxy(document, 'mouseup', () => {
-            if (!this.wf.grabbing) return;
+            if (!grabStart) return;
+            setTimeout(() => (this.wf.grabbing = false));
             container.classList.remove('wf-grabbing');
-            this.wf.grabbing = false;
+            grabStart = false;
             lastCurrentTime = 0;
             lastPageX = 0;
         });
