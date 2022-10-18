@@ -50,6 +50,7 @@ export default class Controller {
         } = this.wf;
 
         if (!mediaElement) return;
+
         proxy(mediaElement, ['seeked', 'seeking', 'canplay'], () => {
             this.wf.update();
         });

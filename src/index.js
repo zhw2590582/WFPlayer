@@ -52,16 +52,6 @@ export default class WFPlayer extends Emitter {
     }
 
     static get scheme() {
-        const checkNum = (name, min, max, isInteger) => (value, type) => {
-            errorHandle(type === 'number', `${name} expects to receive number as a parameter, but got ${type}.`);
-            const numberType = isInteger ? 'an integer' : 'a';
-            errorHandle(
-                value >= min && value <= max && (isInteger ? Number.isInteger(value) : true),
-                `'options.${name}' expect ${numberType} number that >= ${min} and <= ${max}, but got ${value}.`,
-            );
-            return true;
-        };
-
         return {
             container: 'htmlelement|htmldivelement',
             mediaElement: 'null|htmlvideoelement|htmlaudioelement',
@@ -80,12 +70,12 @@ export default class WFPlayer extends Emitter {
             rulerColor: 'string',
             rulerAtTop: 'boolean',
             scrollable: 'boolean',
-            refreshDelay: checkNum('refreshDelay', 16, 1000, true),
-            channel: checkNum('channel', 0, 5, true),
-            duration: checkNum('duration', 1, 100, true),
-            padding: checkNum('padding', 1, 100, true),
-            waveScale: checkNum('waveScale', 0.1, 10, false),
-            pixelRatio: checkNum('pixelRatio', 1, 10, false),
+            refreshDelay: 'number',
+            channel: 'number',
+            duration: 'number',
+            padding: 'number',
+            waveScale: 'number',
+            pixelRatio: 'number',
         };
     }
 
@@ -226,11 +216,6 @@ export default class WFPlayer extends Emitter {
             this.template.update();
             this.drawer.update();
         }
-        return this;
-    }
-
-    reset() {
-        this.decoder.destroy();
         return this;
     }
 
