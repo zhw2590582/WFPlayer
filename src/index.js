@@ -122,6 +122,14 @@ export default class WFPlayer extends Emitter {
         return false;
     }
 
+    get canvas() {
+        return this.template.canvas;
+    }
+
+    get config() {
+        return this.drawer.config;
+    }
+
     setOptions(options = {}) {
         errorHandle(validator.kindOf(options) === 'object', 'setOptions expects to receive object as a parameter.');
 

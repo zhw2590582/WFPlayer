@@ -11,16 +11,18 @@ export default class Controller {
                 this.clickInit();
                 this.resizeInit();
                 this.playInit();
+                this.scrollInit();
             }
         };
     }
 
     clickInit() {
         const {
-            template: { canvas },
+            options: { container },
             events: { proxy },
         } = this.wf;
-        proxy(canvas, ['click', 'contextmenu'], (event) => {
+
+        proxy(container, ['click', 'contextmenu'], (event) => {
             const time = this.wf.getCurrentTimeFromEvent(event);
             this.wf.emit(event.type, time, event);
         });
@@ -66,6 +68,17 @@ export default class Controller {
                 }
             });
         }.call(this));
+    }
+
+    scrollInit() {
+        const {
+            events: { proxy },
+            options: { container },
+        } = this.wf;
+
+        proxy(container, 'wheel', (event) => {
+            this.wf.emit('scroll', Math.sign(event.deltaY), event);
+        });
     }
 
     destroy() {

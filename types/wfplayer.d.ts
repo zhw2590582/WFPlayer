@@ -61,6 +61,9 @@ declare class WFPlayer {
     readonly duration: number;
     readonly playing: boolean;
 
+    readonly canvas: WFPlayer['template']['canvas'];
+    readonly config: WFPlayer['drawer']['config'];
+
     on(name: Events, fn: Function, ctx?: object): void;
     once(name: Events, fn: Function, ctx?: object): void;
     emit(name: Events): void;

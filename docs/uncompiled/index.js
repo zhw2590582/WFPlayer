@@ -256,6 +256,12 @@ class WFPlayer extends (0, _emitterDefault.default) {
         if (mediaElement) return !!(mediaElement.currentTime > 0 && !mediaElement.paused && !mediaElement.ended && mediaElement.readyState > 2);
         return false;
     }
+    get canvas() {
+        return this.template.canvas;
+    }
+    get config() {
+        return this.drawer.config;
+    }
     setOptions(options = {}) {
         (0, _utils.errorHandle)((0, _optionValidatorDefault.default).kindOf(options) === "object", "setOptions expects to receive object as a parameter.");
         if (typeof options.container === "string") options.container = document.querySelector(options.container);
@@ -1036,12 +1042,13 @@ class Controller {
                 this.clickInit();
                 this.resizeInit();
                 this.playInit();
+                this.scrollInit();
             }
         };
     }
     clickInit() {
-        const { template: { canvas  } , events: { proxy  } ,  } = this.wf;
-        proxy(canvas, [
+        const { options: { container  } , events: { proxy  } ,  } = this.wf;
+        proxy(container, [
             "click",
             "contextmenu"
         ], (event)=>{
@@ -1078,6 +1085,12 @@ class Controller {
                 if (!this.wf.isDestroy) loop.call(this);
             });
         }).call(this);
+    }
+    scrollInit() {
+        const { events: { proxy  } , options: { container  } ,  } = this.wf;
+        proxy(container, "wheel", (event)=>{
+            this.wf.emit("scroll", Math.sign(event.deltaY), event);
+        });
     }
     destroy() {
         cancelAnimationFrame(this.playTimer);

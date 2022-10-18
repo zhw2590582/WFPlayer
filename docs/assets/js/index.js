@@ -19,9 +19,8 @@ function initWFPlayer(url) {
         useWorker: true,
     });
     wf.load(url);
-    wf.on('click', (currentTime) => {
-        $video.currentTime = currentTime;
-    });
+    wf.on('click', (currentTime) => wf.seek(currentTime));
+    wf.on('scroll', (deltaY) => wf.seek(wf.currentTime + deltaY / 10));
 }
 
 initWFPlayer('audio.mp3');
