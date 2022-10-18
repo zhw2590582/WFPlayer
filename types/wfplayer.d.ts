@@ -44,6 +44,9 @@ type Events =
     | 'decode'
     | 'update'
     | 'load'
+    | 'scroll'
+    | 'click'
+    | 'contextmenu'
     | (string & Record<never, never>);
 
 declare class WFPlayer {
