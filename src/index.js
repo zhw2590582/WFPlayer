@@ -82,6 +82,7 @@ export default class WFPlayer extends Emitter {
     constructor(options = {}) {
         super();
 
+        this._playTimer = null;
         this._currentTime = 0;
         this.isDestroy = false;
         this.grabbing = false;
@@ -223,15 +224,16 @@ export default class WFPlayer extends Emitter {
     }
 
     smoothSeek(second, duration = 0.2) {
-        const diff = second - this.currentTime;
+        const diff = clamp(second, 0, this.duration) - this.currentTime;
         if (diff === 0) return this;
         const step = diff / duration / 100;
         const { mediaElement } = this.options;
         const { playing } = this;
         if (playing) mediaElement.pause();
+        cancelAnimationFrame(this._playTimer);
 
         (function loop() {
-            requestAnimationFrame(() => {
+            this._playTimer = requestAnimationFrame(() => {
                 if ((diff > 0 && this.currentTime < second) || (diff < 0 && this.currentTime > second)) {
                     this.seek(this.currentTime + step);
                     if (!this.isDestroy) {
