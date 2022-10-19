@@ -230,6 +230,7 @@ class WFPlayer extends (0, _emitterDefault.default) {
     }
     constructor(options = {}){
         super();
+        this._playTimer = null;
         this._currentTime = 0;
         this.isDestroy = false;
         this.grabbing = false;
@@ -325,14 +326,15 @@ class WFPlayer extends (0, _emitterDefault.default) {
         return this;
     }
     smoothSeek(second, duration = 0.2) {
-        const diff = second - this.currentTime;
+        const diff = (0, _utils.clamp)(second, 0, this.duration) - this.currentTime;
         if (diff === 0) return this;
         const step = diff / duration / 100;
         const { mediaElement  } = this.options;
         const { playing  } = this;
         if (playing) mediaElement.pause();
+        cancelAnimationFrame(this._playTimer);
         (function loop() {
-            requestAnimationFrame(()=>{
+            this._playTimer = requestAnimationFrame(()=>{
                 if (diff > 0 && this.currentTime < second || diff < 0 && this.currentTime > second) {
                     this.seek(this.currentTime + step);
                     if (!this.isDestroy) loop.call(this);
@@ -1162,6 +1164,7 @@ class Controller {
     hoverInit() {
         const { events: { proxy  } , options: { container  } ,  } = this.wf;
         const $cursor = document.createElement("div");
+        $cursor.classList.add("wf-cursor");
         $cursor.style.cssText = `position:absolute;top:0;left:0;bottom:0;z-index:1;width:1px;height:100%;background-color:#ffffff;opacity:0.25;user-select:none;pointer-events:none;display:none;`;
         container.appendChild($cursor);
         this.wf.template.cursor = $cursor;
