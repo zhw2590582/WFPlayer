@@ -225,33 +225,30 @@ export default class WFPlayer extends Emitter {
     }
 
     smoothSeek(second, duration = 0.2) {
-        errorHandle(typeof second === 'number', 'smoothSeek expects to receive number as a parameter.');
-        cancelAnimationFrame(this._playTimer);
-        const clampSecond = clamp(second, 0, this.duration);
-        const diff = clampSecond - this.currentTime;
-        if (diff === 0) return this;
-        const step = diff / duration / 100;
-        const { mediaElement } = this.options;
-        const { playing } = this;
-        if (playing) mediaElement.pause();
+        return new Promise((resolve) => {
+            errorHandle(typeof second === 'number', 'smoothSeek expects to receive number as a parameter.');
+            cancelAnimationFrame(this._playTimer);
+            const clampSecond = clamp(second, 0, this.duration);
+            const diff = clampSecond - this.currentTime;
+            if (diff === 0) return resolve(this);
+            const step = diff / duration / 100;
+            const { mediaElement } = this.options;
+            const { playing } = this;
+            if (playing) mediaElement.pause();
 
-        (function loop() {
-            this._playTimer = requestAnimationFrame(() => {
-                if ((diff > 0 && this.currentTime < clampSecond) || (diff < 0 && this.currentTime > clampSecond)) {
-                    this.seek(this.currentTime + step);
-                    if (!this.isDestroy) {
-                        loop.call(this);
+            (function loop() {
+                this._playTimer = requestAnimationFrame(() => {
+                    if ((diff > 0 && this.currentTime < clampSecond) || (diff < 0 && this.currentTime > clampSecond)) {
+                        this.seek(this.currentTime + step);
+                        if (!this.isDestroy) loop.call(this);
+                    } else {
+                        this.seek(clampSecond);
+                        if (playing) mediaElement.play();
+                        resolve(this);
                     }
-                } else {
-                    this.seek(clampSecond);
-                    if (playing) {
-                        mediaElement.play();
-                    }
-                }
-            });
-        }.call(this));
-
-        return this;
+                });
+            }.call(this));
+        });
     }
 
     changeChannel(channel) {
