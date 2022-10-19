@@ -225,7 +225,7 @@ export default class WFPlayer extends Emitter {
     }
 
     smoothSeek(second, duration = 0.2) {
-        errorHandle(typeof second === 'number', 'seek expects to receive number as a parameter.');
+        errorHandle(typeof second === 'number', 'smoothSeek expects to receive number as a parameter.');
         cancelAnimationFrame(this._playTimer);
         const clampSecond = clamp(second, 0, this.duration);
         const diff = clampSecond - this.currentTime;
