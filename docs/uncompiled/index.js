@@ -326,7 +326,8 @@ class WFPlayer extends (0, _emitterDefault.default) {
         return this;
     }
     smoothSeek(second, duration = 0.2) {
-        const diff = (0, _utils.clamp)(second, 0, this.duration) - this.currentTime;
+        const clampSecond = (0, _utils.clamp)(second, 0, this.duration);
+        const diff = clampSecond - this.currentTime;
         if (diff === 0) return this;
         const step = diff / duration / 100;
         const { mediaElement  } = this.options;
@@ -335,11 +336,11 @@ class WFPlayer extends (0, _emitterDefault.default) {
         cancelAnimationFrame(this._playTimer);
         (function loop() {
             this._playTimer = requestAnimationFrame(()=>{
-                if (diff > 0 && this.currentTime < second || diff < 0 && this.currentTime > second) {
+                if (diff > 0 && this.currentTime < clampSecond || diff < 0 && this.currentTime > clampSecond) {
                     this.seek(this.currentTime + step);
                     if (!this.isDestroy) loop.call(this);
                 } else {
-                    this.seek(second);
+                    this.seek(clampSecond);
                     if (playing) mediaElement.play();
                 }
             });
