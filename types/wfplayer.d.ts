@@ -85,6 +85,7 @@ declare class WFPlayer {
     getCurrentTimeFromEvent(event: Event): number;
     getDurationFromWidth(width: number): number;
     seek(second: number): WFPlayer;
+    smoothSeek(second: number, duration: number): WFPlayer;
     changeChannel(channel: 0 | 1 | 2): WFPlayer;
     exportImage(): WFPlayer;
     update(): WFPlayer;

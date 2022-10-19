@@ -281,7 +281,6 @@ class WFPlayer extends (0, _emitterDefault.default) {
         return this;
     }
     load(target) {
-        this.emit("load", target);
         // Audiobuffer
         if (target && typeof target.getChannelData === "function") {
             this.decoder.decodeSuccess(target);
@@ -323,6 +322,26 @@ class WFPlayer extends (0, _emitterDefault.default) {
         this._currentTime = (0, _utils.clamp)(second, 0, this.duration);
         if (this.options.mediaElement && this.options.mediaElement.currentTime !== this._currentTime) this.options.mediaElement.currentTime = this._currentTime;
         this.update();
+        return this;
+    }
+    smoothSeek(second, duration = 0.2) {
+        const diff = second - this.currentTime;
+        if (diff === 0) return this;
+        const step = diff / duration / 100;
+        const { mediaElement  } = this.options;
+        const { playing  } = this;
+        if (playing) mediaElement.pause();
+        (function loop() {
+            requestAnimationFrame(()=>{
+                if (diff > 0 && this.currentTime < second || diff < 0 && this.currentTime > second) {
+                    this.seek(this.currentTime + step);
+                    if (!this.isDestroy) loop.call(this);
+                } else {
+                    this.seek(second);
+                    if (playing) mediaElement.play();
+                }
+            });
+        }).call(this);
         return this;
     }
     changeChannel(channel) {
@@ -1143,7 +1162,7 @@ class Controller {
     hoverInit() {
         const { events: { proxy  } , options: { container  } ,  } = this.wf;
         const $cursor = document.createElement("div");
-        $cursor.style.cssText = `position: absolute; top: 0; left: 0; width: 1px; height: 100%; background-color: rgb(255, 255, 255); opacity: 0.25; user-select: none; pointer-events: none; display: none;`;
+        $cursor.style.cssText = `position:absolute;top:0;left:0;bottom:0;z-index:1;width:1px;height:100%;background-color:#ffffff;opacity:0.25;user-select:none;pointer-events:none;display:none;`;
         container.appendChild($cursor);
         this.wf.template.cursor = $cursor;
         this.wf.on("mousemove", (event)=>{

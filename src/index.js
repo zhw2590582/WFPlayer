@@ -222,6 +222,33 @@ export default class WFPlayer extends Emitter {
         return this;
     }
 
+    smoothSeek(second, duration = 0.2) {
+        const diff = second - this.currentTime;
+        if (diff === 0) return this;
+        const step = diff / duration / 100;
+        const { mediaElement } = this.options;
+        const { playing } = this;
+        if (playing) mediaElement.pause();
+
+        (function loop() {
+            requestAnimationFrame(() => {
+                if ((diff > 0 && this.currentTime < second) || (diff < 0 && this.currentTime > second)) {
+                    this.seek(this.currentTime + step);
+                    if (!this.isDestroy) {
+                        loop.call(this);
+                    }
+                } else {
+                    this.seek(second);
+                    if (playing) {
+                        mediaElement.play();
+                    }
+                }
+            });
+        }.call(this));
+
+        return this;
+    }
+
     changeChannel(channel) {
         this.decoder.changeChannel(channel);
         this.setOptions({ channel });

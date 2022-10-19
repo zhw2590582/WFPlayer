@@ -169,6 +169,12 @@ Jump to a certain time:
 wf.seek(second);
 ```
 
+Jump to a certain time with smooth:
+
+```js
+wf.smoothSeek(second, duration);
+```
+
 Export image:
 
 ```js
