@@ -215,6 +215,7 @@ export default class WFPlayer extends Emitter {
 
     seek(second) {
         errorHandle(typeof second === 'number', 'seek expects to receive number as a parameter.');
+        cancelAnimationFrame(this._playTimer);
         this._currentTime = clamp(second, 0, this.duration);
         if (this.options.mediaElement && this.options.mediaElement.currentTime !== this._currentTime) {
             this.options.mediaElement.currentTime = this._currentTime;
@@ -224,6 +225,8 @@ export default class WFPlayer extends Emitter {
     }
 
     smoothSeek(second, duration = 0.2) {
+        errorHandle(typeof second === 'number', 'seek expects to receive number as a parameter.');
+        cancelAnimationFrame(this._playTimer);
         const clampSecond = clamp(second, 0, this.duration);
         const diff = clampSecond - this.currentTime;
         if (diff === 0) return this;
@@ -231,7 +234,6 @@ export default class WFPlayer extends Emitter {
         const { mediaElement } = this.options;
         const { playing } = this;
         if (playing) mediaElement.pause();
-        cancelAnimationFrame(this._playTimer);
 
         (function loop() {
             this._playTimer = requestAnimationFrame(() => {

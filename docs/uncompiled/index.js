@@ -320,12 +320,15 @@ class WFPlayer extends (0, _emitterDefault.default) {
     }
     seek(second) {
         (0, _utils.errorHandle)(typeof second === "number", "seek expects to receive number as a parameter.");
+        cancelAnimationFrame(this._playTimer);
         this._currentTime = (0, _utils.clamp)(second, 0, this.duration);
         if (this.options.mediaElement && this.options.mediaElement.currentTime !== this._currentTime) this.options.mediaElement.currentTime = this._currentTime;
         this.update();
         return this;
     }
     smoothSeek(second, duration = 0.2) {
+        (0, _utils.errorHandle)(typeof second === "number", "seek expects to receive number as a parameter.");
+        cancelAnimationFrame(this._playTimer);
         const clampSecond = (0, _utils.clamp)(second, 0, this.duration);
         const diff = clampSecond - this.currentTime;
         if (diff === 0) return this;
@@ -333,7 +336,6 @@ class WFPlayer extends (0, _emitterDefault.default) {
         const { mediaElement  } = this.options;
         const { playing  } = this;
         if (playing) mediaElement.pause();
-        cancelAnimationFrame(this._playTimer);
         (function loop() {
             this._playTimer = requestAnimationFrame(()=>{
                 if (diff > 0 && this.currentTime < clampSecond || diff < 0 && this.currentTime > clampSecond) {
