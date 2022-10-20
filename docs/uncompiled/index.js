@@ -647,6 +647,7 @@ class Template {
         } else {
             (0, _utils.errorHandle)(this.wf.constructor.instances.every((wf)=>wf.options.container !== container), "Cannot mount multiple instances on the same dom element, please destroy the previous instance first.");
             container.innerHTML = "";
+            container.style.overflow = "hidden";
             this.canvas = document.createElement("canvas");
             this.canvas.width = width;
             this.canvas.height = height;
@@ -1184,7 +1185,7 @@ class Controller {
         const { events: { proxy  } , options: { container  } ,  } = this.wf;
         const $cursor = document.createElement("div");
         (0, _utils.addClass)($cursor, "wf-cursor");
-        $cursor.style.cssText = `position:absolute;top:0;left:0;bottom:0;z-index:1;width:1px;height:100%;background-color:#ffffff;opacity:0.25;user-select:none;pointer-events:none;display:none;`;
+        $cursor.style.cssText = `position:absolute;top:0;left:0;bottom:0;z-index:10;width:1px;height:100%;background-color:#ffffff;opacity:0.25;user-select:none;pointer-events:none;display:none;`;
         container.appendChild($cursor);
         this.wf.template.cursor = $cursor;
         this.wf.on("mousemove", (event)=>{
@@ -1200,32 +1201,40 @@ class Controller {
         });
     }
     scrollbarInit() {
-        const { events: { proxy  } , options: { container , mediaElement , scrollable  } ,  } = this.wf;
+        const { options: { container  } ,  } = this.wf;
         const $scrollbar = document.createElement("div");
         (0, _utils.addClass)($scrollbar, "wf-scrollbar");
-        $scrollbar.style.cssText = `position:absolute;bottom:0;left:0;z-index:2;width:0;border-radius:2px;height:15px;background-color:#ffffff;opacity:0.25;user-select:none;`;
+        $scrollbar.style.cssText = `position:absolute;bottom:0;left:0;z-index:20;width:0;height:5px;border-radius:2px;background-color:#ffffff;opacity:0.25;user-select:none;`;
         container.appendChild($scrollbar);
         this.wf.template.scrollbar = $scrollbar;
-        function initWidth(duration) {
-            const totolWidth = this.wf.getWidthFromDuration(duration);
+        function updateTop() {
+            if (this.wf.config.rulerAtTop) {
+                $scrollbar.style.top = null;
+                $scrollbar.style.bottom = 0;
+            } else {
+                $scrollbar.style.top = 0;
+                $scrollbar.style.bottom = null;
+            }
+        }
+        function updateLeft() {
+            const width = container.clientWidth - $scrollbar.clientWidth;
+            const left = this.wf.currentTime / this.wf.duration * width + "px";
+            if ($scrollbar.style.left !== left) $scrollbar.style.left = left;
+        }
+        function updateWidth() {
+            const totolWidth = this.wf.getWidthFromDuration(this.wf.duration);
             const clientWidth = container.clientWidth;
-            $scrollbar.style.width = clientWidth / totolWidth * 100 + "%";
+            const width = clientWidth / totolWidth * 100 + "%";
+            if ($scrollbar.style.width !== width) $scrollbar.style.width = width;
         }
-        function checkConfig(duration) {
-            if (this.wf.config.gridGap) initWidth.call(this, duration);
-            else this.wf.once("update", ()=>{
-                initWidth.call(this, duration);
-            });
-        }
-        if (this.wf.duration && this.wf.duration !== Infinity) checkConfig.call(this, this.wf.duration);
-        else if (mediaElement) proxy(mediaElement, "canplay", ()=>{
-            checkConfig.call(this, this.wf.duration);
-        }, {
-            once: true
-        });
-        $scrollbar.style.display = scrollable ? null : "none";
-        this.wf.on("options", (options)=>{
-            $scrollbar.style.display = options.scrollable ? null : "none";
+        this.wf.on("update", (config)=>{
+            if (this.wf.duration === Infinity || !this.wf.duration || !config.scrollable) $scrollbar.style.display = "none";
+            else {
+                $scrollbar.style.display = null;
+                updateTop.call(this);
+                updateWidth.call(this);
+                updateLeft.call(this);
+            }
         });
     }
     destroy() {

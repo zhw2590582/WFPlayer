@@ -28,6 +28,7 @@ export default class Template {
                 'Cannot mount multiple instances on the same dom element, please destroy the previous instance first.',
             );
             container.innerHTML = '';
+            container.style.overflow = 'hidden';
             this.canvas = document.createElement('canvas');
             this.canvas.width = width;
             this.canvas.height = height;
