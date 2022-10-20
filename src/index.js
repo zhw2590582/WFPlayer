@@ -6,7 +6,7 @@ import Drawer from './drawer';
 import Decoder from './decoder';
 import Loader from './loader';
 import Controller from './controller';
-import { clamp, errorHandle } from './utils';
+import { clamp, errorHandle, addClass, removeClass } from './utils';
 
 let id = 0;
 const instances = [];
@@ -157,9 +157,9 @@ export default class WFPlayer extends Emitter {
         );
 
         if (this.options.scrollable) {
-            this.options.container.classList.add('wf-scrollable');
+            addClass(this.options.container, 'wf-scrollable');
         } else {
-            this.options.container.classList.remove('wf-scrollable');
+            removeClass(this.options.container, 'wf-scrollable');
         }
 
         this.update();

@@ -34,3 +34,11 @@ export function throttle(func, delay, context) {
         }
     };
 }
+
+export function addClass(el, className) {
+    return el.classList.add(className);
+}
+
+export function removeClass(el, className) {
+    return el.classList.remove(className);
+}

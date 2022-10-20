@@ -1,4 +1,4 @@
-import { throttle } from './utils';
+import { throttle, addClass } from './utils';
 
 export default class Controller {
     constructor(wf) {
@@ -133,7 +133,7 @@ export default class Controller {
         } = this.wf;
 
         const $cursor = document.createElement('div');
-        $cursor.classList.add('wf-cursor');
+        addClass($cursor, 'wf-cursor');
         $cursor.style.cssText = `position:absolute;top:0;left:0;bottom:0;z-index:1;width:1px;height:100%;background-color:#ffffff;opacity:0.25;user-select:none;pointer-events:none;display:none;`;
         container.appendChild($cursor);
         this.wf.template.cursor = $cursor;
