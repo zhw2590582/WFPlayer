@@ -276,8 +276,9 @@ class WFPlayer extends (0, _emitterDefault.default) {
             ...this.options,
             ...options
         }, WFPlayer.scheme);
-        if (this.options.scrollable) this.options.container.classList.add("wf-scrollable");
-        else this.options.container.classList.remove("wf-scrollable");
+        this.emit("options", this.options);
+        if (this.options.scrollable) (0, _utils.addClass)(this.options.container, "wf-scrollable");
+        else (0, _utils.removeClass)(this.options.container, "wf-scrollable");
         this.update();
         return this;
     }
@@ -317,6 +318,10 @@ class WFPlayer extends (0, _emitterDefault.default) {
     getDurationFromWidth(width) {
         const { gridGap , pixelRatio  } = this.drawer.config;
         return width / (gridGap / pixelRatio * 10);
+    }
+    getWidthFromDuration(duration) {
+        const { gridGap , pixelRatio  } = this.drawer.config;
+        return gridGap / pixelRatio * 10 * duration;
     }
     seek(second) {
         (0, _utils.errorHandle)(typeof second === "number", "seek expects to receive number as a parameter.");
@@ -673,6 +678,8 @@ parcelHelpers.export(exports, "errorHandle", ()=>errorHandle);
 parcelHelpers.export(exports, "mergeBuffer", ()=>mergeBuffer);
 parcelHelpers.export(exports, "clamp", ()=>clamp);
 parcelHelpers.export(exports, "throttle", ()=>throttle);
+parcelHelpers.export(exports, "addClass", ()=>addClass);
+parcelHelpers.export(exports, "removeClass", ()=>removeClass);
 class WFPlayerError extends Error {
     constructor(message){
         super(message);
@@ -704,6 +711,12 @@ function throttle(func, delay, context) {
             prev = Date.now();
         }
     };
+}
+function addClass(el, className) {
+    return el.classList.add(className);
+}
+function removeClass(el, className) {
+    return el.classList.remove(className);
 }
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"7NL0G":[function(require,module,exports) {
@@ -1082,6 +1095,7 @@ class Controller {
                 this.scrollInit();
                 this.grabInit();
                 this.hoverInit();
+                this.scrollbarInit();
             }
         };
     }
@@ -1149,7 +1163,7 @@ class Controller {
             this.wf.emit("mousemove", event);
             if (!grabStart) return;
             this.wf.grabbing = true;
-            container.classList.add("wf-grabbing");
+            (0, _utils.addClass)(container, "wf-grabbing");
             const { scrollable  } = this.wf.config;
             const diffWidth = event.pageX - lastPageX;
             const diffTime = this.wf.getDurationFromWidth(diffWidth);
@@ -1160,7 +1174,7 @@ class Controller {
             this.wf.emit("mouseup", event);
             if (!grabStart) return;
             setTimeout(()=>this.wf.grabbing = false);
-            container.classList.remove("wf-grabbing");
+            (0, _utils.removeClass)(container, "wf-grabbing");
             grabStart = false;
             lastCurrentTime = 0;
             lastPageX = 0;
@@ -1169,7 +1183,7 @@ class Controller {
     hoverInit() {
         const { events: { proxy  } , options: { container  } ,  } = this.wf;
         const $cursor = document.createElement("div");
-        $cursor.classList.add("wf-cursor");
+        (0, _utils.addClass)($cursor, "wf-cursor");
         $cursor.style.cssText = `position:absolute;top:0;left:0;bottom:0;z-index:1;width:1px;height:100%;background-color:#ffffff;opacity:0.25;user-select:none;pointer-events:none;display:none;`;
         container.appendChild($cursor);
         this.wf.template.cursor = $cursor;
@@ -1183,6 +1197,35 @@ class Controller {
         proxy(container, "mouseleave", (event)=>{
             this.wf.emit("mouseleave", event);
             $cursor.style.display = "none";
+        });
+    }
+    scrollbarInit() {
+        const { events: { proxy  } , options: { container , mediaElement , scrollable  } ,  } = this.wf;
+        const $scrollbar = document.createElement("div");
+        (0, _utils.addClass)($scrollbar, "wf-scrollbar");
+        $scrollbar.style.cssText = `position:absolute;bottom:0;left:0;z-index:2;width:0;border-radius:2px;height:15px;background-color:#ffffff;opacity:0.25;user-select:none;`;
+        container.appendChild($scrollbar);
+        this.wf.template.scrollbar = $scrollbar;
+        function initWidth(duration) {
+            const totolWidth = this.wf.getWidthFromDuration(duration);
+            const clientWidth = container.clientWidth;
+            $scrollbar.style.width = clientWidth / totolWidth * 100 + "%";
+        }
+        function checkConfig(duration) {
+            if (this.wf.config.gridGap) initWidth.call(this, duration);
+            else this.wf.once("update", ()=>{
+                initWidth.call(this, duration);
+            });
+        }
+        if (this.wf.duration && this.wf.duration !== Infinity) checkConfig.call(this, this.wf.duration);
+        else if (mediaElement) proxy(mediaElement, "canplay", ()=>{
+            checkConfig.call(this, this.wf.duration);
+        }, {
+            once: true
+        });
+        $scrollbar.style.display = scrollable ? null : "none";
+        this.wf.on("options", (options)=>{
+            $scrollbar.style.display = options.scrollable ? null : "none";
         });
     }
     destroy() {

@@ -53,6 +53,7 @@ type Events = {
     mouseup: [event: Event];
     mouseenter: [event: Event];
     mouseleave: [event: Event];
+    options: [options: Required<Option>];
 };
 
 declare class WFPlayer {
@@ -84,6 +85,7 @@ declare class WFPlayer {
     load(target: string | Uint8Array | AudioBuffer | HTMLVideoElement | HTMLAudioElement): WFPlayer;
     getCurrentTimeFromEvent(event: Event): number;
     getDurationFromWidth(width: number): number;
+    getWidthFromDuration(width: number): number;
     seek(second: number): WFPlayer;
     smoothSeek(second: number, duration: number): Promise<WFPlayer>;
     changeChannel(channel: 0 | 1 | 2): WFPlayer;
