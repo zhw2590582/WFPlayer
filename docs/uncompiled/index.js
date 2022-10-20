@@ -276,8 +276,9 @@ class WFPlayer extends (0, _emitterDefault.default) {
             ...this.options,
             ...options
         }, WFPlayer.scheme);
-        if (this.options.scrollable) this.options.container.classList.add("wf-scrollable");
-        else this.options.container.classList.remove("wf-scrollable");
+        this.emit("options", this.options);
+        if (this.options.scrollable) (0, _utils.addClass)(this.options.container, "wf-scrollable");
+        else (0, _utils.removeClass)(this.options.container, "wf-scrollable");
         this.update();
         return this;
     }
@@ -317,6 +318,10 @@ class WFPlayer extends (0, _emitterDefault.default) {
     getDurationFromWidth(width) {
         const { gridGap , pixelRatio  } = this.drawer.config;
         return width / (gridGap / pixelRatio * 10);
+    }
+    getWidthFromDuration(duration) {
+        const { gridGap , pixelRatio  } = this.drawer.config;
+        return gridGap / pixelRatio * 10 * duration;
     }
     seek(second) {
         (0, _utils.errorHandle)(typeof second === "number", "seek expects to receive number as a parameter.");
@@ -642,6 +647,7 @@ class Template {
         } else {
             (0, _utils.errorHandle)(this.wf.constructor.instances.every((wf)=>wf.options.container !== container), "Cannot mount multiple instances on the same dom element, please destroy the previous instance first.");
             container.innerHTML = "";
+            container.style.overflow = "hidden";
             this.canvas = document.createElement("canvas");
             this.canvas.width = width;
             this.canvas.height = height;
@@ -673,6 +679,8 @@ parcelHelpers.export(exports, "errorHandle", ()=>errorHandle);
 parcelHelpers.export(exports, "mergeBuffer", ()=>mergeBuffer);
 parcelHelpers.export(exports, "clamp", ()=>clamp);
 parcelHelpers.export(exports, "throttle", ()=>throttle);
+parcelHelpers.export(exports, "addClass", ()=>addClass);
+parcelHelpers.export(exports, "removeClass", ()=>removeClass);
 class WFPlayerError extends Error {
     constructor(message){
         super(message);
@@ -704,6 +712,12 @@ function throttle(func, delay, context) {
             prev = Date.now();
         }
     };
+}
+function addClass(el, className) {
+    return el.classList.add(className);
+}
+function removeClass(el, className) {
+    return el.classList.remove(className);
 }
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"7NL0G":[function(require,module,exports) {
@@ -1082,6 +1096,7 @@ class Controller {
                 this.scrollInit();
                 this.grabInit();
                 this.hoverInit();
+                this.scrollbarInit();
             }
         };
     }
@@ -1149,7 +1164,7 @@ class Controller {
             this.wf.emit("mousemove", event);
             if (!grabStart) return;
             this.wf.grabbing = true;
-            container.classList.add("wf-grabbing");
+            (0, _utils.addClass)(container, "wf-grabbing");
             const { scrollable  } = this.wf.config;
             const diffWidth = event.pageX - lastPageX;
             const diffTime = this.wf.getDurationFromWidth(diffWidth);
@@ -1160,7 +1175,7 @@ class Controller {
             this.wf.emit("mouseup", event);
             if (!grabStart) return;
             setTimeout(()=>this.wf.grabbing = false);
-            container.classList.remove("wf-grabbing");
+            (0, _utils.removeClass)(container, "wf-grabbing");
             grabStart = false;
             lastCurrentTime = 0;
             lastPageX = 0;
@@ -1169,8 +1184,8 @@ class Controller {
     hoverInit() {
         const { events: { proxy  } , options: { container  } ,  } = this.wf;
         const $cursor = document.createElement("div");
-        $cursor.classList.add("wf-cursor");
-        $cursor.style.cssText = `position:absolute;top:0;left:0;bottom:0;z-index:1;width:1px;height:100%;background-color:#ffffff;opacity:0.25;user-select:none;pointer-events:none;display:none;`;
+        (0, _utils.addClass)($cursor, "wf-cursor");
+        $cursor.style.cssText = `position:absolute;top:0;left:0;bottom:0;z-index:10;width:1px;height:100%;background-color:#ffffff;opacity:0.25;user-select:none;pointer-events:none;display:none;`;
         container.appendChild($cursor);
         this.wf.template.cursor = $cursor;
         this.wf.on("mousemove", (event)=>{
@@ -1183,6 +1198,43 @@ class Controller {
         proxy(container, "mouseleave", (event)=>{
             this.wf.emit("mouseleave", event);
             $cursor.style.display = "none";
+        });
+    }
+    scrollbarInit() {
+        const { options: { container  } ,  } = this.wf;
+        const $scrollbar = document.createElement("div");
+        (0, _utils.addClass)($scrollbar, "wf-scrollbar");
+        $scrollbar.style.cssText = `position:absolute;bottom:0;left:0;z-index:20;width:0;height:5px;border-radius:2px;background-color:#ffffff;opacity:0.25;user-select:none;`;
+        container.appendChild($scrollbar);
+        this.wf.template.scrollbar = $scrollbar;
+        function updateTop() {
+            if (this.wf.config.rulerAtTop) {
+                $scrollbar.style.top = null;
+                $scrollbar.style.bottom = 0;
+            } else {
+                $scrollbar.style.top = 0;
+                $scrollbar.style.bottom = null;
+            }
+        }
+        function updateLeft() {
+            const width = container.clientWidth - $scrollbar.clientWidth;
+            const left = this.wf.currentTime / this.wf.duration * width + "px";
+            if ($scrollbar.style.left !== left) $scrollbar.style.left = left;
+        }
+        function updateWidth() {
+            const totolWidth = this.wf.getWidthFromDuration(this.wf.duration);
+            const clientWidth = container.clientWidth;
+            const width = clientWidth / totolWidth * 100 + "%";
+            if ($scrollbar.style.width !== width) $scrollbar.style.width = width;
+        }
+        this.wf.on("update", (config)=>{
+            if (this.wf.duration === Infinity || !this.wf.duration || !config.scrollable) $scrollbar.style.display = "none";
+            else {
+                $scrollbar.style.display = null;
+                updateTop.call(this);
+                updateWidth.call(this);
+                updateLeft.call(this);
+            }
         });
     }
     destroy() {

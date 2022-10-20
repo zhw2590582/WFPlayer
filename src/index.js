@@ -156,6 +156,8 @@ export default class WFPlayer extends Emitter {
             WFPlayer.scheme,
         );
 
+        this.emit('options', this.options);
+
         if (this.options.scrollable) {
             addClass(this.options.container, 'wf-scrollable');
         } else {
@@ -211,6 +213,11 @@ export default class WFPlayer extends Emitter {
     getDurationFromWidth(width) {
         const { gridGap, pixelRatio } = this.drawer.config;
         return width / ((gridGap / pixelRatio) * 10);
+    }
+
+    getWidthFromDuration(duration) {
+        const { gridGap, pixelRatio } = this.drawer.config;
+        return (gridGap / pixelRatio) * 10 * duration;
     }
 
     seek(second) {
