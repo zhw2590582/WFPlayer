@@ -1252,7 +1252,7 @@ class Controller {
 exports.default = Controller;
 
 },{"./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"fVJDJ":[function(require,module,exports) {
-module.exports = ".wf-player {\n  position: relative;\n  overflow: hidden;\n}\n\n.wf-scrollable {\n  cursor: grab;\n}\n\n.wf-scrollable.wf-grabbing {\n  cursor: grabbing;\n}\n\n.wf-cursor {\n  z-index: 10;\n  width: 1px;\n  height: 100%;\n  opacity: .25;\n  user-select: none;\n  pointer-events: none;\n  background-color: #fff;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n}\n\n.wf-subtitle {\n  z-index: 20;\n  height: 100%;\n  width: 100%;\n  user-select: none;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.wf-subtitle-item {\n  height: 100%;\n  cursor: default;\n  pointer-events: all;\n  background-color: #ffffff40;\n  justify-content: space-between;\n  transition: background-color .2s;\n  display: flex;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n.wf-subtitle-item:hover {\n  background-color: #ffffff4d;\n}\n\n.wf-subtitle-center {\n  word-break: break-all;\n  white-space: nowrap;\n  color: #fff;\n  text-shadow: 0 1px #000000bf;\n  height: 100%;\n  flex: 1;\n  justify-content: center;\n  align-items: center;\n  display: flex;\n}\n\n.wf-subtitle-left, .wf-subtitle-right {\n  width: 15px;\n  height: 100%;\n}\n\n";
+module.exports = ".wf-player {\n  position: relative;\n  overflow: hidden;\n}\n\n.wf-scrollable {\n  cursor: grab;\n}\n\n.wf-scrollable.wf-grabbing {\n  cursor: grabbing;\n}\n\n.wf-cursor {\n  z-index: 10;\n  width: 1px;\n  height: 100%;\n  opacity: .25;\n  user-select: none;\n  pointer-events: none;\n  background-color: #fff;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n}\n\n.wf-subtitle {\n  z-index: 20;\n  height: 100%;\n  width: 100%;\n  user-select: none;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.wf-subtitle-item {\n  height: 60%;\n  cursor: default;\n  pointer-events: all;\n  background-color: #fff3;\n  justify-content: space-between;\n  transition: background-color .2s;\n  display: flex;\n  position: absolute;\n  top: 25%;\n}\n\n.wf-subtitle-item:hover {\n  background-color: #ffffff4d;\n}\n\n.wf-subtitle-current {\n  background-color: #2196f380;\n  border: 1px solid #2196f380;\n}\n\n.wf-subtitle-current:hover {\n  background-color: #2196f399;\n}\n\n.wf-subtitle-html {\n  word-break: break-all;\n  white-space: nowrap;\n  color: #fff;\n  text-shadow: 0 1px #000000bf;\n  height: 100%;\n  cursor: move;\n  flex: 1;\n  justify-content: center;\n  align-items: center;\n  display: flex;\n}\n\n.wf-subtitle-left, .wf-subtitle-right {\n  width: 10px;\n  height: 100%;\n  cursor: col-resize;\n  user-select: none;\n  background-color: #fff0;\n  transition: background-color .2s;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n.wf-subtitle-left:hover, .wf-subtitle-right:hover {\n  background-color: #fff3;\n}\n\n.wf-subtitle-left {\n  left: 0;\n}\n\n.wf-subtitle-right {\n  right: 0;\n}\n\n";
 
 },{}],"1kFyE":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -1265,7 +1265,13 @@ class Subtitle {
         this.$subtitle = null;
         this.elSymbol = Symbol("el");
         this.idSymbol = Symbol("id");
-        this.data = [];
+        this.data = [
+            {
+                start: 1,
+                end: 2,
+                html: "test"
+            }
+        ];
         this.renderData = [];
         this.timer = null;
         this.init();
@@ -1285,19 +1291,19 @@ class Subtitle {
         if (this.$els.length) {
             const $el = this.$els.pop();
             $el.style.display = null;
-            const $center = $el.querySelector("wf-subtitle-center");
+            const $center = $el.querySelector(".wf-subtitle-html");
             $center.innerHTML = item.html || "";
             return $el;
         } else {
             const $el1 = document.createElement("div");
             (0, _utils.addClass)($el1, "wf-subtitle-item");
+            const $html = document.createElement("div");
+            (0, _utils.addClass)($html, "wf-subtitle-html");
+            $html.innerHTML = item.html || "";
+            $el1.appendChild($html);
             const $left = document.createElement("div");
             (0, _utils.addClass)($left, "wf-subtitle-left");
             $el1.appendChild($left);
-            const $center1 = document.createElement("div");
-            (0, _utils.addClass)($center1, "wf-subtitle-center");
-            $center1.innerHTML = item.html || "";
-            $el1.appendChild($center1);
             const $right = document.createElement("div");
             (0, _utils.addClass)($right, "wf-subtitle-right");
             $el1.appendChild($right);
@@ -1312,6 +1318,8 @@ class Subtitle {
                 item[this.elSymbol] = this.createEl(item);
                 this.$subtitle.appendChild(item[this.elSymbol]);
             }
+            if (this.wf.currentTime >= item.start && this.wf.currentTime <= item.end) (0, _utils.addClass)(item[this.elSymbol], "wf-subtitle-current");
+            else (0, _utils.removeClass)(item[this.elSymbol], "wf-subtitle-current");
             const left = this.wf.getLeftFromTime(item.start);
             const width = this.wf.getWidthFromDuration(item.end - item.start);
             item[this.elSymbol].style.left = left + "px";

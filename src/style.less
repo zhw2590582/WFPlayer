@@ -42,20 +42,28 @@
     display: flex;
     justify-content: space-between;
     position: absolute;
-    top: 0;
-    bottom: 0;
-    height: 100%;
+    top: 25%;
+    height: 60%;
     cursor: default;
     pointer-events: all;
     transition: background-color 0.2s ease;
-    background-color: rgb(255 255 255 / 25%);
+    background-color: rgb(255 255 255 / 20%);
 }
 
 .wf-subtitle-item:hover {
     background-color: rgb(255 255 255 / 30%);
 }
 
-.wf-subtitle-center {
+.wf-subtitle-current {
+    background-color: rgba(33, 150, 243, 0.5);
+    border: 1px solid rgba(33, 150, 243, 0.5);
+}
+
+.wf-subtitle-current:hover {
+    background-color: rgba(33, 150, 243, 0.6);
+}
+
+.wf-subtitle-html {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -65,9 +73,29 @@
     text-shadow: rgb(0 0 0 / 75%) 0px 1px 0px;
     flex: 1;
     height: 100%;
+    cursor: move;
 }
 
 .wf-subtitle-left, .wf-subtitle-right {
-    width: 15px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 10px;
     height: 100%;
+    cursor: col-resize;
+    user-select: none;
+    transition: background-color 0.2s ease;
+    background-color: rgb(255 255 255 / 0%);
+}
+
+.wf-subtitle-left:hover, .wf-subtitle-right:hover {
+    background-color: rgb(255 255 255 / 20%);
+}
+
+.wf-subtitle-left{
+    left: 0;
+}
+
+.wf-subtitle-right{
+    right: 0;
 }

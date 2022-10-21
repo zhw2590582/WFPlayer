@@ -1,4 +1,4 @@
-import { addClass } from './utils';
+import { addClass, removeClass } from './utils';
 
 export default class Subtitle {
     constructor(wf) {
@@ -7,7 +7,7 @@ export default class Subtitle {
         this.$subtitle = null;
         this.elSymbol = Symbol('el');
         this.idSymbol = Symbol('id');
-        this.data = [];
+        this.data = [{ start: 1, end: 2, html: 'test' }];
         this.renderData = [];
         this.timer = null;
         this.init();
@@ -35,21 +35,21 @@ export default class Subtitle {
         if (this.$els.length) {
             const $el = this.$els.pop();
             $el.style.display = null;
-            const $center = $el.querySelector('wf-subtitle-center');
+            const $center = $el.querySelector('.wf-subtitle-html');
             $center.innerHTML = item.html || '';
             return $el;
         } else {
             const $el = document.createElement('div');
             addClass($el, 'wf-subtitle-item');
 
+            const $html = document.createElement('div');
+            addClass($html, 'wf-subtitle-html');
+            $html.innerHTML = item.html || '';
+            $el.appendChild($html);
+
             const $left = document.createElement('div');
             addClass($left, 'wf-subtitle-left');
             $el.appendChild($left);
-
-            const $center = document.createElement('div');
-            addClass($center, 'wf-subtitle-center');
-            $center.innerHTML = item.html || '';
-            $el.appendChild($center);
 
             const $right = document.createElement('div');
             addClass($right, 'wf-subtitle-right');
@@ -68,6 +68,12 @@ export default class Subtitle {
             if (!this.renderData.includes(item)) {
                 item[this.elSymbol] = this.createEl(item);
                 this.$subtitle.appendChild(item[this.elSymbol]);
+            }
+
+            if (this.wf.currentTime >= item.start && this.wf.currentTime <= item.end) {
+                addClass(item[this.elSymbol], 'wf-subtitle-current');
+            } else {
+                removeClass(item[this.elSymbol], 'wf-subtitle-current');
             }
 
             const left = this.wf.getLeftFromTime(item.start);
