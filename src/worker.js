@@ -9,6 +9,7 @@ let beginTime = 0;
 let density = 1;
 let sampleRate = 44100;
 let channelData = new Float32Array();
+let lastDataString = '';
 
 function secondToTime(second) {
     const add0 = (num) => (num < 10 ? `0${num}` : String(num));
@@ -163,6 +164,11 @@ self.onmessage = function onmessage(event) {
     }
 
     if (type === 'UPDATE') {
+        const dataString = JSON.stringify(data);
+        if (lastDataString === dataString) {
+            return (lastDataString = dataString);
+        }
+
         const { width, height, currentTime, cursor, grid, ruler, wave, duration, padding, scrollable, scrollbar } =
             data;
 

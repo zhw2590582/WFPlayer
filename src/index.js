@@ -5,6 +5,7 @@ import Template from './template';
 import Drawer from './drawer';
 import Decoder from './decoder';
 import Loader from './loader';
+import Subtitle from './subtitle';
 import Controller from './controller';
 import style from 'bundle-text:./style.less';
 import { clamp, errorHandle, addClass, removeClass } from './utils';
@@ -87,7 +88,7 @@ export default class WFPlayer extends Emitter {
     constructor(options = {}) {
         super();
 
-        this._playTimer = null;
+        this._seekTimer = null;
         this._currentTime = 0;
         this.isDestroy = false;
         this.grabbing = false;
@@ -98,6 +99,7 @@ export default class WFPlayer extends Emitter {
         this.template = new Template(this);
         this.decoder = new Decoder(this);
         this.drawer = new Drawer(this);
+        this.subtitle = new Subtitle(this);
         this.controller = new Controller(this);
         this.loader = new Loader(this);
 
@@ -242,7 +244,7 @@ export default class WFPlayer extends Emitter {
 
     seek(second) {
         errorHandle(typeof second === 'number', 'seek expects to receive number as a parameter.');
-        cancelAnimationFrame(this._playTimer);
+        cancelAnimationFrame(this._seekTimer);
         this._currentTime = clamp(second, 0, this.duration);
         if (this.options.mediaElement && this.options.mediaElement.currentTime !== this._currentTime) {
             this.options.mediaElement.currentTime = this._currentTime;
@@ -254,7 +256,7 @@ export default class WFPlayer extends Emitter {
     smoothSeek(second, duration = 0.2) {
         return new Promise((resolve) => {
             errorHandle(typeof second === 'number', 'smoothSeek expects to receive number as a parameter.');
-            cancelAnimationFrame(this._playTimer);
+            cancelAnimationFrame(this._seekTimer);
             const clampSecond = clamp(second, 0, this.duration);
             const diff = clampSecond - this.currentTime;
             if (diff === 0) return resolve(this);
@@ -264,7 +266,7 @@ export default class WFPlayer extends Emitter {
             if (playing) mediaElement.pause();
 
             (function loop() {
-                this._playTimer = requestAnimationFrame(() => {
+                this._seekTimer = requestAnimationFrame(() => {
                     if ((diff > 0 && this.currentTime < clampSecond) || (diff < 0 && this.currentTime > clampSecond)) {
                         this.seek(this.currentTime + step);
                         if (!this.isDestroy) loop.call(this);
@@ -306,6 +308,7 @@ export default class WFPlayer extends Emitter {
         this.decoder.destroy();
         this.loader.destroy();
         this.drawer.destroy();
+        this.subtitle.destroy();
         instances.splice(instances.indexOf(this), 1);
         return this;
     }
