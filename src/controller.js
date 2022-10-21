@@ -14,7 +14,6 @@ export default class Controller {
                 this.scrollInit();
                 this.grabInit();
                 this.hoverInit();
-                this.scrollbarInit();
             }
         };
     }
@@ -151,56 +150,6 @@ export default class Controller {
         proxy(container, 'mouseleave', (event) => {
             this.wf.emit('mouseleave', event);
             $cursor.style.display = 'none';
-        });
-    }
-
-    scrollbarInit() {
-        const {
-            options: { container },
-        } = this.wf;
-
-        const $scrollbar = document.createElement('div');
-        addClass($scrollbar, 'wf-scrollbar');
-        $scrollbar.style.cssText = `position:absolute;bottom:0;left:0;z-index:20;width:0;height:5px;border-radius:2px;background-color:#ffffff;opacity:0.25;user-select:none;`;
-        container.appendChild($scrollbar);
-        this.wf.template.scrollbar = $scrollbar;
-
-        function updateTop() {
-            if (this.wf.config.rulerAtTop) {
-                $scrollbar.style.top = null;
-                $scrollbar.style.bottom = 0;
-            } else {
-                $scrollbar.style.top = 0;
-                $scrollbar.style.bottom = null;
-            }
-        }
-
-        function updateLeft() {
-            const width = container.clientWidth - $scrollbar.clientWidth;
-            const left = (this.wf.currentTime / this.wf.duration) * width + 'px';
-            if ($scrollbar.style.left !== left) {
-                $scrollbar.style.left = left;
-            }
-        }
-
-        function updateWidth() {
-            const totolWidth = this.wf.getWidthFromDuration(this.wf.duration);
-            const clientWidth = container.clientWidth;
-            const width = (clientWidth / totolWidth) * 100 + '%';
-            if ($scrollbar.style.width !== width) {
-                $scrollbar.style.width = width;
-            }
-        }
-
-        this.wf.on('update', (config) => {
-            if (this.wf.duration === Infinity || !this.wf.duration || !config.scrollable) {
-                $scrollbar.style.display = 'none';
-            } else {
-                $scrollbar.style.display = null;
-                updateTop.call(this);
-                updateWidth.call(this);
-                updateLeft.call(this);
-            }
         });
     }
 
