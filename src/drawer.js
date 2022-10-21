@@ -54,6 +54,7 @@ export default class Drawer {
     update() {
         const {
             currentTime,
+            duration: totolDuration,
             // eslint-disable-next-line no-unused-vars
             options: { container, mediaElement, ...options },
         } = this.wf;
@@ -62,7 +63,7 @@ export default class Drawer {
 
         this.worker.postMessage({
             type: 'UPDATE',
-            data: { ...options, currentTime, width, height },
+            data: { ...options, currentTime, width, height, totolDuration },
         });
     }
 

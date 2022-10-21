@@ -128,6 +128,12 @@ var wf = new WFPlayer({
     // Ruler color
     rulerColor: 'rgba(255, 255, 255, 0.5)',
 
+    // Whether to display scrollbar
+    scrollbar: true,
+
+    // Scrollbar color
+    scrollbarColor: 'rgba(255, 255, 255, 0.25)',
+
     // Whether to display ruler at the top
     rulerAtTop: true,
 

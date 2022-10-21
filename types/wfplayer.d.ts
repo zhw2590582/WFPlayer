@@ -17,6 +17,8 @@ type Option = {
     gridColor?: string;
     ruler?: boolean;
     rulerColor?: string;
+    scrollbar?: boolean;
+    scrollbarColor?: string;
     rulerAtTop?: boolean;
     scrollable?: boolean;
     refreshDelay?: number;

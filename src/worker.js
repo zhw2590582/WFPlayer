@@ -125,6 +125,18 @@ function drawWave(data) {
     }
 }
 
+function drawScrollbar(data) {
+    const { width, height, currentTime, pixelRatio, rulerAtTop, totolDuration, scrollable, scrollbarColor } = data;
+    if (!scrollable || !totolDuration || totolDuration === Infinity) return;
+    const totolWidth = (gridGap / pixelRatio) * 10 * totolDuration;
+    const scrollbarWidth = (width / totolWidth) * width;
+    const scrollbarHeight = 5 * pixelRatio;
+    const scrollbarLeft = (currentTime / totolDuration) * (width - scrollbarWidth);
+    const scrollbarTop = rulerAtTop ? height - scrollbarHeight : 0;
+    ctx.fillStyle = scrollbarColor;
+    ctx.fillRect(scrollbarLeft, scrollbarTop, scrollbarWidth, scrollbarHeight);
+}
+
 function drawCursor(data) {
     const { height, width, currentTime, cursorColor, pixelRatio, padding, scrollable } = data;
     ctx.fillStyle = cursorColor;
@@ -151,7 +163,8 @@ self.onmessage = function onmessage(event) {
     }
 
     if (type === 'UPDATE') {
-        const { width, height, currentTime, cursor, grid, ruler, wave, duration, padding, scrollable } = data;
+        const { width, height, currentTime, cursor, grid, ruler, wave, duration, padding, scrollable, scrollbar } =
+            data;
 
         if (canvas.width !== width) {
             canvas.width = width;
@@ -178,6 +191,10 @@ self.onmessage = function onmessage(event) {
 
         if (wave) {
             drawWave(data);
+        }
+
+        if (scrollbar) {
+            drawScrollbar(data);
         }
 
         if (cursor) {
