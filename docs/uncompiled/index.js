@@ -1252,7 +1252,7 @@ class Controller {
 exports.default = Controller;
 
 },{"./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"fVJDJ":[function(require,module,exports) {
-module.exports = ".wf-player {\n  position: relative;\n  overflow: hidden;\n}\n\n.wf-scrollable {\n  cursor: grab;\n}\n\n.wf-scrollable.wf-grabbing {\n  cursor: grabbing;\n}\n\n.wf-cursor {\n  z-index: 10;\n  width: 1px;\n  height: 100%;\n  opacity: .25;\n  user-select: none;\n  pointer-events: none;\n  background-color: #fff;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n}\n\n.wf-subtitle {\n  z-index: 20;\n  height: 100%;\n  width: 100%;\n  user-select: none;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.wf-subtitle-item {\n  height: 100%;\n  background-color: red;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n";
+module.exports = ".wf-player {\n  position: relative;\n  overflow: hidden;\n}\n\n.wf-scrollable {\n  cursor: grab;\n}\n\n.wf-scrollable.wf-grabbing {\n  cursor: grabbing;\n}\n\n.wf-cursor {\n  z-index: 10;\n  width: 1px;\n  height: 100%;\n  opacity: .25;\n  user-select: none;\n  pointer-events: none;\n  background-color: #fff;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n}\n\n.wf-subtitle {\n  z-index: 20;\n  height: 100%;\n  width: 100%;\n  user-select: none;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.wf-subtitle-item {\n  height: 100%;\n  cursor: default;\n  pointer-events: all;\n  background-color: #ffffff40;\n  justify-content: space-between;\n  transition: background-color .2s;\n  display: flex;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n.wf-subtitle-item:hover {\n  background-color: #ffffff4d;\n}\n\n.wf-subtitle-center {\n  word-break: break-all;\n  white-space: nowrap;\n  color: #fff;\n  text-shadow: 0 1px #000000bf;\n  height: 100%;\n  flex: 1;\n  justify-content: center;\n  align-items: center;\n  display: flex;\n}\n\n.wf-subtitle-left, .wf-subtitle-right {\n  width: 15px;\n  height: 100%;\n}\n\n";
 
 },{}],"1kFyE":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -1261,16 +1261,11 @@ var _utils = require("./utils");
 class Subtitle {
     constructor(wf){
         this.wf = wf;
-        this.elSymbol = Symbol("el");
-        this.idSymbol = Symbol("id");
         this.$els = [];
         this.$subtitle = null;
-        this.data = [
-            {
-                start: 1,
-                end: 2
-            }
-        ];
+        this.elSymbol = Symbol("el");
+        this.idSymbol = Symbol("id");
+        this.data = [];
         this.renderData = [];
         this.timer = null;
         this.init();
@@ -1281,19 +1276,31 @@ class Subtitle {
         this.wf.options.container.appendChild(this.$subtitle);
         (function loop() {
             this.timer = requestAnimationFrame(()=>{
-                this.update();
+                if (this.data.length) this.update();
                 if (!this.wf.isDestroy) loop.call(this);
             });
         }).call(this);
     }
-    createEl() {
+    createEl(item) {
         if (this.$els.length) {
             const $el = this.$els.pop();
             $el.style.display = null;
+            const $center = $el.querySelector("wf-subtitle-center");
+            $center.innerHTML = item.html || "";
             return $el;
         } else {
             const $el1 = document.createElement("div");
             (0, _utils.addClass)($el1, "wf-subtitle-item");
+            const $left = document.createElement("div");
+            (0, _utils.addClass)($left, "wf-subtitle-left");
+            $el1.appendChild($left);
+            const $center1 = document.createElement("div");
+            (0, _utils.addClass)($center1, "wf-subtitle-center");
+            $center1.innerHTML = item.html || "";
+            $el1.appendChild($center1);
+            const $right = document.createElement("div");
+            (0, _utils.addClass)($right, "wf-subtitle-right");
+            $el1.appendChild($right);
             return $el1;
         }
     }
@@ -1302,7 +1309,7 @@ class Subtitle {
         for(let index = 0; index < renderData.length; index++){
             const item = renderData[index];
             if (!this.renderData.includes(item)) {
-                item[this.elSymbol] = this.createEl();
+                item[this.elSymbol] = this.createEl(item);
                 this.$subtitle.appendChild(item[this.elSymbol]);
             }
             const left = this.wf.getLeftFromTime(item.start);
@@ -1310,9 +1317,22 @@ class Subtitle {
             item[this.elSymbol].style.left = left + "px";
             item[this.elSymbol].style.width = width + "px";
         }
+        for(let index1 = 0; index1 < this.renderData.length; index1++){
+            const item1 = this.renderData[index1];
+            if (!renderData.includes(item1)) {
+                item1[this.elSymbol].style.display = "none";
+                this.$els.push(item1[this.elSymbol]);
+                delete item1[this.elSymbol];
+            }
+        }
         this.renderData = renderData;
     }
-    load(data) {
+    load(data = []) {
+        for(let index = 0; index < data.length; index++){
+            const item = data[index];
+            item[this.idSymbol] = index;
+            delete item[this.elSymbol];
+        }
         this.data = data;
     }
     destroy() {

@@ -39,9 +39,35 @@
 }
 
 .wf-subtitle-item {
+    display: flex;
+    justify-content: space-between;
     position: absolute;
     top: 0;
     bottom: 0;
     height: 100%;
-    background-color: red;
+    cursor: default;
+    pointer-events: all;
+    transition: background-color 0.2s ease;
+    background-color: rgb(255 255 255 / 25%);
+}
+
+.wf-subtitle-item:hover {
+    background-color: rgb(255 255 255 / 30%);
+}
+
+.wf-subtitle-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    word-break: break-all;
+    white-space: nowrap;
+    color: #ffffff;
+    text-shadow: rgb(0 0 0 / 75%) 0px 1px 0px;
+    flex: 1;
+    height: 100%;
+}
+
+.wf-subtitle-left, .wf-subtitle-right {
+    width: 15px;
+    height: 100%;
 }
