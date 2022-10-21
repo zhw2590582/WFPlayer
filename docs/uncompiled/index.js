@@ -327,6 +327,19 @@ class WFPlayer extends (0, _emitterDefault.default) {
         const { gridGap , pixelRatio  } = this.drawer.config;
         return gridGap / pixelRatio * 10 * duration;
     }
+    getLeftFromTime(time) {
+        const { gridGap , pixelRatio , beginTime , padding  } = this.drawer.config;
+        const width = this.getWidthFromDuration(time - beginTime);
+        return width + padding * gridGap / pixelRatio;
+    }
+    checkVisible(start, end) {
+        const { beginTime , duration  } = this.drawer.config;
+        if (typeof start !== "number" || typeof end !== "number") return false;
+        if (start >= end) return false;
+        if (end < beginTime) return false;
+        if (start > beginTime + duration) return false;
+        return true;
+    }
     seek(second) {
         (0, _utils.errorHandle)(typeof second === "number", "seek expects to receive number as a parameter.");
         cancelAnimationFrame(this._playTimer);

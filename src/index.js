@@ -224,6 +224,21 @@ export default class WFPlayer extends Emitter {
         return (gridGap / pixelRatio) * 10 * duration;
     }
 
+    getLeftFromTime(time) {
+        const { gridGap, pixelRatio, beginTime, padding } = this.drawer.config;
+        const width = this.getWidthFromDuration(time - beginTime);
+        return width + (padding * gridGap) / pixelRatio;
+    }
+
+    checkVisible(start, end) {
+        const { beginTime, duration } = this.drawer.config;
+        if (typeof start !== 'number' || typeof end !== 'number') return false;
+        if (start >= end) return false;
+        if (end < beginTime) return false;
+        if (start > beginTime + duration) return false;
+        return true;
+    }
+
     seek(second) {
         errorHandle(typeof second === 'number', 'seek expects to receive number as a parameter.');
         cancelAnimationFrame(this._playTimer);
