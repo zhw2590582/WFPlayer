@@ -1252,7 +1252,7 @@ class Controller {
 exports.default = Controller;
 
 },{"./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"fVJDJ":[function(require,module,exports) {
-module.exports = ".wf-player {\n  position: relative;\n  overflow: hidden;\n}\n\n.wf-scrollable {\n  cursor: grab;\n}\n\n.wf-scrollable.wf-grabbing {\n  cursor: grabbing;\n}\n\n.wf-cursor {\n  z-index: 10;\n  width: 1px;\n  height: 100%;\n  opacity: .25;\n  user-select: none;\n  pointer-events: none;\n  background-color: #fff;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n}\n\n.wf-subtitle {\n  z-index: 20;\n  height: 100%;\n  width: 100%;\n  user-select: none;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n";
+module.exports = ".wf-player {\n  position: relative;\n  overflow: hidden;\n}\n\n.wf-scrollable {\n  cursor: grab;\n}\n\n.wf-scrollable.wf-grabbing {\n  cursor: grabbing;\n}\n\n.wf-cursor {\n  z-index: 10;\n  width: 1px;\n  height: 100%;\n  opacity: .25;\n  user-select: none;\n  pointer-events: none;\n  background-color: #fff;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n}\n\n.wf-subtitle {\n  z-index: 20;\n  height: 100%;\n  width: 100%;\n  user-select: none;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.wf-subtitle-item {\n  height: 100%;\n  background-color: red;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n";
 
 },{}],"1kFyE":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -1264,6 +1264,7 @@ class Subtitle {
         this.elSymbol = Symbol("el");
         this.idSymbol = Symbol("id");
         this.$els = [];
+        this.$subtitle = null;
         this.data = [
             {
                 start: 1,
@@ -1275,9 +1276,9 @@ class Subtitle {
         this.init();
     }
     init() {
-        const $subtitle = document.createElement("div");
-        (0, _utils.addClass)($subtitle, "wf-subtitle");
-        this.wf.options.container.appendChild($subtitle);
+        this.$subtitle = document.createElement("div");
+        (0, _utils.addClass)(this.$subtitle, "wf-subtitle");
+        this.wf.options.container.appendChild(this.$subtitle);
         (function loop() {
             this.timer = requestAnimationFrame(()=>{
                 this.update();
@@ -1297,7 +1298,19 @@ class Subtitle {
         }
     }
     update() {
-        this.renderData = this.data.filter((item)=>this.wf.checkVisible(item.start, item.end));
+        const renderData = this.data.filter((item)=>this.wf.checkVisible(item.start, item.end));
+        for(let index = 0; index < renderData.length; index++){
+            const item = renderData[index];
+            if (!this.renderData.includes(item)) {
+                item[this.elSymbol] = this.createEl();
+                this.$subtitle.appendChild(item[this.elSymbol]);
+            }
+            const left = this.wf.getLeftFromTime(item.start);
+            const width = this.wf.getWidthFromDuration(item.end - item.start);
+            item[this.elSymbol].style.left = left + "px";
+            item[this.elSymbol].style.width = width + "px";
+        }
+        this.renderData = renderData;
     }
     load(data) {
         this.data = data;

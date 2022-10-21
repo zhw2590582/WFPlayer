@@ -6,6 +6,7 @@ export default class Subtitle {
         this.elSymbol = Symbol('el');
         this.idSymbol = Symbol('id');
         this.$els = [];
+        this.$subtitle = null;
         this.data = [{ start: 1, end: 2 }];
         this.renderData = [];
         this.timer = null;
@@ -13,9 +14,9 @@ export default class Subtitle {
     }
 
     init() {
-        const $subtitle = document.createElement('div');
-        addClass($subtitle, 'wf-subtitle');
-        this.wf.options.container.appendChild($subtitle);
+        this.$subtitle = document.createElement('div');
+        addClass(this.$subtitle, 'wf-subtitle');
+        this.wf.options.container.appendChild(this.$subtitle);
         (function loop() {
             this.timer = requestAnimationFrame(() => {
                 this.update();
@@ -39,7 +40,23 @@ export default class Subtitle {
     }
 
     update() {
-        this.renderData = this.data.filter((item) => this.wf.checkVisible(item.start, item.end));
+        const renderData = this.data.filter((item) => this.wf.checkVisible(item.start, item.end));
+
+        for (let index = 0; index < renderData.length; index++) {
+            const item = renderData[index];
+
+            if (!this.renderData.includes(item)) {
+                item[this.elSymbol] = this.createEl();
+                this.$subtitle.appendChild(item[this.elSymbol]);
+            }
+
+            const left = this.wf.getLeftFromTime(item.start);
+            const width = this.wf.getWidthFromDuration(item.end - item.start);
+            item[this.elSymbol].style.left = left + 'px';
+            item[this.elSymbol].style.width = width + 'px';
+        }
+
+        this.renderData = renderData;
     }
 
     load(data) {
