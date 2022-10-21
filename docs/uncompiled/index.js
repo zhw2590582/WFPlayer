@@ -1261,12 +1261,16 @@ var _utils = require("./utils");
 class Subtitle {
     constructor(wf){
         this.wf = wf;
+        this.elSymbol = Symbol("el");
+        this.idSymbol = Symbol("id");
+        this.$els = [];
         this.data = [
             {
                 start: 1,
                 end: 2
             }
         ];
+        this.renderData = [];
         this.timer = null;
         this.init();
     }
@@ -1277,12 +1281,23 @@ class Subtitle {
         (function loop() {
             this.timer = requestAnimationFrame(()=>{
                 this.update();
-                loop.call(this);
+                if (!this.wf.isDestroy) loop.call(this);
             });
         }).call(this);
     }
+    createEl() {
+        if (this.$els.length) {
+            const $el = this.$els.pop();
+            $el.style.display = null;
+            return $el;
+        } else {
+            const $el1 = document.createElement("div");
+            (0, _utils.addClass)($el1, "wf-subtitle-item");
+            return $el1;
+        }
+    }
     update() {
-    // const arr = this.data.filter((item) => this.wf.checkVisible(item.start, item.end));
+        this.renderData = this.data.filter((item)=>this.wf.checkVisible(item.start, item.end));
     }
     load(data) {
         this.data = data;
