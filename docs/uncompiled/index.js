@@ -161,6 +161,8 @@ var _loader = require("./loader");
 var _loaderDefault = parcelHelpers.interopDefault(_loader);
 var _controller = require("./controller");
 var _controllerDefault = parcelHelpers.interopDefault(_controller);
+var _styleLess = require("bundle-text:./style.less");
+var _styleLessDefault = parcelHelpers.interopDefault(_styleLess);
 var _utils = require("./utils");
 let id = 0;
 const instances = [];
@@ -169,7 +171,7 @@ class WFPlayer extends (0, _emitterDefault.default) {
         return instances;
     }
     static get version() {
-        return "2.2.2";
+        return "2.2.3";
     }
     static get env() {
         return "development";
@@ -405,9 +407,17 @@ class WFPlayer extends (0, _emitterDefault.default) {
     }
 }
 exports.default = WFPlayer;
+if (typeof document !== "undefined") {
+    if (!document.getElementById("wfplayer-style")) {
+        const $style = document.createElement("style");
+        $style.id = "wfplayer-style";
+        $style.textContent = (0, _styleLessDefault.default);
+        document.head.appendChild($style);
+    }
+}
 if (typeof window !== "undefined") window["WFPlayer"] = WFPlayer;
 
-},{"option-validator":"2tbdu","./emitter":"2ZQK0","./events":"jVQIf","./template":"eG0JW","./drawer":"7NL0G","./decoder":"eDdom","./loader":"6Zr4E","./controller":"5fGZE","./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"2tbdu":[function(require,module,exports) {
+},{"option-validator":"2tbdu","./emitter":"2ZQK0","./events":"jVQIf","./template":"eG0JW","./drawer":"7NL0G","./decoder":"eDdom","./loader":"6Zr4E","./controller":"5fGZE","bundle-text:./style.less":"fVJDJ","./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"2tbdu":[function(require,module,exports) {
 !function(r, t) {
     module.exports = t();
 }(this, function() {
@@ -664,7 +674,7 @@ class Template {
         } else {
             (0, _utils.errorHandle)(this.wf.constructor.instances.every((wf)=>wf.options.container !== container), "Cannot mount multiple instances on the same dom element, please destroy the previous instance first.");
             container.innerHTML = "";
-            container.style.overflow = "hidden";
+            (0, _utils.addClass)(container, "wf-player");
             this.canvas = document.createElement("canvas");
             this.canvas.width = width;
             this.canvas.height = height;
@@ -1214,7 +1224,6 @@ class Controller {
         const { events: { proxy  } , options: { container  } ,  } = this.wf;
         const $cursor = document.createElement("div");
         (0, _utils.addClass)($cursor, "wf-cursor");
-        $cursor.style.cssText = `position:absolute;top:0;left:0;bottom:0;z-index:10;width:1px;height:100%;background-color:#ffffff;opacity:0.25;user-select:none;pointer-events:none;display:none;`;
         container.appendChild($cursor);
         this.wf.template.cursor = $cursor;
         this.wf.on("mousemove", (event)=>{
@@ -1235,6 +1244,9 @@ class Controller {
 }
 exports.default = Controller;
 
-},{"./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}]},["gEVO5"], "gEVO5", "parcelRequireb650")
+},{"./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"fVJDJ":[function(require,module,exports) {
+module.exports = ".wf-player {\n  position: relative;\n  overflow: hidden;\n}\n\n.wf-scrollable {\n  cursor: grab;\n}\n\n.wf-scrollable.wf-grabbing {\n  cursor: grabbing;\n}\n\n.wf-cursor {\n  z-index: 10;\n  width: 1px;\n  height: 100%;\n  opacity: .25;\n  user-select: none;\n  pointer-events: none;\n  background-color: #fff;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n}\n\n";
+
+},{}]},["gEVO5"], "gEVO5", "parcelRequireb650")
 
 //# sourceMappingURL=index.js.map

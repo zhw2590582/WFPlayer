@@ -6,6 +6,7 @@ import Drawer from './drawer';
 import Decoder from './decoder';
 import Loader from './loader';
 import Controller from './controller';
+import style from 'bundle-text:./style.less';
 import { clamp, errorHandle, addClass, removeClass } from './utils';
 
 let id = 0;
@@ -307,6 +308,15 @@ export default class WFPlayer extends Emitter {
         this.drawer.destroy();
         instances.splice(instances.indexOf(this), 1);
         return this;
+    }
+}
+
+if (typeof document !== 'undefined') {
+    if (!document.getElementById('wfplayer-style')) {
+        const $style = document.createElement('style');
+        $style.id = 'wfplayer-style';
+        $style.textContent = style;
+        document.head.appendChild($style);
     }
 }
 

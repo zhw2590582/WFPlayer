@@ -134,7 +134,6 @@ export default class Controller {
 
         const $cursor = document.createElement('div');
         addClass($cursor, 'wf-cursor');
-        $cursor.style.cssText = `position:absolute;top:0;left:0;bottom:0;z-index:10;width:1px;height:100%;background-color:#ffffff;opacity:0.25;user-select:none;pointer-events:none;display:none;`;
         container.appendChild($cursor);
         this.wf.template.cursor = $cursor;
 

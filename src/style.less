@@ -1,0 +1,26 @@
+.wf-player {
+    position: relative;
+    overflow: hidden;
+}
+
+.wf-scrollable {
+    cursor: grab;
+}
+
+.wf-scrollable.wf-grabbing {
+    cursor: grabbing;
+}
+
+.wf-cursor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 10;
+    width: 1px;
+    height: 100%;
+    background-color: #ffffff;
+    opacity: 0.25;
+    user-select: none;
+    pointer-events: none;
+}
