@@ -285,6 +285,11 @@ class WFPlayer extends (0, _emitterDefault.default) {
             ...this.options,
             ...options
         }, WFPlayer.scheme);
+        this.options.channel = Math.abs(Math.floor(this.options.channel));
+        this.options.duration = Math.abs(Math.floor(this.options.duration));
+        this.options.padding = Math.abs(Math.floor(this.options.padding));
+        this.options.pixelRatio = Math.abs(Math.floor(this.options.pixelRatio));
+        this.options.waveScale = Math.abs(this.options.waveScale);
         this.emit("options", this.options);
         if (this.options.scrollable) (0, _utils.addClass)(this.options.container, "wf-scrollable");
         else (0, _utils.removeClass)(this.options.container, "wf-scrollable");

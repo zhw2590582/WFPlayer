@@ -163,6 +163,12 @@ export default class WFPlayer extends Emitter {
             WFPlayer.scheme,
         );
 
+        this.options.channel = Math.abs(Math.floor(this.options.channel));
+        this.options.duration = Math.abs(Math.floor(this.options.duration));
+        this.options.padding = Math.abs(Math.floor(this.options.padding));
+        this.options.pixelRatio = Math.abs(Math.floor(this.options.pixelRatio));
+        this.options.waveScale = Math.abs(this.options.waveScale);
+
         this.emit('options', this.options);
 
         if (this.options.scrollable) {
