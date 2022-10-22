@@ -345,6 +345,9 @@ class WFPlayer extends (0, _emitterDefault.default) {
         if (start > beginTime + duration) return false;
         return true;
     }
+    checkCurrent(start, end) {
+        return this.checkVisible(start, end) && this.currentTime >= start && this.currentTime <= end;
+    }
     seek(second) {
         (0, _utils.errorHandle)(typeof second === "number", "seek expects to receive number as a parameter.");
         cancelAnimationFrame(this._seekTimer);
@@ -421,7 +424,7 @@ if (typeof document !== "undefined") {
 }
 if (typeof window !== "undefined") window["WFPlayer"] = WFPlayer;
 
-},{"option-validator":"2tbdu","./emitter":"2ZQK0","./events":"jVQIf","./template":"eG0JW","./drawer":"7NL0G","./decoder":"eDdom","./loader":"6Zr4E","./controller":"5fGZE","bundle-text:./style.less":"fVJDJ","./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6","./subtitle":"1kFyE"}],"2tbdu":[function(require,module,exports) {
+},{"option-validator":"2tbdu","./emitter":"2ZQK0","./events":"jVQIf","./template":"eG0JW","./drawer":"7NL0G","./decoder":"eDdom","./loader":"6Zr4E","./subtitle":"1kFyE","./controller":"5fGZE","bundle-text:./style.less":"fVJDJ","./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"2tbdu":[function(require,module,exports) {
 !function(r, t) {
     module.exports = t();
 }(this, function() {
@@ -1125,6 +1128,93 @@ class Loader {
 }
 exports.default = Loader;
 
+},{"./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"1kFyE":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _utils = require("./utils");
+class Subtitle {
+    constructor(wf){
+        this.wf = wf;
+        this.$els = [];
+        this.$subtitle = null;
+        this.elSymbol = Symbol("el");
+        this.data = [
+            {
+                start: 1,
+                end: 2,
+                html: "test"
+            }
+        ];
+        this.renderData = [];
+        this.timer = null;
+        this.isInit = false;
+    }
+    init() {
+        this.$subtitle = document.createElement("div");
+        (0, _utils.addClass)(this.$subtitle, "wf-subtitle");
+        this.wf.options.container.appendChild(this.$subtitle);
+        (function loop() {
+            this.timer = requestAnimationFrame(()=>{
+                if (this.data.length) this.update();
+                if (!this.wf.isDestroy) loop.call(this);
+            });
+        }).call(this);
+    }
+    createEl(item) {
+        if (this.$els.length) {
+            const $el = this.$els.pop();
+            $el.style.display = null;
+            $el.innerHTML = item.html || "";
+            return $el;
+        } else {
+            const $el1 = document.createElement("div");
+            $el1.innerHTML = item.html || "";
+            (0, _utils.addClass)($el1, "wf-subtitle-item");
+            return $el1;
+        }
+    }
+    update() {
+        const renderData = this.data.filter((item)=>this.wf.checkVisible(item.start, item.end));
+        for(let index = 0; index < renderData.length; index++){
+            const item = renderData[index];
+            if (!this.renderData.includes(item)) {
+                item[this.elSymbol] = this.createEl(item);
+                this.$subtitle.appendChild(item[this.elSymbol]);
+            }
+            if (this.wf.checkCurrent(item.start, item.end)) (0, _utils.addClass)(item[this.elSymbol], "wf-subtitle-current");
+            else (0, _utils.removeClass)(item[this.elSymbol], "wf-subtitle-current");
+            const left = this.wf.getLeftFromTime(item.start);
+            const width = this.wf.getWidthFromDuration(item.end - item.start);
+            item[this.elSymbol].style.left = left + "px";
+            item[this.elSymbol].style.width = width + "px";
+        }
+        for(let index1 = 0; index1 < this.renderData.length; index1++){
+            const item1 = this.renderData[index1];
+            if (!renderData.includes(item1)) {
+                item1[this.elSymbol].style.display = "none";
+                this.$els.push(item1[this.elSymbol]);
+                delete item1[this.elSymbol];
+            }
+        }
+        this.renderData = renderData;
+    }
+    load(data = []) {
+        for(let index = 0; index < data.length; index++){
+            const item = data[index];
+            delete item[this.elSymbol];
+        }
+        this.data = data;
+        if (!this.isInit) {
+            this.isInit = true;
+            this.init();
+        }
+    }
+    destroy() {
+        cancelAnimationFrame(this.timer);
+    }
+}
+exports.default = Subtitle;
+
 },{"./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"5fGZE":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
@@ -1252,103 +1342,8 @@ class Controller {
 exports.default = Controller;
 
 },{"./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"fVJDJ":[function(require,module,exports) {
-module.exports = ".wf-player {\n  position: relative;\n  overflow: hidden;\n}\n\n.wf-scrollable {\n  cursor: grab;\n}\n\n.wf-scrollable.wf-grabbing {\n  cursor: grabbing;\n}\n\n.wf-cursor {\n  z-index: 10;\n  width: 1px;\n  height: 100%;\n  opacity: .25;\n  user-select: none;\n  pointer-events: none;\n  background-color: #fff;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n}\n\n.wf-subtitle {\n  z-index: 20;\n  height: 100%;\n  width: 100%;\n  user-select: none;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.wf-subtitle-item {\n  height: 60%;\n  cursor: default;\n  pointer-events: all;\n  background-color: #fff3;\n  justify-content: space-between;\n  transition: background-color .2s;\n  display: flex;\n  position: absolute;\n  top: 25%;\n}\n\n.wf-subtitle-item:hover {\n  background-color: #ffffff4d;\n}\n\n.wf-subtitle-current {\n  background-color: #2196f380;\n  border: 1px solid #2196f380;\n}\n\n.wf-subtitle-current:hover {\n  background-color: #2196f399;\n}\n\n.wf-subtitle-html {\n  word-break: break-all;\n  white-space: nowrap;\n  color: #fff;\n  text-shadow: 0 1px #000000bf;\n  height: 100%;\n  cursor: move;\n  flex: 1;\n  justify-content: center;\n  align-items: center;\n  display: flex;\n}\n\n.wf-subtitle-left, .wf-subtitle-right {\n  width: 10px;\n  height: 100%;\n  cursor: col-resize;\n  user-select: none;\n  background-color: #fff0;\n  transition: background-color .2s;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n.wf-subtitle-left:hover, .wf-subtitle-right:hover {\n  background-color: #fff3;\n}\n\n.wf-subtitle-left {\n  left: 0;\n}\n\n.wf-subtitle-right {\n  right: 0;\n}\n\n";
+module.exports = ".wf-player {\n  position: relative;\n  overflow: hidden;\n}\n\n.wf-scrollable {\n  cursor: grab;\n}\n\n.wf-scrollable.wf-grabbing {\n  cursor: grabbing;\n}\n\n.wf-cursor {\n  z-index: 10;\n  width: 1px;\n  height: 100%;\n  opacity: .25;\n  user-select: none;\n  pointer-events: none;\n  background-color: #fff;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n}\n\n.wf-subtitle {\n  z-index: 20;\n  height: 100%;\n  width: 100%;\n  user-select: none;\n  pointer-events: none;\n  position: absolute;\n  inset: 0;\n}\n\n.wf-subtitle-item {\n  height: 100%;\n  cursor: default;\n  pointer-events: all;\n  background-color: #fff3;\n  justify-content: center;\n  align-items: center;\n  transition: background-color .2s;\n  display: flex;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n}\n\n.wf-subtitle-item:hover {\n  background-color: #ffffff4d;\n}\n\n.wf-subtitle-current {\n  background-color: #2196f380;\n  border: 1px solid #2196f380;\n}\n\n.wf-subtitle-current:hover {\n  background-color: #2196f399;\n}\n\n";
 
-},{}],"1kFyE":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-var _utils = require("./utils");
-class Subtitle {
-    constructor(wf){
-        this.wf = wf;
-        this.$els = [];
-        this.$subtitle = null;
-        this.elSymbol = Symbol("el");
-        this.idSymbol = Symbol("id");
-        this.data = [
-            {
-                start: 1,
-                end: 2,
-                html: "test"
-            }
-        ];
-        this.renderData = [];
-        this.timer = null;
-        this.init();
-    }
-    init() {
-        this.$subtitle = document.createElement("div");
-        (0, _utils.addClass)(this.$subtitle, "wf-subtitle");
-        this.wf.options.container.appendChild(this.$subtitle);
-        (function loop() {
-            this.timer = requestAnimationFrame(()=>{
-                if (this.data.length) this.update();
-                if (!this.wf.isDestroy) loop.call(this);
-            });
-        }).call(this);
-    }
-    createEl(item) {
-        if (this.$els.length) {
-            const $el = this.$els.pop();
-            $el.style.display = null;
-            const $center = $el.querySelector(".wf-subtitle-html");
-            $center.innerHTML = item.html || "";
-            return $el;
-        } else {
-            const $el1 = document.createElement("div");
-            (0, _utils.addClass)($el1, "wf-subtitle-item");
-            const $html = document.createElement("div");
-            (0, _utils.addClass)($html, "wf-subtitle-html");
-            $html.innerHTML = item.html || "";
-            $el1.appendChild($html);
-            const $left = document.createElement("div");
-            (0, _utils.addClass)($left, "wf-subtitle-left");
-            $el1.appendChild($left);
-            const $right = document.createElement("div");
-            (0, _utils.addClass)($right, "wf-subtitle-right");
-            $el1.appendChild($right);
-            return $el1;
-        }
-    }
-    update() {
-        const renderData = this.data.filter((item)=>this.wf.checkVisible(item.start, item.end));
-        for(let index = 0; index < renderData.length; index++){
-            const item = renderData[index];
-            if (!this.renderData.includes(item)) {
-                item[this.elSymbol] = this.createEl(item);
-                this.$subtitle.appendChild(item[this.elSymbol]);
-            }
-            if (this.wf.currentTime >= item.start && this.wf.currentTime <= item.end) (0, _utils.addClass)(item[this.elSymbol], "wf-subtitle-current");
-            else (0, _utils.removeClass)(item[this.elSymbol], "wf-subtitle-current");
-            const left = this.wf.getLeftFromTime(item.start);
-            const width = this.wf.getWidthFromDuration(item.end - item.start);
-            item[this.elSymbol].style.left = left + "px";
-            item[this.elSymbol].style.width = width + "px";
-        }
-        for(let index1 = 0; index1 < this.renderData.length; index1++){
-            const item1 = this.renderData[index1];
-            if (!renderData.includes(item1)) {
-                item1[this.elSymbol].style.display = "none";
-                this.$els.push(item1[this.elSymbol]);
-                delete item1[this.elSymbol];
-            }
-        }
-        this.renderData = renderData;
-    }
-    load(data = []) {
-        for(let index = 0; index < data.length; index++){
-            const item = data[index];
-            item[this.idSymbol] = index;
-            delete item[this.elSymbol];
-        }
-        this.data = data;
-    }
-    destroy() {
-        cancelAnimationFrame(this.timer);
-    }
-}
-exports.default = Subtitle;
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6","./utils":"5vF3n"}]},["gEVO5"], "gEVO5", "parcelRequireb650")
+},{}]},["gEVO5"], "gEVO5", "parcelRequireb650")
 
 //# sourceMappingURL=index.js.map

@@ -6,11 +6,10 @@ export default class Subtitle {
         this.$els = [];
         this.$subtitle = null;
         this.elSymbol = Symbol('el');
-        this.idSymbol = Symbol('id');
         this.data = [{ start: 1, end: 2, html: 'test' }];
         this.renderData = [];
         this.timer = null;
-        this.init();
+        this.isInit = false;
     }
 
     init() {
@@ -35,26 +34,12 @@ export default class Subtitle {
         if (this.$els.length) {
             const $el = this.$els.pop();
             $el.style.display = null;
-            const $center = $el.querySelector('.wf-subtitle-html');
-            $center.innerHTML = item.html || '';
+            $el.innerHTML = item.html || '';
             return $el;
         } else {
             const $el = document.createElement('div');
+            $el.innerHTML = item.html || '';
             addClass($el, 'wf-subtitle-item');
-
-            const $html = document.createElement('div');
-            addClass($html, 'wf-subtitle-html');
-            $html.innerHTML = item.html || '';
-            $el.appendChild($html);
-
-            const $left = document.createElement('div');
-            addClass($left, 'wf-subtitle-left');
-            $el.appendChild($left);
-
-            const $right = document.createElement('div');
-            addClass($right, 'wf-subtitle-right');
-            $el.appendChild($right);
-
             return $el;
         }
     }
@@ -70,7 +55,7 @@ export default class Subtitle {
                 this.$subtitle.appendChild(item[this.elSymbol]);
             }
 
-            if (this.wf.currentTime >= item.start && this.wf.currentTime <= item.end) {
+            if (this.wf.checkCurrent(item.start, item.end)) {
                 addClass(item[this.elSymbol], 'wf-subtitle-current');
             } else {
                 removeClass(item[this.elSymbol], 'wf-subtitle-current');
@@ -97,10 +82,15 @@ export default class Subtitle {
     load(data = []) {
         for (let index = 0; index < data.length; index++) {
             const item = data[index];
-            item[this.idSymbol] = index;
             delete item[this.elSymbol];
         }
+
         this.data = data;
+
+        if (!this.isInit) {
+            this.isInit = true;
+            this.init();
+        }
     }
 
     destroy() {

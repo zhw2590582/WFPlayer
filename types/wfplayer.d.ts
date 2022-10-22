@@ -90,6 +90,7 @@ declare class WFPlayer {
     getWidthFromDuration(width: number): number;
     getLeftFromTime(time: number): number;
     checkVisible(start: number, end: number): boolean;
+    checkCurrent(start: number, end: number): boolean;
     seek(second: number): WFPlayer;
     smoothSeek(second: number, duration: number): Promise<WFPlayer>;
     changeChannel(channel: 0 | 1 | 2): WFPlayer;

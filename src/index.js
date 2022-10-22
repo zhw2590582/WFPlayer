@@ -242,6 +242,10 @@ export default class WFPlayer extends Emitter {
         return true;
     }
 
+    checkCurrent(start, end) {
+        return this.checkVisible(start, end) && this.currentTime >= start && this.currentTime <= end;
+    }
+
     seek(second) {
         errorHandle(typeof second === 'number', 'seek expects to receive number as a parameter.');
         cancelAnimationFrame(this._seekTimer);
