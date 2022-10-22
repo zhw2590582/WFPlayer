@@ -18,10 +18,11 @@ function initWFPlayer(url) {
         scrollable: $scrollable.checked,
         useWorker: true,
     });
+
     wf.load(url);
     wf.on('click', (currentTime) => wf.smoothSeek(currentTime));
     wf.on('grabbing', (currentTime) => wf.seek(currentTime));
-    wf.on('scroll', (deltaY) => wf.seek(wf.currentTime + deltaY / 10));
+    wf.on('scroll', (deltaY) => wf.seek(wf.currentTime + deltaY / 5));
 }
 
 initWFPlayer('audio.mp3');
