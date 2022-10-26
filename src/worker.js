@@ -177,6 +177,7 @@ self.onmessage = function onmessage(event) {
             canvas.height = data.height;
         }
 
+        const { byteLength } = channelData;
         gridNum = data.duration * 10 + data.padding * 2;
         gridGap = data.width / gridNum;
         density = getDensity(data);
@@ -205,8 +206,6 @@ self.onmessage = function onmessage(event) {
         if (data.cursor) {
             drawCursor(data);
         }
-
-        const { byteLength } = channelData;
 
         const config = {
             gridNum,
