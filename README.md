@@ -152,8 +152,8 @@ var wf = new WFPlayer({
     // Waveform height scale ratio
     waveScale: 0.8,
 
-    // Waveform width ratio
-    waveWidth: 1,
+    // Waveform Size ratio
+    waveSize: 1,
 });
 ```
 

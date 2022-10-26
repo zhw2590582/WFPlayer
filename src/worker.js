@@ -93,8 +93,20 @@ function drawRuler(data) {
 }
 
 function drawWave(data) {
-    const { width, height, currentTime, progress, waveColor, progressColor, duration, padding, waveScale, scrollable } =
-        data;
+    const {
+        width,
+        height,
+        currentTime,
+        progress,
+        waveColor,
+        progressColor,
+        duration,
+        padding,
+        waveScale,
+        waveSize,
+        scrollable,
+    } = data;
+
     const middle = height / 2;
     const waveWidth = width - gridGap * padding * 2;
     const startIndex = Math.floor(beginTime * sampleRate);
@@ -105,7 +117,7 @@ function drawWave(data) {
     let xIndex = 0;
     let min = 1;
     let max = -1;
-    for (let i = startIndex; i < endIndex; i += 1) {
+    for (let i = startIndex; i < endIndex; i += waveSize) {
         stepIndex += 1;
         const item = channelData[i] || 0;
         if (item < min) {
@@ -114,10 +126,15 @@ function drawWave(data) {
             max = item;
         }
         if (stepIndex >= step && xIndex < waveWidth) {
-            xIndex += 1;
             const waveX = gridGap * padding + xIndex;
             ctx.fillStyle = progress && cursorX >= waveX ? progressColor : waveColor;
-            ctx.fillRect(waveX, (1 + min * waveScale) * middle, 1, Math.max(1, (max - min) * middle * waveScale));
+            ctx.fillRect(
+                waveX,
+                (1 + min * waveScale) * middle,
+                waveSize,
+                Math.max(1, (max - min) * middle * waveScale),
+            );
+            xIndex += waveSize;
             stepIndex = 0;
             min = 1;
             max = -1;
