@@ -26,6 +26,7 @@ type Option = {
     duration?: number;
     padding?: number;
     waveScale?: number;
+    waveWidth?: number;
     pixelRatio?: number;
 };
 

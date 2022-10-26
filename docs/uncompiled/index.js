@@ -202,6 +202,7 @@ class WFPlayer extends (0, _emitterDefault.default) {
             duration: 10,
             padding: 5,
             waveScale: 0.8,
+            waveWidth: 1,
             pixelRatio: Math.ceil(window.devicePixelRatio)
         };
     }
@@ -231,6 +232,7 @@ class WFPlayer extends (0, _emitterDefault.default) {
             duration: "number",
             padding: "number",
             waveScale: "number",
+            waveWidth: "number",
             pixelRatio: "number"
         };
     }
@@ -286,8 +288,10 @@ class WFPlayer extends (0, _emitterDefault.default) {
         this.options.duration = Math.abs(Math.floor(this.options.duration));
         this.options.padding = Math.abs(Math.floor(this.options.padding));
         this.options.pixelRatio = Math.abs(Math.floor(this.options.pixelRatio));
+        this.options.waveWidth = Math.abs(Math.floor(this.options.waveWidth));
         this.options.waveScale = Math.abs(this.options.waveScale);
         if (this.options.duration % 2 !== 0) this.options.duration -= 1;
+        if (this.options.waveWidth % 2 !== 0) this.options.waveWidth -= 1;
         this.emit("options", this.options);
         if (this.options.scrollable) (0, _utils.addClass)(this.options.container, "wf-scrollable");
         else (0, _utils.removeClass)(this.options.container, "wf-scrollable");
