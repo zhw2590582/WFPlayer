@@ -169,45 +169,45 @@ self.onmessage = function onmessage(event) {
             return (lastDataString = dataString);
         }
 
-        const { width, height, currentTime, cursor, grid, ruler, wave, duration, padding, scrollable, scrollbar } =
-            data;
-
-        if (canvas.width !== width) {
-            canvas.width = width;
+        if (canvas.width !== data.width) {
+            canvas.width = data.width;
         }
 
-        if (canvas.height !== height) {
-            canvas.height = height;
+        if (canvas.height !== data.height) {
+            canvas.height = data.height;
         }
 
-        gridNum = duration * 10 + padding * 2;
-        gridGap = width / gridNum;
-        beginTime = scrollable ? currentTime - duration / 2 : Math.floor(currentTime / duration) * duration;
+        gridNum = data.duration * 10 + data.padding * 2;
+        gridGap = data.width / gridNum;
         density = getDensity(data);
+        beginTime = data.scrollable
+            ? data.currentTime - data.duration / 2
+            : Math.floor(data.currentTime / data.duration) * data.duration;
 
         drawBackground(data);
 
-        if (grid) {
+        if (data.grid) {
             drawGrid(data);
         }
 
-        if (ruler) {
+        if (data.ruler) {
             drawRuler(data);
         }
 
-        if (wave) {
+        if (data.wave) {
             drawWave(data);
         }
 
-        if (scrollbar) {
+        if (data.scrollbar) {
             drawScrollbar(data);
         }
 
-        if (cursor) {
+        if (data.cursor) {
             drawCursor(data);
         }
 
         const { byteLength } = channelData;
+
         const config = {
             gridNum,
             gridGap,

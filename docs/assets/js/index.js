@@ -94,6 +94,7 @@ $pickers.forEach(function ($el) {
 $range.forEach(function ($el) {
     var name = $el.getAttribute('name');
     $el.oninput = function () {
+        $el.nextElementSibling.textContent = $el.value;
         wf.setOptions({
             [name]: Number($el.value),
         });
