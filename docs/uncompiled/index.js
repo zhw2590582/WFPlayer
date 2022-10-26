@@ -159,8 +159,6 @@ var _decoder = require("./decoder");
 var _decoderDefault = parcelHelpers.interopDefault(_decoder);
 var _loader = require("./loader");
 var _loaderDefault = parcelHelpers.interopDefault(_loader);
-var _subtitle = require("./subtitle");
-var _subtitleDefault = parcelHelpers.interopDefault(_subtitle);
 var _controller = require("./controller");
 var _controllerDefault = parcelHelpers.interopDefault(_controller);
 var _styleLess = require("bundle-text:./style.less");
@@ -173,7 +171,7 @@ class WFPlayer extends (0, _emitterDefault.default) {
         return instances;
     }
     static get version() {
-        return "2.2.3";
+        return "2.2.4";
     }
     static get env() {
         return "development";
@@ -248,7 +246,6 @@ class WFPlayer extends (0, _emitterDefault.default) {
         this.template = new (0, _templateDefault.default)(this);
         this.decoder = new (0, _decoderDefault.default)(this);
         this.drawer = new (0, _drawerDefault.default)(this);
-        this.subtitle = new (0, _subtitleDefault.default)(this);
         this.controller = new (0, _controllerDefault.default)(this);
         this.loader = new (0, _loaderDefault.default)(this);
         this.update();
@@ -405,6 +402,10 @@ class WFPlayer extends (0, _emitterDefault.default) {
         }
         return this;
     }
+    reset() {
+        this.decoder.destroy();
+        return this;
+    }
     destroy() {
         this.isDestroy = true;
         this.events.destroy();
@@ -413,7 +414,6 @@ class WFPlayer extends (0, _emitterDefault.default) {
         this.decoder.destroy();
         this.loader.destroy();
         this.drawer.destroy();
-        this.subtitle.destroy();
         instances.splice(instances.indexOf(this), 1);
         return this;
     }
@@ -429,7 +429,7 @@ if (typeof document !== "undefined") {
 }
 if (typeof window !== "undefined") window["WFPlayer"] = WFPlayer;
 
-},{"option-validator":"2tbdu","./emitter":"2ZQK0","./events":"jVQIf","./template":"eG0JW","./drawer":"7NL0G","./decoder":"eDdom","./loader":"6Zr4E","./subtitle":"1kFyE","./controller":"5fGZE","bundle-text:./style.less":"fVJDJ","./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"2tbdu":[function(require,module,exports) {
+},{"option-validator":"2tbdu","./emitter":"2ZQK0","./events":"jVQIf","./template":"eG0JW","./drawer":"7NL0G","./decoder":"eDdom","./loader":"6Zr4E","./controller":"5fGZE","bundle-text:./style.less":"fVJDJ","./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"2tbdu":[function(require,module,exports) {
 !function(r, t) {
     module.exports = t();
 }(this, function() {
@@ -1132,93 +1132,6 @@ class Loader {
     }
 }
 exports.default = Loader;
-
-},{"./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"1kFyE":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-var _utils = require("./utils");
-class Subtitle {
-    constructor(wf){
-        this.wf = wf;
-        this.$els = [];
-        this.$subtitle = null;
-        this.elSymbol = Symbol("el");
-        this.data = [
-            {
-                start: 1,
-                end: 2,
-                html: "test"
-            }
-        ];
-        this.renderData = [];
-        this.timer = null;
-        this.isInit = false;
-    }
-    init() {
-        this.$subtitle = document.createElement("div");
-        (0, _utils.addClass)(this.$subtitle, "wf-subtitle");
-        this.wf.options.container.appendChild(this.$subtitle);
-        (function loop() {
-            this.timer = requestAnimationFrame(()=>{
-                if (this.data.length) this.update();
-                if (!this.wf.isDestroy) loop.call(this);
-            });
-        }).call(this);
-    }
-    createEl(item) {
-        if (this.$els.length) {
-            const $el = this.$els.pop();
-            $el.style.display = null;
-            $el.innerHTML = item.html || "";
-            return $el;
-        } else {
-            const $el1 = document.createElement("div");
-            $el1.innerHTML = item.html || "";
-            (0, _utils.addClass)($el1, "wf-subtitle-item");
-            return $el1;
-        }
-    }
-    update() {
-        const renderData = this.data.filter((item)=>this.wf.checkVisible(item.start, item.end));
-        for(let index = 0; index < renderData.length; index++){
-            const item = renderData[index];
-            if (!this.renderData.includes(item)) {
-                item[this.elSymbol] = this.createEl(item);
-                this.$subtitle.appendChild(item[this.elSymbol]);
-            }
-            if (this.wf.checkCurrent(item.start, item.end)) (0, _utils.addClass)(item[this.elSymbol], "wf-subtitle-current");
-            else (0, _utils.removeClass)(item[this.elSymbol], "wf-subtitle-current");
-            const left = this.wf.getLeftFromTime(item.start);
-            const width = this.wf.getWidthFromDuration(item.end - item.start);
-            item[this.elSymbol].style.left = left + "px";
-            item[this.elSymbol].style.width = width + "px";
-        }
-        for(let index1 = 0; index1 < this.renderData.length; index1++){
-            const item1 = this.renderData[index1];
-            if (!renderData.includes(item1)) {
-                item1[this.elSymbol].style.display = "none";
-                this.$els.push(item1[this.elSymbol]);
-                delete item1[this.elSymbol];
-            }
-        }
-        this.renderData = renderData;
-    }
-    load(data = []) {
-        for(let index = 0; index < data.length; index++){
-            const item = data[index];
-            delete item[this.elSymbol];
-        }
-        this.data = data;
-        if (!this.isInit) {
-            this.isInit = true;
-            this.init();
-        }
-    }
-    destroy() {
-        cancelAnimationFrame(this.timer);
-    }
-}
-exports.default = Subtitle;
 
 },{"./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"5fGZE":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");

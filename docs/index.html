@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="./assets/css/normalize.css" />
     <link rel="stylesheet" href="./assets/css/style.css" />
     <link rel="stylesheet" href="./assets/css/pickr.css" />
-    <link rel="stylesheet" href="./assets/css/powerange.css" />
 </head>
 
 <body>
@@ -26,104 +25,90 @@
             </div>
             <div class="log"></div>
             <div class="right">
-                <a class="github" href="https://github.com/zhw2590582/WFPlayer">
+                <a class="item" href="https://github.com/zhw2590582/WFPlayer">
                     Github
                 </a>
                 <div class="item">
-                    Open Video
+                    Open File
                     <input class="open" type="file" name="file" />
                 </div>
-                <div class="item download">Download Image</div>
             </div>
         </header>
         <section class="main">
             <div class="left">
-                <div class="item">
-                    <div class="name">Scrollable :</div>
-                    <div class="controller">
-                        <input class="scrollable" type="checkbox" name="scrollable" checked>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="name">Wave Color :</div>
-                    <div class="controller">
+                <div class="row">
+                    <div class="item">
+                        <div class="name">Wave: </div>
+                        <input class="checkbox" type="checkbox" name="wave" checked>
                         <div class="color-picker" name="waveColor"></div>
                     </div>
-                </div>
-                <div class="item">
-                    <div class="name">Progress Color :</div>
-                    <div class="controller">
+                    <div class="item">
+                        <div class="name">Background: </div>
+                        <div class="color-picker" name="backgroundColor"></div>
+                    </div>
+                    <div class="item">
+                        <div class="name">Padding: </div>
+                        <div class="color-picker" name="paddingColor"></div>
+                    </div>
+                    <div class="item">
+                        <div class="name">Cursor: </div>
+                        <input class="checkbox" type="checkbox" name="cursor" checked>
+                        <div class="color-picker" name="cursorColor"></div>
+                    </div>
+                    <div class="item">
+                        <div class="name">Progress: </div>
+                        <input class="checkbox" type="checkbox" name="progress" checked>
                         <div class="color-picker" name="progressColor"></div>
                     </div>
                 </div>
-                <div class="item">
-                    <div class="name">Cursor Color :</div>
-                    <div class="controller">
-                        <div class="color-picker" name="cursorColor"></div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="name">Ruler Color :</div>
-                    <div class="controller">
-                        <div class="color-picker" name="rulerColor"></div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="name">Grid Color :</div>
-                    <div class="controller">
+                <div class="row">
+                    <div class="item">
+                        <div class="name">Grid: </div>
+                        <input class="checkbox" type="checkbox" name="grid" checked>
                         <div class="color-picker" name="gridColor"></div>
                     </div>
-                </div>
-                <div class="item">
-                    <div class="name">Background Color :</div>
-                    <div class="controller">
-                        <div class="color-picker" name="backgroundColor"></div>
+                    <div class="item">
+                        <div class="name">Ruler: </div>
+                        <input class="checkbox" type="checkbox" name="ruler" checked>
+                        <div class="color-picker" name="rulerColor"></div>
                     </div>
-                </div>
-                <div class="item">
-                    <div class="name">Padding Color :</div>
-                    <div class="controller">
-                        <div class="color-picker" name="paddingColor"></div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="name">Scrollbar Color :</div>
-                    <div class="controller">
+                    <div class="item">
+                        <div class="name">Scrollbar: </div>
+                        <input class="checkbox" type="checkbox" name="scrollbar" checked>
                         <div class="color-picker" name="scrollbarColor"></div>
                     </div>
-                </div>
-                <div class="item">
-                    <div class="name">Duration :</div>
-                    <div class="controller range">
-                        <span class="value">10</span>
-                        <input type="text" name="duration" value="10" step="1" style="display: none;">
+                    <div class="item">
+                        <div class="name">Ruler At Top: </div>
+                        <input class="checkbox" type="checkbox" name="rulerAtTop" checked>
+                    </div>
+                    <div class="item">
+                        <div class="name">Scrollable: </div>
+                        <input class="checkbox" type="checkbox" name="scrollable" checked>
                     </div>
                 </div>
-                <div class="item">
-                    <div class="name">Padding :</div>
-                    <div class="controller range">
-                        <span class="value">5</span>
-                        <input type="text" name="padding" value="5" step="1" style="display: none;">
+                <div class="row">
+                    <div class="item">
+                        <div class="name">Duration: </div>
+                        <input class="range" type="range" name="duration" min="1" max="20" step="1" value="10">
                     </div>
-                </div>
-                <div class="item">
-                    <div class="name">Wave Scale :</div>
-                    <div class="controller range">
-                        <span class="value">0.8</span>
-                        <input type="text" name="waveScale" value="0.8" min="0.1" max="2" step="0.1"
-                            style="display: none;">
+                    <div class="item">
+                        <div class="name">Padding: </div>
+                        <input class="range" type="range" name="padding" min="1" max="20" step="1" value="5">
+                    </div>
+                    <div class="item">
+                        <div class="name">Wave Scale: </div>
+                        <input class="range" type="range" name="waveScale" min="0.1" max="2" step="0.1" value="0.8">
                     </div>
                 </div>
             </div>
             <div class="right">
-                <video class="video" src="https://wfplayer.js.org/sample.mp4" controls height="360"></video>
+                <video class="video" src="https://wfplayer.js.org/sample.mp4" controls></video>
             </div>
         </section>
         <footer class="waveform"></footer>
     </div>
     <script src="./uncompiled/index.js"></script>
     <script src="./assets/js/pickr.js"></script>
-    <script src="./assets/js/powerange.js"></script>
     <script src="./assets/js/index.js"></script>
     <script>
         var _hmt = _hmt || [];

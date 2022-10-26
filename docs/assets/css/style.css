@@ -63,26 +63,20 @@ body,
     height: 100%;
 }
 
-.header .right .github {
-    color: #03A9F4;
-    text-decoration: none;
-    margin-right: 30px;
-}
-
 .header .right .item {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100%;
-    padding: 0 10px;
-    width: 170px;
+    padding: 0 20px;
     cursor: pointer;
     overflow: hidden;
-    color: #ccc;
-    background-color: rgb(46, 54, 60);
-    border-left: 1px solid rgb(10, 10, 10);
+    color: #f1fa8c;
+    border-left: 1px solid rgb(17, 21, 24);
+    background-color: rgb(39, 41, 54);
     transition: all 0.2s ease;
+    text-decoration: none;
 }
 
 .header .right .item:hover {
@@ -101,13 +95,6 @@ body,
     opacity: 0;
 }
 
-.log {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-}
-
 .main {
     display: flex;
     flex: 1;
@@ -120,46 +107,40 @@ body,
     border-right: 1px solid rgb(10, 10, 10);
 }
 
-.main .left .item {
+.main .left .row {
     display: flex;
-    height: 41px;
-    border-bottom: 1px solid rgb(53, 53, 53);
     align-items: center;
-    padding: 0 20px;
+    min-height: 45px;
+    border-bottom: 1px solid rgb(10, 10, 10);
 }
 
-.main .left .item.infos {
-    display: flex;
-}
-
-.main .left .item.infos .info {
-    display: flex;
-}
-
-.main .left .item .name {
-    color: #999;
-    margin-right: 10px;
-}
-
-.main .left .item .controller {
+.main .left .row .item {
     flex: 1;
     display: flex;
+    gap: 10px;
+    font-size: 13px;
     align-items: center;
+    line-height: 1;
     height: 100%;
-    padding-right: 50px;
+    padding: 10px;
+    border-right: 1px solid rgb(10, 10, 10);
 }
 
-.main .left .item .range .value {
-    width: 50px;
-    text-align: center;
+.main .left .row .item:last-child {
+    border-right: none;
 }
 
 .main .right {
-    flex: 1;
+    width: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 40px;
+    background-color: rgb(16, 17, 19);
+}
+
+.main .right video {
+    max-width: 100%;
 }
 
 .waveform {
@@ -167,4 +148,10 @@ body,
     height: 200px;
     background-color: rgb(28, 32, 34);
     border-top: 1px solid rgb(10, 10, 10);
+}
+
+.pickr .pcr-button {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.5);
 }
