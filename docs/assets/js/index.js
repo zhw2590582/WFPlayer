@@ -1,21 +1,20 @@
 var $video = document.querySelector('.video');
 var $version = document.querySelector('.version');
 var $open = document.querySelector('.open');
-var $download = document.querySelector('.download');
-var $log = document.querySelector('.log');
-var $scrollable = document.querySelector('.scrollable');
+var $checkboxs = Array.from(document.querySelectorAll('.checkbox'));
 var $pickers = Array.from(document.querySelectorAll('.color-picker'));
-var $range = Array.from(document.querySelectorAll('.range input'));
-
-$version.innerHTML = 'Beta ' + WFPlayer.version;
+var $range = Array.from(document.querySelectorAll('.range'));
 
 var wf = null;
+$version.innerHTML = 'Beta ' + WFPlayer.version;
+
 function initWFPlayer(url) {
     if (wf) wf.destroy();
+
     wf = new WFPlayer({
         container: '.waveform',
         mediaElement: $video,
-        scrollable: $scrollable.checked,
+        scrollable: true,
         useWorker: true,
     });
 
@@ -32,22 +31,16 @@ $open.addEventListener('change', async function () {
     if (file) {
         var canPlayType = $video.canPlayType(file.type);
         if (canPlayType === 'maybe' || canPlayType === 'probably') {
-            $video.src = URL.createObjectURL(file);
-            initWFPlayer($video.src);
+            if (file.size <= 128 * 1024 * 1024) {
+                $video.src = URL.createObjectURL(file);
+                initWFPlayer($video.src);
+            } else {
+                alert('This file size cannot be greater than 128M');
+            }
         } else {
             alert('This file format is not supported');
         }
     }
-});
-
-$download.addEventListener('click', function () {
-    wf.exportImage();
-});
-
-$scrollable.addEventListener('change', function () {
-    wf.setOptions({
-        scrollable: $scrollable.checked,
-    });
 });
 
 $pickers.forEach(function ($el) {
@@ -100,21 +93,19 @@ $pickers.forEach(function ($el) {
 
 $range.forEach(function ($el) {
     var name = $el.getAttribute('name');
-    var min = Number($el.getAttribute('min'));
-    var max = Number($el.getAttribute('max'));
-    var step = Number($el.getAttribute('step'));
-    new Powerange($el, {
-        start: $el.value,
-        min: min || 1,
-        max: max || 20,
-        step: step || 1,
-        hideRange: true,
-        decimal: true,
-    });
-    $el.onchange = function () {
-        $el.previousElementSibling.innerHTML = $el.value;
+    $el.onchange = $el.oninput = function () {
+        $el.nextElementSibling.textContent = $el.value;
         wf.setOptions({
-            [name]: name === 'waveScale' ? Number($el.value) : Math.floor(Number($el.value)),
+            [name]: Number($el.value),
+        });
+    };
+});
+
+$checkboxs.forEach(function ($el) {
+    var name = $el.getAttribute('name');
+    $el.onchange = function () {
+        wf.setOptions({
+            [name]: $el.checked,
         });
     };
 });
