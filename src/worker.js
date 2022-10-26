@@ -24,9 +24,8 @@ function clamp(num, a, b) {
 }
 
 function getDensity(data) {
-    const { pixelRatio } = data;
     const fontSize = 11;
-    ctx.font = `${fontSize * pixelRatio}px Arial`;
+    ctx.font = `${fontSize * data.pixelRatio}px Arial`;
     const rulerWidth = ctx.measureText('99:99:99').width;
     return (function loop(second) {
         const rate = (gridGap * second) / (rulerWidth * 1.5);
