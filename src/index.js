@@ -5,7 +5,6 @@ import Template from './template';
 import Drawer from './drawer';
 import Decoder from './decoder';
 import Loader from './loader';
-import Subtitle from './subtitle';
 import Controller from './controller';
 import style from 'bundle-text:./style.less';
 import { clamp, errorHandle, addClass, removeClass } from './utils';
@@ -99,7 +98,6 @@ export default class WFPlayer extends Emitter {
         this.template = new Template(this);
         this.decoder = new Decoder(this);
         this.drawer = new Drawer(this);
-        this.subtitle = new Subtitle(this);
         this.controller = new Controller(this);
         this.loader = new Loader(this);
 
@@ -307,6 +305,11 @@ export default class WFPlayer extends Emitter {
             this.template.update();
             this.drawer.update();
         }
+        return this;
+    }
+
+    reset() {
+        this.decoder.destroy();
         return this;
     }
 

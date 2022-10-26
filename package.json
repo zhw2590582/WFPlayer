@@ -1,13 +1,12 @@
 {
   "name": "wfplayer",
-  "version": "2.2.3",
-  "type": "module",
+  "version": "2.2.4",
   "description": "WFPlayer.js is an audio waveform generator",
   "main": "dist/wfplayer.js",
   "types": "types/wfplayer.d.ts",
   "scripts": {
-    "dev": "npx cross-env NODE_ENV=development node ./scripts/dev.js",
-    "build": "npx cross-env NODE_ENV=production node ./scripts/build.js",
+    "dev": "npx cross-env NODE_ENV=development node ./scripts/dev.mjs",
+    "build": "npx cross-env NODE_ENV=production node ./scripts/build.mjs",
     "test": "npx eslint src"
   },
   "repository": {

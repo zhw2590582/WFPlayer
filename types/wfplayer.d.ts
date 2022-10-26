@@ -96,6 +96,7 @@ declare class WFPlayer {
     changeChannel(channel: 0 | 1 | 2): WFPlayer;
     exportImage(): WFPlayer;
     update(): WFPlayer;
+    reset(): WFPlayer;
     destroy(): WFPlayer;
 
     readonly events: {
