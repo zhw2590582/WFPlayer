@@ -105,7 +105,7 @@ export default class Controller {
             this.wf.grabbing = true;
             lastCurrentTime = scrollable ? this.wf.currentTime : this.wf.getCurrentTimeFromEvent(event);
             lastPageX = event.pageX;
-            this.wf.emit('grabbing', lastCurrentTime, event);
+            this.wf.emit('startGrabbing', lastCurrentTime, event);
         });
 
         proxy(container, 'mousemove', (event) => {
@@ -123,12 +123,13 @@ export default class Controller {
         proxy(document, 'mouseup', (event) => {
             this.wf.emit('mouseup', event);
             if (!grabStart) return;
-            this.wf.grabbing = false
+            setTimeout(() => (this.wf.grabbing = false)); // allows to prevent click jmp trigger
             removeClass(container, 'wf-grabbing');
             grabStart = false;
             if (wasPlaying === true) {
                 this.wf.options.mediaElement.play()
             }
+            this.wf.emit('stopGrabbing', this.wf.currentTime, event);
 
             lastCurrentTime = 0;
             lastPageX = 0;
