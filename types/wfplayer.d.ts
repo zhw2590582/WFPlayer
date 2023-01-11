@@ -51,6 +51,8 @@ type Events = {
     click: [currentTime: number, event: Event];
     contextmenu: [currentTime: number, event: Event];
     grabbing: [currentTime: number, event: Event];
+    startGrabbing: [currentTime: number, event: Event];
+    stopGrabbing: [currentTime: number, event: Event];
     mousemove: [event: Event];
     mousedown: [event: Event];
     mouseup: [event: Event];
