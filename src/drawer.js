@@ -33,6 +33,11 @@ export default class Drawer {
             });
         } else {
             this.worker = { postMessage };
+
+            this.wf.on('update', (config) => {
+                this.config = config;
+            });
+
             this.worker.postMessage({
                 type: 'INIT',
                 data: {
