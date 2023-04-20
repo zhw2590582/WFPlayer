@@ -24,6 +24,10 @@ function clamp(num, a, b) {
 }
 
 function getDensity(data) {
+    if (gridGap === 0)
+    {
+        return 1;
+    }
     const fontSize = 11;
     ctx.font = `${fontSize * data.pixelRatio}px Arial`;
     const rulerWidth = ctx.measureText('99:99:99').width;
