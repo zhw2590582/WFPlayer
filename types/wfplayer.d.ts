@@ -28,6 +28,9 @@ type Option = {
     waveScale?: number;
     waveSize?: number;
     pixelRatio?: number;
+    waveBorder?: boolean;
+    waveBorderWidth?: number;
+    waveBorderColor?: string;
 };
 
 type Config = {
