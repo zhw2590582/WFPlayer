@@ -106,6 +106,9 @@ function drawWave(data) {
         waveScale,
         waveSize,
         scrollable,
+        waveBorder,
+        waveBorderWidth,
+        waveBorderColor,
     } = data;
 
     const middle = height / 2;
@@ -128,13 +131,29 @@ function drawWave(data) {
         }
         if (stepIndex >= step && xIndex < waveWidth) {
             const waveX = gridGap * padding + xIndex;
+
+            if (waveBorder) {
+                ctx.strokeStyle = waveBorderColor; // Set the border color
+                ctx.lineWidth = waveBorderWidth; // Set the border width
+
+                // Draw the border around the rectangle
+                ctx.strokeRect(
+                    waveX,
+                    (1 + min * waveScale) * middle,
+                    waveSize,
+                    Math.max(1, (max - min) * middle * waveScale)
+                );
+            }
+
+            // Fill the rectangle with the desired color
             ctx.fillStyle = progress && cursorX >= waveX ? progressColor : waveColor;
             ctx.fillRect(
-                waveX,
-                (1 + min * waveScale) * middle,
-                waveSize,
-                Math.max(1, (max - min) * middle * waveScale),
+                waveX + (waveBorder ? waveBorderWidth / 2 : 0), // Offset the x-coordinate to accommodate the border
+                (1 + min * waveScale) * middle + (waveBorder ? waveBorderWidth / 2 : 0), // Offset the y-coordinate
+                waveSize - (waveBorder ? waveBorderWidth : 0), // Adjust the width for the border
+                Math.max(1, (max - min) * middle * waveScale) - (waveBorder ? waveBorderWidth : 0) // Adjust the height for the border
             );
+
             xIndex += waveSize;
             stepIndex = 0;
             min = 1;

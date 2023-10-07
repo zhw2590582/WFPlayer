@@ -52,6 +52,9 @@ export default class WFPlayer extends Emitter {
             waveScale: 0.8,
             waveSize: 1,
             pixelRatio: Math.ceil(window.devicePixelRatio),
+            waveBorder: false,
+            waveBorderWidth: 1,
+            waveBorderColor: "rgba(255, 255, 255, 0.1)"
         };
     }
 
@@ -83,6 +86,9 @@ export default class WFPlayer extends Emitter {
             waveScale: 'number',
             waveSize: 'number',
             pixelRatio: 'number',
+            waveBorder: 'boolean',
+            waveBorderWidth: 'number',
+            waveBorderColor: 'string',
         };
     }
 
