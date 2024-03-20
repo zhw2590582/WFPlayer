@@ -54,7 +54,8 @@ export default class WFPlayer extends Emitter {
             pixelRatio: Math.ceil(window.devicePixelRatio),
             waveBorder: false,
             waveBorderWidth: 1,
-            waveBorderColor: "rgba(255, 255, 255, 0.1)"
+            waveBorderColor: 'rgba(255, 255, 255, 0.1)',
+            useAudioContext: false,
         };
     }
 
@@ -89,6 +90,7 @@ export default class WFPlayer extends Emitter {
             waveBorder: 'boolean',
             waveBorderWidth: 'number',
             waveBorderColor: 'string',
+            useAudioContext: 'boolean',
         };
     }
 
@@ -117,11 +119,18 @@ export default class WFPlayer extends Emitter {
     }
 
     get currentTime() {
-        return this.options.mediaElement ? this.options.mediaElement.currentTime : this._currentTime;
+        return this.options.mediaElement?.currentTime || this._currentTime;
+    }
+
+    set currentTime(second) {
+        this._currentTime = clamp(second, 0, this.duration);
+        if (this.options.mediaElement && this.options.mediaElement.currentTime !== this._currentTime) {
+            this.options.mediaElement.currentTime = this._currentTime;
+        }
     }
 
     get duration() {
-        return this.options.mediaElement ? this.options.mediaElement.duration : Infinity;
+        return this.options.mediaElement?.duration || Infinity;
     }
 
     get playing() {
@@ -221,7 +230,26 @@ export default class WFPlayer extends Emitter {
         // String Url
         this.loader.load(target);
         this.controller.init();
+
+        if (this.options.useAudioContext) {
+            this.options.mediaElement = null;
+            this.on('decode:success', (audiobuffer) => {
+                const offlineAudioContext = this.decoder.audioCtx;
+                const audioBufferSourceNode = offlineAudioContext.createBufferSource();
+                audioBufferSourceNode.connect(offlineAudioContext.destination);
+                audioBufferSourceNode.buffer = audiobuffer;
+            });
+        }
+
         return this;
+    }
+
+    play() {
+        return this.options.mediaElement?.play?.();
+    }
+
+    pause() {
+        return this.options.mediaElement?.pause?.();
     }
 
     getCurrentTimeFromEvent(event) {
@@ -266,10 +294,7 @@ export default class WFPlayer extends Emitter {
     seek(second) {
         errorHandle(typeof second === 'number', 'seek expects to receive number as a parameter.');
         cancelAnimationFrame(this._seekTimer);
-        this._currentTime = clamp(second, 0, this.duration);
-        if (this.options.mediaElement && this.options.mediaElement.currentTime !== this._currentTime) {
-            this.options.mediaElement.currentTime = this._currentTime;
-        }
+        this.currentTime = second;
         this.update();
         return this;
     }
@@ -282,9 +307,8 @@ export default class WFPlayer extends Emitter {
             const diff = clampSecond - this.currentTime;
             if (diff === 0) return resolve(this);
             const step = diff / duration / 100;
-            const { mediaElement } = this.options;
             const { playing } = this;
-            if (playing) mediaElement.pause();
+            if (playing) this.pause();
 
             (function loop() {
                 this._seekTimer = requestAnimationFrame(() => {
@@ -293,11 +317,11 @@ export default class WFPlayer extends Emitter {
                         if (!this.isDestroy) loop.call(this);
                     } else {
                         this.seek(clampSecond);
-                        if (playing) mediaElement.play();
+                        if (playing) this.play();
                         resolve(this);
                     }
                 });
-            }.call(this));
+            }).call(this);
         });
     }
 

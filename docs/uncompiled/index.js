@@ -171,7 +171,7 @@ class WFPlayer extends (0, _emitterDefault.default) {
         return instances;
     }
     static get version() {
-        return "2.2.7";
+        return "2.2.8";
     }
     static get env() {
         return "development";
@@ -203,7 +203,11 @@ class WFPlayer extends (0, _emitterDefault.default) {
             padding: 5,
             waveScale: 0.8,
             waveSize: 1,
-            pixelRatio: Math.ceil(window.devicePixelRatio)
+            pixelRatio: Math.ceil(window.devicePixelRatio),
+            waveBorder: false,
+            waveBorderWidth: 1,
+            waveBorderColor: "rgba(255, 255, 255, 0.1)",
+            useAudioContext: false
         };
     }
     static get scheme() {
@@ -233,7 +237,11 @@ class WFPlayer extends (0, _emitterDefault.default) {
             padding: "number",
             waveScale: "number",
             waveSize: "number",
-            pixelRatio: "number"
+            pixelRatio: "number",
+            waveBorder: "boolean",
+            waveBorderWidth: "number",
+            waveBorderColor: "string",
+            useAudioContext: "boolean"
         };
     }
     constructor(options = {}){
@@ -256,10 +264,14 @@ class WFPlayer extends (0, _emitterDefault.default) {
         instances.push(this);
     }
     get currentTime() {
-        return this.options.mediaElement ? this.options.mediaElement.currentTime : this._currentTime;
+        return this.options.mediaElement?.currentTime || this._currentTime;
+    }
+    set currentTime(second) {
+        this._currentTime = (0, _utils.clamp)(second, 0, this.duration);
+        if (this.options.mediaElement && this.options.mediaElement.currentTime !== this._currentTime) this.options.mediaElement.currentTime = this._currentTime;
     }
     get duration() {
-        return this.options.mediaElement ? this.options.mediaElement.duration : Infinity;
+        return this.options.mediaElement?.duration || Infinity;
     }
     get playing() {
         const { mediaElement } = this.options;
@@ -319,7 +331,22 @@ class WFPlayer extends (0, _emitterDefault.default) {
         // String Url
         this.loader.load(target);
         this.controller.init();
+        if (this.options.useAudioContext) {
+            this.options.mediaElement = null;
+            this.on("decode:success", (audiobuffer)=>{
+                const offlineAudioContext = this.decoder.audioCtx;
+                const audioBufferSourceNode = offlineAudioContext.createBufferSource();
+                audioBufferSourceNode.connect(offlineAudioContext.destination);
+                audioBufferSourceNode.buffer = audiobuffer;
+            });
+        }
         return this;
+    }
+    play() {
+        return this.options.mediaElement?.play?.();
+    }
+    pause() {
+        return this.options.mediaElement?.pause?.();
     }
     getCurrentTimeFromEvent(event) {
         const { container } = this.options;
@@ -357,8 +384,7 @@ class WFPlayer extends (0, _emitterDefault.default) {
     seek(second) {
         (0, _utils.errorHandle)(typeof second === "number", "seek expects to receive number as a parameter.");
         cancelAnimationFrame(this._seekTimer);
-        this._currentTime = (0, _utils.clamp)(second, 0, this.duration);
-        if (this.options.mediaElement && this.options.mediaElement.currentTime !== this._currentTime) this.options.mediaElement.currentTime = this._currentTime;
+        this.currentTime = second;
         this.update();
         return this;
     }
@@ -370,9 +396,8 @@ class WFPlayer extends (0, _emitterDefault.default) {
             const diff = clampSecond - this.currentTime;
             if (diff === 0) return resolve(this);
             const step = diff / duration / 100;
-            const { mediaElement } = this.options;
             const { playing } = this;
-            if (playing) mediaElement.pause();
+            if (playing) this.pause();
             (function loop() {
                 this._seekTimer = requestAnimationFrame(()=>{
                     if (diff > 0 && this.currentTime < clampSecond || diff < 0 && this.currentTime > clampSecond) {
@@ -380,7 +405,7 @@ class WFPlayer extends (0, _emitterDefault.default) {
                         if (!this.isDestroy) loop.call(this);
                     } else {
                         this.seek(clampSecond);
-                        if (playing) mediaElement.play();
+                        if (playing) this.play();
                         resolve(this);
                     }
                 });
@@ -433,7 +458,7 @@ if (typeof document !== "undefined") {
 }
 if (typeof window !== "undefined") window["WFPlayer"] = WFPlayer;
 
-},{"option-validator":"lEoFj","./emitter":"2ZQK0","./events":"jVQIf","./template":"eG0JW","./drawer":"7NL0G","./decoder":"eDdom","./loader":"6Zr4E","./controller":"5fGZE","bundle-text:./style.less":"4SQ8Q","./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"jPXxM"}],"lEoFj":[function(require,module,exports) {
+},{"option-validator":"2tbdu","./emitter":"2ZQK0","./events":"jVQIf","./template":"eG0JW","./drawer":"7NL0G","./decoder":"eDdom","./loader":"6Zr4E","./controller":"5fGZE","bundle-text:./style.less":"fVJDJ","./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"2tbdu":[function(require,module,exports) {
 !function(r, t) {
     module.exports = t();
 }(this, function() {
@@ -616,7 +641,7 @@ class Emitter {
 }
 exports.default = Emitter;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"jPXxM"}],"jPXxM":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"5dUr6":[function(require,module,exports) {
 exports.interopDefault = function(a) {
     return a && a.__esModule ? a : {
         default: a
@@ -629,7 +654,7 @@ exports.defineInteropFlag = function(a) {
 };
 exports.exportAll = function(source, dest) {
     Object.keys(source).forEach(function(key) {
-        if (key === "default" || key === "__esModule" || dest.hasOwnProperty(key)) return;
+        if (key === "default" || key === "__esModule" || Object.prototype.hasOwnProperty.call(dest, key)) return;
         Object.defineProperty(dest, key, {
             enumerable: true,
             get: function() {
@@ -667,7 +692,7 @@ class Events {
 }
 exports.default = Events;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"jPXxM"}],"eG0JW":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"eG0JW":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _utils = require("./utils");
@@ -714,7 +739,7 @@ class Template {
 }
 exports.default = Template;
 
-},{"./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"jPXxM"}],"5vF3n":[function(require,module,exports) {
+},{"./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"5vF3n":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "WFPlayerError", ()=>WFPlayerError);
@@ -763,7 +788,7 @@ function removeClass(el, className) {
     return el.classList.remove(className);
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"jPXxM"}],"7NL0G":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"7NL0G":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _utils = require("./utils");
@@ -844,8 +869,8 @@ class Drawer {
 }
 exports.default = Drawer;
 
-},{"./utils":"5vF3n","bundle-text:./worker":"hhCcS","./worker":"lPZ5X","@parcel/transformer-js/src/esmodule-helpers.js":"jPXxM"}],"hhCcS":[function(require,module,exports) {
-module.exports = "// modules are defined as an array\n// [ module function, map of requires ]\n//\n// map of requires is short require name -> numeric require\n//\n// anything defined in a previous bundle is accessed via the\n// orig method which is the require for previous bundles\n\n(function (modules, entry, mainEntry, parcelRequireName, globalName) {\n  /* eslint-disable no-undef */\n  var globalObject =\n    typeof globalThis !== 'undefined'\n      ? globalThis\n      : typeof self !== 'undefined'\n      ? self\n      : typeof window !== 'undefined'\n      ? window\n      : typeof global !== 'undefined'\n      ? global\n      : {};\n  /* eslint-enable no-undef */\n\n  // Save the require from previous bundle to this closure if any\n  var previousRequire =\n    typeof globalObject[parcelRequireName] === 'function' &&\n    globalObject[parcelRequireName];\n\n  var cache = previousRequire.cache || {};\n  // Do not use `require` to prevent Webpack from trying to bundle this call\n  var nodeRequire =\n    typeof module !== 'undefined' &&\n    typeof module.require === 'function' &&\n    module.require.bind(module);\n\n  function newRequire(name, jumped) {\n    if (!cache[name]) {\n      if (!modules[name]) {\n        // if we cannot find the module within our internal map or\n        // cache jump to the current global require ie. the last bundle\n        // that was added to the page.\n        var currentRequire =\n          typeof globalObject[parcelRequireName] === 'function' &&\n          globalObject[parcelRequireName];\n        if (!jumped && currentRequire) {\n          return currentRequire(name, true);\n        }\n\n        // If there are other bundles on this page the require from the\n        // previous one is saved to 'previousRequire'. Repeat this as\n        // many times as there are bundles until the module is found or\n        // we exhaust the require chain.\n        if (previousRequire) {\n          return previousRequire(name, true);\n        }\n\n        // Try the node require function if it exists.\n        if (nodeRequire && typeof name === 'string') {\n          return nodeRequire(name);\n        }\n\n        var err = new Error(\"Cannot find module '\" + name + \"'\");\n        err.code = 'MODULE_NOT_FOUND';\n        throw err;\n      }\n\n      localRequire.resolve = resolve;\n      localRequire.cache = {};\n\n      var module = (cache[name] = new newRequire.Module(name));\n\n      modules[name][0].call(\n        module.exports,\n        localRequire,\n        module,\n        module.exports,\n        this\n      );\n    }\n\n    return cache[name].exports;\n\n    function localRequire(x) {\n      var res = localRequire.resolve(x);\n      return res === false ? {} : newRequire(res);\n    }\n\n    function resolve(x) {\n      var id = modules[name][1][x];\n      return id != null ? id : x;\n    }\n  }\n\n  function Module(moduleName) {\n    this.id = moduleName;\n    this.bundle = newRequire;\n    this.exports = {};\n  }\n\n  newRequire.isParcelRequire = true;\n  newRequire.Module = Module;\n  newRequire.modules = modules;\n  newRequire.cache = cache;\n  newRequire.parent = previousRequire;\n  newRequire.register = function (id, exports) {\n    modules[id] = [\n      function (require, module) {\n        module.exports = exports;\n      },\n      {},\n    ];\n  };\n\n  Object.defineProperty(newRequire, 'root', {\n    get: function () {\n      return globalObject[parcelRequireName];\n    },\n  });\n\n  globalObject[parcelRequireName] = newRequire;\n\n  for (var i = 0; i < entry.length; i++) {\n    newRequire(entry[i]);\n  }\n\n  if (mainEntry) {\n    // Expose entry point to Node, AMD or browser globals\n    // Based on https://github.com/ForbesLindesay/umd/blob/master/template.js\n    var mainExports = newRequire(mainEntry);\n\n    // CommonJS\n    if (typeof exports === 'object' && typeof module !== 'undefined') {\n      module.exports = mainExports;\n\n      // RequireJS\n    } else if (typeof define === 'function' && define.amd) {\n      define(function () {\n        return mainExports;\n      });\n\n      // <script>\n    } else if (globalName) {\n      this[globalName] = mainExports;\n    }\n  }\n})({\"dbBlS\":[function(require,module,exports) {\nvar parcelHelpers = require(\"@parcel/transformer-js/src/esmodule-helpers.js\");\nparcelHelpers.defineInteropFlag(exports);\nparcelHelpers.export(exports, \"postMessage\", ()=>postMessage);\nconst isWorker = self.document === undefined;\nlet wf = null;\nlet canvas = null;\nlet ctx = null;\nlet gridNum = 0;\nlet gridGap = 0;\nlet beginTime = 0;\nlet density = 1;\nlet sampleRate = 44100;\nlet channelData = new Float32Array();\nlet lastDataString = \"\";\nfunction secondToTime(second) {\n    const add0 = (num)=>num < 10 ? `0${num}` : String(num);\n    const hour = Math.floor(second / 3600);\n    const min = Math.floor((second - hour * 3600) / 60);\n    const sec = Math.floor(second - hour * 3600 - min * 60);\n    return [\n        hour,\n        min,\n        sec\n    ].map(add0).join(\":\");\n}\nfunction clamp(num, a, b) {\n    return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));\n}\nfunction getDensity(data) {\n    if (gridGap === 0) return 1;\n    const fontSize = 11;\n    ctx.font = `${fontSize * data.pixelRatio}px Arial`;\n    const rulerWidth = ctx.measureText(\"99:99:99\").width;\n    return function loop(second) {\n        const rate = gridGap * second / (rulerWidth * 1.5);\n        if (rate > 1) return Math.floor(second / 10);\n        return loop(second + 10);\n    }(10);\n}\nfunction drawBackground(data) {\n    const { width, height, backgroundColor, paddingColor, padding } = data;\n    ctx.clearRect(0, 0, width, height);\n    ctx.fillStyle = backgroundColor;\n    ctx.fillRect(0, 0, width, height);\n    ctx.fillStyle = paddingColor;\n    ctx.fillRect(0, 0, padding * gridGap, height);\n    ctx.fillRect(width - padding * gridGap, 0, padding * gridGap, height);\n}\nfunction drawGrid(data) {\n    const { width, height, currentTime, gridColor, pixelRatio, scrollable } = data;\n    ctx.fillStyle = gridColor;\n    for(let index = 0; index < gridNum + 10; index += density){\n        const x = scrollable ? gridGap * index - (currentTime - parseInt(currentTime, 10)) * gridGap * 10 : gridGap * index;\n        ctx.fillRect(x, 0, pixelRatio, height);\n    }\n    for(let index = 0; index < height / gridGap; index += density)ctx.fillRect(0, gridGap * index, width, pixelRatio);\n}\nfunction drawRuler(data) {\n    const { height, currentTime, rulerColor, pixelRatio, padding, rulerAtTop, scrollable } = data;\n    const fontSize = 11;\n    const fontHeight = 15;\n    const fontTop = 30;\n    ctx.font = `${fontSize * pixelRatio}px Arial`;\n    ctx.fillStyle = rulerColor;\n    let second = -1;\n    for(let index = 0; index < gridNum + 10; index += 1){\n        const x = scrollable ? gridGap * index - (currentTime - parseInt(currentTime, 10)) * gridGap * 10 : gridGap * index;\n        if ((index - padding) % 10 === 0) {\n            second += 1;\n            ctx.fillRect(x, rulerAtTop ? 0 : height - fontHeight * pixelRatio, pixelRatio, fontHeight * pixelRatio);\n            const time = Math.floor(beginTime + second);\n            if (time % density === 0 && time >= 0) ctx.fillText(secondToTime(time), x - fontSize * pixelRatio * 2 + pixelRatio, rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize);\n        } else if ((index - padding) % 5 === 0) ctx.fillRect(x, rulerAtTop ? 0 : height - fontHeight / 2 * pixelRatio, pixelRatio, fontHeight / 2 * pixelRatio);\n    }\n}\nfunction drawWave(data) {\n    const { width, height, currentTime, progress, waveColor, progressColor, duration, padding, waveScale, waveSize, scrollable } = data;\n    const middle = height / 2;\n    const waveWidth = width - gridGap * padding * 2;\n    const startIndex = Math.floor(beginTime * sampleRate);\n    const endIndex = Math.floor(clamp((beginTime + duration) * sampleRate, startIndex, Infinity));\n    const step = Math.floor((endIndex - startIndex) / waveWidth);\n    const cursorX = scrollable ? width / 2 : padding * gridGap + (currentTime - beginTime) * gridGap * 10;\n    let stepIndex = 0;\n    let xIndex = 0;\n    let min = 1;\n    let max = -1;\n    for(let i = startIndex; i < endIndex; i += waveSize){\n        stepIndex += 1;\n        const item = channelData[i] || 0;\n        if (item < min) min = item;\n        else if (item > max) max = item;\n        if (stepIndex >= step && xIndex < waveWidth) {\n            const waveX = gridGap * padding + xIndex;\n            ctx.fillStyle = progress && cursorX >= waveX ? progressColor : waveColor;\n            ctx.fillRect(waveX, (1 + min * waveScale) * middle, waveSize, Math.max(1, (max - min) * middle * waveScale));\n            xIndex += waveSize;\n            stepIndex = 0;\n            min = 1;\n            max = -1;\n        }\n    }\n}\nfunction drawScrollbar(data) {\n    const { width, height, currentTime, pixelRatio, rulerAtTop, totolDuration, scrollable, scrollbarColor } = data;\n    if (!scrollable || !totolDuration || totolDuration === Infinity) return;\n    const totolWidth = gridGap / pixelRatio * 10 * totolDuration;\n    const scrollbarWidth = width / totolWidth * width;\n    const scrollbarHeight = 5 * pixelRatio;\n    const scrollbarLeft = currentTime / totolDuration * (width - scrollbarWidth);\n    const scrollbarTop = rulerAtTop ? height - scrollbarHeight : 0;\n    ctx.fillStyle = scrollbarColor;\n    ctx.fillRect(scrollbarLeft, scrollbarTop, scrollbarWidth, scrollbarHeight);\n}\nfunction drawCursor(data) {\n    const { height, width, currentTime, cursorColor, pixelRatio, padding, scrollable } = data;\n    ctx.fillStyle = cursorColor;\n    const x = scrollable ? width / 2 : padding * gridGap + (currentTime - beginTime) * gridGap * 10;\n    ctx.fillRect(x, 0, pixelRatio, height);\n}\nself.onmessage = function onmessage(event) {\n    const { type, data } = event.data;\n    if (type === \"INIT\") {\n        if (isWorker) canvas = new OffscreenCanvas(data.width, data.height);\n        else {\n            wf = data.wf;\n            canvas = data.canvas;\n        }\n        ctx = canvas.getContext(\"2d\");\n    }\n    if (type === \"DECODE\") {\n        sampleRate = data.sampleRate;\n        channelData = data.channelData;\n    }\n    if (type === \"UPDATE\") {\n        const dataString = JSON.stringify(data);\n        if (lastDataString === dataString) return lastDataString = dataString;\n        if (canvas.width !== data.width) canvas.width = data.width;\n        if (canvas.height !== data.height) canvas.height = data.height;\n        const { byteLength } = channelData;\n        gridNum = data.duration * 10 + data.padding * 2;\n        gridGap = data.width / gridNum;\n        density = getDensity(data);\n        beginTime = data.scrollable ? data.currentTime - data.duration / 2 : Math.floor(data.currentTime / data.duration) * data.duration;\n        drawBackground(data);\n        if (data.grid) drawGrid(data);\n        if (data.ruler) drawRuler(data);\n        if (data.wave) drawWave(data);\n        if (data.scrollbar) drawScrollbar(data);\n        if (data.cursor) drawCursor(data);\n        const config = {\n            gridNum,\n            gridGap,\n            beginTime,\n            density,\n            sampleRate,\n            byteLength,\n            ...data\n        };\n        if (isWorker) self.postMessage({\n            type: \"UPFATE\",\n            data: {\n                config,\n                imageBitmap: canvas.transferToImageBitmap()\n            }\n        });\n        else wf.emit(\"update\", config);\n    }\n};\nconst postMessage = (data)=>{\n    self.onmessage({\n        data\n    });\n};\n\n},{\"@parcel/transformer-js/src/esmodule-helpers.js\":\"jPXxM\"}],\"jPXxM\":[function(require,module,exports) {\nexports.interopDefault = function(a) {\n    return a && a.__esModule ? a : {\n        default: a\n    };\n};\nexports.defineInteropFlag = function(a) {\n    Object.defineProperty(a, \"__esModule\", {\n        value: true\n    });\n};\nexports.exportAll = function(source, dest) {\n    Object.keys(source).forEach(function(key) {\n        if (key === \"default\" || key === \"__esModule\" || dest.hasOwnProperty(key)) return;\n        Object.defineProperty(dest, key, {\n            enumerable: true,\n            get: function() {\n                return source[key];\n            }\n        });\n    });\n    return dest;\n};\nexports.export = function(dest, destName, get) {\n    Object.defineProperty(dest, destName, {\n        enumerable: true,\n        get: get\n    });\n};\n\n},{}]},[\"dbBlS\"], \"dbBlS\", \"parcelRequireb650\")\n\n";
+},{"./utils":"5vF3n","bundle-text:./worker":"5gMmV","./worker":"lPZ5X","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"5gMmV":[function(require,module,exports) {
+module.exports = "// modules are defined as an array\n// [ module function, map of requires ]\n//\n// map of requires is short require name -> numeric require\n//\n// anything defined in a previous bundle is accessed via the\n// orig method which is the require for previous bundles\n\n(function (modules, entry, mainEntry, parcelRequireName, globalName) {\n  /* eslint-disable no-undef */\n  var globalObject =\n    typeof globalThis !== 'undefined'\n      ? globalThis\n      : typeof self !== 'undefined'\n      ? self\n      : typeof window !== 'undefined'\n      ? window\n      : typeof global !== 'undefined'\n      ? global\n      : {};\n  /* eslint-enable no-undef */\n\n  // Save the require from previous bundle to this closure if any\n  var previousRequire =\n    typeof globalObject[parcelRequireName] === 'function' &&\n    globalObject[parcelRequireName];\n\n  var cache = previousRequire.cache || {};\n  // Do not use `require` to prevent Webpack from trying to bundle this call\n  var nodeRequire =\n    typeof module !== 'undefined' &&\n    typeof module.require === 'function' &&\n    module.require.bind(module);\n\n  function newRequire(name, jumped) {\n    if (!cache[name]) {\n      if (!modules[name]) {\n        // if we cannot find the module within our internal map or\n        // cache jump to the current global require ie. the last bundle\n        // that was added to the page.\n        var currentRequire =\n          typeof globalObject[parcelRequireName] === 'function' &&\n          globalObject[parcelRequireName];\n        if (!jumped && currentRequire) {\n          return currentRequire(name, true);\n        }\n\n        // If there are other bundles on this page the require from the\n        // previous one is saved to 'previousRequire'. Repeat this as\n        // many times as there are bundles until the module is found or\n        // we exhaust the require chain.\n        if (previousRequire) {\n          return previousRequire(name, true);\n        }\n\n        // Try the node require function if it exists.\n        if (nodeRequire && typeof name === 'string') {\n          return nodeRequire(name);\n        }\n\n        var err = new Error(\"Cannot find module '\" + name + \"'\");\n        err.code = 'MODULE_NOT_FOUND';\n        throw err;\n      }\n\n      localRequire.resolve = resolve;\n      localRequire.cache = {};\n\n      var module = (cache[name] = new newRequire.Module(name));\n\n      modules[name][0].call(\n        module.exports,\n        localRequire,\n        module,\n        module.exports,\n        this\n      );\n    }\n\n    return cache[name].exports;\n\n    function localRequire(x) {\n      var res = localRequire.resolve(x);\n      return res === false ? {} : newRequire(res);\n    }\n\n    function resolve(x) {\n      var id = modules[name][1][x];\n      return id != null ? id : x;\n    }\n  }\n\n  function Module(moduleName) {\n    this.id = moduleName;\n    this.bundle = newRequire;\n    this.exports = {};\n  }\n\n  newRequire.isParcelRequire = true;\n  newRequire.Module = Module;\n  newRequire.modules = modules;\n  newRequire.cache = cache;\n  newRequire.parent = previousRequire;\n  newRequire.register = function (id, exports) {\n    modules[id] = [\n      function (require, module) {\n        module.exports = exports;\n      },\n      {},\n    ];\n  };\n\n  Object.defineProperty(newRequire, 'root', {\n    get: function () {\n      return globalObject[parcelRequireName];\n    },\n  });\n\n  globalObject[parcelRequireName] = newRequire;\n\n  for (var i = 0; i < entry.length; i++) {\n    newRequire(entry[i]);\n  }\n\n  if (mainEntry) {\n    // Expose entry point to Node, AMD or browser globals\n    // Based on https://github.com/ForbesLindesay/umd/blob/master/template.js\n    var mainExports = newRequire(mainEntry);\n\n    // CommonJS\n    if (typeof exports === 'object' && typeof module !== 'undefined') {\n      module.exports = mainExports;\n\n      // RequireJS\n    } else if (typeof define === 'function' && define.amd) {\n      define(function () {\n        return mainExports;\n      });\n\n      // <script>\n    } else if (globalName) {\n      this[globalName] = mainExports;\n    }\n  }\n})({\"dbBlS\":[function(require,module,exports) {\nvar parcelHelpers = require(\"@parcel/transformer-js/src/esmodule-helpers.js\");\nparcelHelpers.defineInteropFlag(exports);\nparcelHelpers.export(exports, \"postMessage\", ()=>postMessage);\nconst isWorker = self.document === undefined;\nlet wf = null;\nlet canvas = null;\nlet ctx = null;\nlet gridNum = 0;\nlet gridGap = 0;\nlet beginTime = 0;\nlet density = 1;\nlet sampleRate = 44100;\nlet channelData = new Float32Array();\nlet lastDataString = \"\";\nfunction secondToTime(second) {\n    const add0 = (num)=>num < 10 ? `0${num}` : String(num);\n    const hour = Math.floor(second / 3600);\n    const min = Math.floor((second - hour * 3600) / 60);\n    const sec = Math.floor(second - hour * 3600 - min * 60);\n    return [\n        hour,\n        min,\n        sec\n    ].map(add0).join(\":\");\n}\nfunction clamp(num, a, b) {\n    return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));\n}\nfunction getDensity(data) {\n    if (gridGap === 0) return 1;\n    const fontSize = 11;\n    ctx.font = `${fontSize * data.pixelRatio}px Arial`;\n    const rulerWidth = ctx.measureText(\"99:99:99\").width;\n    return function loop(second) {\n        const rate = gridGap * second / (rulerWidth * 1.5);\n        if (rate > 1) return Math.floor(second / 10);\n        return loop(second + 10);\n    }(10);\n}\nfunction drawBackground(data) {\n    const { width, height, backgroundColor, paddingColor, padding } = data;\n    ctx.clearRect(0, 0, width, height);\n    ctx.fillStyle = backgroundColor;\n    ctx.fillRect(0, 0, width, height);\n    ctx.fillStyle = paddingColor;\n    ctx.fillRect(0, 0, padding * gridGap, height);\n    ctx.fillRect(width - padding * gridGap, 0, padding * gridGap, height);\n}\nfunction drawGrid(data) {\n    const { width, height, currentTime, gridColor, pixelRatio, scrollable } = data;\n    ctx.fillStyle = gridColor;\n    for(let index = 0; index < gridNum + 10; index += density){\n        const x = scrollable ? gridGap * index - (currentTime - parseInt(currentTime, 10)) * gridGap * 10 : gridGap * index;\n        ctx.fillRect(x, 0, pixelRatio, height);\n    }\n    for(let index = 0; index < height / gridGap; index += density)ctx.fillRect(0, gridGap * index, width, pixelRatio);\n}\nfunction drawRuler(data) {\n    const { height, currentTime, rulerColor, pixelRatio, padding, rulerAtTop, scrollable } = data;\n    const fontSize = 11;\n    const fontHeight = 15;\n    const fontTop = 30;\n    ctx.font = `${fontSize * pixelRatio}px Arial`;\n    ctx.fillStyle = rulerColor;\n    let second = -1;\n    for(let index = 0; index < gridNum + 10; index += 1){\n        const x = scrollable ? gridGap * index - (currentTime - parseInt(currentTime, 10)) * gridGap * 10 : gridGap * index;\n        if ((index - padding) % 10 === 0) {\n            second += 1;\n            ctx.fillRect(x, rulerAtTop ? 0 : height - fontHeight * pixelRatio, pixelRatio, fontHeight * pixelRatio);\n            const time = Math.floor(beginTime + second);\n            if (time % density === 0 && time >= 0) ctx.fillText(secondToTime(time), x - fontSize * pixelRatio * 2 + pixelRatio, rulerAtTop ? fontTop * pixelRatio : height - fontTop * pixelRatio + fontSize);\n        } else if ((index - padding) % 5 === 0) ctx.fillRect(x, rulerAtTop ? 0 : height - fontHeight / 2 * pixelRatio, pixelRatio, fontHeight / 2 * pixelRatio);\n    }\n}\nfunction drawWave(data) {\n    const { width, height, currentTime, progress, waveColor, progressColor, duration, padding, waveScale, waveSize, scrollable, waveBorder, waveBorderWidth, waveBorderColor } = data;\n    const middle = height / 2;\n    const waveWidth = width - gridGap * padding * 2;\n    const startIndex = Math.floor(beginTime * sampleRate);\n    const endIndex = Math.floor(clamp((beginTime + duration) * sampleRate, startIndex, Infinity));\n    const step = Math.floor((endIndex - startIndex) / waveWidth);\n    const cursorX = scrollable ? width / 2 : padding * gridGap + (currentTime - beginTime) * gridGap * 10;\n    let stepIndex = 0;\n    let xIndex = 0;\n    let min = 1;\n    let max = -1;\n    for(let i = startIndex; i < endIndex; i += waveSize){\n        stepIndex += 1;\n        const item = channelData[i] || 0;\n        if (item < min) min = item;\n        else if (item > max) max = item;\n        if (stepIndex >= step && xIndex < waveWidth) {\n            const waveX = gridGap * padding + xIndex;\n            if (waveBorder) {\n                ctx.strokeStyle = waveBorderColor; // Set the border color\n                ctx.lineWidth = waveBorderWidth; // Set the border width\n                // Draw the border around the rectangle\n                ctx.strokeRect(waveX, (1 + min * waveScale) * middle, waveSize, Math.max(1, (max - min) * middle * waveScale));\n            }\n            // Fill the rectangle with the desired color\n            ctx.fillStyle = progress && cursorX >= waveX ? progressColor : waveColor;\n            ctx.fillRect(waveX + (waveBorder ? waveBorderWidth / 2 : 0), (1 + min * waveScale) * middle + (waveBorder ? waveBorderWidth / 2 : 0), waveSize - (waveBorder ? waveBorderWidth : 0), Math.max(1, (max - min) * middle * waveScale) - (waveBorder ? waveBorderWidth : 0 // Adjust the height for the border\n            ));\n            xIndex += waveSize;\n            stepIndex = 0;\n            min = 1;\n            max = -1;\n        }\n    }\n}\nfunction drawScrollbar(data) {\n    const { width, height, currentTime, pixelRatio, rulerAtTop, totolDuration, scrollable, scrollbarColor } = data;\n    if (!scrollable || !totolDuration || totolDuration === Infinity) return;\n    const totolWidth = gridGap / pixelRatio * 10 * totolDuration;\n    const scrollbarWidth = width / totolWidth * width;\n    const scrollbarHeight = 5 * pixelRatio;\n    const scrollbarLeft = currentTime / totolDuration * (width - scrollbarWidth);\n    const scrollbarTop = rulerAtTop ? height - scrollbarHeight : 0;\n    ctx.fillStyle = scrollbarColor;\n    ctx.fillRect(scrollbarLeft, scrollbarTop, scrollbarWidth, scrollbarHeight);\n}\nfunction drawCursor(data) {\n    const { height, width, currentTime, cursorColor, pixelRatio, padding, scrollable } = data;\n    ctx.fillStyle = cursorColor;\n    const x = scrollable ? width / 2 : padding * gridGap + (currentTime - beginTime) * gridGap * 10;\n    ctx.fillRect(x, 0, pixelRatio, height);\n}\nself.onmessage = function onmessage(event) {\n    const { type, data } = event.data;\n    if (type === \"INIT\") {\n        if (isWorker) canvas = new OffscreenCanvas(data.width, data.height);\n        else {\n            wf = data.wf;\n            canvas = data.canvas;\n        }\n        ctx = canvas.getContext(\"2d\");\n    }\n    if (type === \"DECODE\") {\n        sampleRate = data.sampleRate;\n        channelData = data.channelData;\n    }\n    if (type === \"UPDATE\") {\n        const dataString = JSON.stringify(data);\n        if (lastDataString === dataString) return lastDataString = dataString;\n        if (canvas.width !== data.width) canvas.width = data.width;\n        if (canvas.height !== data.height) canvas.height = data.height;\n        const { byteLength } = channelData;\n        gridNum = data.duration * 10 + data.padding * 2;\n        gridGap = data.width / gridNum;\n        density = getDensity(data);\n        beginTime = data.scrollable ? data.currentTime - data.duration / 2 : Math.floor(data.currentTime / data.duration) * data.duration;\n        drawBackground(data);\n        if (data.grid) drawGrid(data);\n        if (data.ruler) drawRuler(data);\n        if (data.wave) drawWave(data);\n        if (data.scrollbar) drawScrollbar(data);\n        if (data.cursor) drawCursor(data);\n        const config = {\n            gridNum,\n            gridGap,\n            beginTime,\n            density,\n            sampleRate,\n            byteLength,\n            ...data\n        };\n        if (isWorker) self.postMessage({\n            type: \"UPFATE\",\n            data: {\n                config,\n                imageBitmap: canvas.transferToImageBitmap()\n            }\n        });\n        else wf.emit(\"update\", config);\n    }\n};\nconst postMessage = (data)=>{\n    self.onmessage({\n        data\n    });\n};\n\n},{\"@parcel/transformer-js/src/esmodule-helpers.js\":\"5dUr6\"}],\"5dUr6\":[function(require,module,exports) {\nexports.interopDefault = function(a) {\n    return a && a.__esModule ? a : {\n        default: a\n    };\n};\nexports.defineInteropFlag = function(a) {\n    Object.defineProperty(a, \"__esModule\", {\n        value: true\n    });\n};\nexports.exportAll = function(source, dest) {\n    Object.keys(source).forEach(function(key) {\n        if (key === \"default\" || key === \"__esModule\" || Object.prototype.hasOwnProperty.call(dest, key)) return;\n        Object.defineProperty(dest, key, {\n            enumerable: true,\n            get: function() {\n                return source[key];\n            }\n        });\n    });\n    return dest;\n};\nexports.export = function(dest, destName, get) {\n    Object.defineProperty(dest, destName, {\n        enumerable: true,\n        get: get\n    });\n};\n\n},{}]},[\"dbBlS\"], \"dbBlS\", \"parcelRequireb650\")\n\n";
 
 },{}],"lPZ5X":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -924,7 +949,7 @@ function drawRuler(data) {
     }
 }
 function drawWave(data) {
-    const { width, height, currentTime, progress, waveColor, progressColor, duration, padding, waveScale, waveSize, scrollable } = data;
+    const { width, height, currentTime, progress, waveColor, progressColor, duration, padding, waveScale, waveSize, scrollable, waveBorder, waveBorderWidth, waveBorderColor } = data;
     const middle = height / 2;
     const waveWidth = width - gridGap * padding * 2;
     const startIndex = Math.floor(beginTime * sampleRate);
@@ -942,8 +967,16 @@ function drawWave(data) {
         else if (item > max) max = item;
         if (stepIndex >= step && xIndex < waveWidth) {
             const waveX = gridGap * padding + xIndex;
+            if (waveBorder) {
+                ctx.strokeStyle = waveBorderColor; // Set the border color
+                ctx.lineWidth = waveBorderWidth; // Set the border width
+                // Draw the border around the rectangle
+                ctx.strokeRect(waveX, (1 + min * waveScale) * middle, waveSize, Math.max(1, (max - min) * middle * waveScale));
+            }
+            // Fill the rectangle with the desired color
             ctx.fillStyle = progress && cursorX >= waveX ? progressColor : waveColor;
-            ctx.fillRect(waveX, (1 + min * waveScale) * middle, waveSize, Math.max(1, (max - min) * middle * waveScale));
+            ctx.fillRect(waveX + (waveBorder ? waveBorderWidth / 2 : 0), (1 + min * waveScale) * middle + (waveBorder ? waveBorderWidth / 2 : 0), waveSize - (waveBorder ? waveBorderWidth : 0), Math.max(1, (max - min) * middle * waveScale) - (waveBorder ? waveBorderWidth : 0 // Adjust the height for the border
+            ));
             xIndex += waveSize;
             stepIndex = 0;
             min = 1;
@@ -1023,7 +1056,7 @@ const postMessage = (data)=>{
     });
 };
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"jPXxM"}],"eDdom":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"eDdom":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 class Decoder {
@@ -1078,7 +1111,7 @@ class Decoder {
 }
 exports.default = Decoder;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"jPXxM"}],"6Zr4E":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"6Zr4E":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _utils = require("./utils");
@@ -1139,7 +1172,7 @@ class Loader {
 }
 exports.default = Loader;
 
-},{"./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"jPXxM"}],"5fGZE":[function(require,module,exports) {
+},{"./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"5fGZE":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _utils = require("./utils");
@@ -1265,8 +1298,8 @@ class Controller {
 }
 exports.default = Controller;
 
-},{"./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"jPXxM"}],"4SQ8Q":[function(require,module,exports) {
-module.exports = ".wf-player {\n  position: relative;\n  overflow: hidden;\n}\n\n.wf-scrollable {\n  cursor: grab;\n}\n\n.wf-scrollable.wf-grabbing {\n  cursor: grabbing;\n}\n\n.wf-cursor {\n  z-index: 10;\n  opacity: .25;\n  user-select: none;\n  pointer-events: none;\n  background-color: #fff;\n  width: 1px;\n  height: 100%;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n}\n\n";
+},{"./utils":"5vF3n","@parcel/transformer-js/src/esmodule-helpers.js":"5dUr6"}],"fVJDJ":[function(require,module,exports) {
+module.exports = ".wf-player {\n  position: relative;\n  overflow: hidden;\n}\n\n.wf-scrollable {\n  cursor: grab;\n}\n\n.wf-scrollable.wf-grabbing {\n  cursor: grabbing;\n}\n\n.wf-cursor {\n  z-index: 10;\n  opacity: .25;\n  user-select: none;\n  pointer-events: none;\n  background-color: #fff;\n  width: 1px;\n  height: 100%;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n}\n";
 
 },{}]},["gEVO5"], "gEVO5", "parcelRequireb650")
 
