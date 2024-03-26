@@ -46,12 +46,20 @@ function drawBackground(data) {
 }
 
 function drawGrid(data) {
-    const { width, height, currentTime, gridColor, pixelRatio, scrollable } = data;
+    const { width, height, currentTime, gridColor, pixelRatio, scrollable, waveAlign } = data;
     ctx.fillStyle = gridColor;
     for (let index = 0; index < gridNum + 10; index += density) {
-        const x = scrollable
-            ? gridGap * index - (currentTime - parseInt(currentTime, 10)) * gridGap * 10
-            : gridGap * index;
+        // maybe just use x = gridGap * index, other statement is not useful
+        let x;
+        if (scrollable) {
+            if (waveAlign === 'left') {
+                x = gridGap * index;
+            } else {
+                x = gridGap * index - (currentTime - parseInt(currentTime, 10)) * gridGap * 10;
+            }
+        } else {
+            x = gridGap * index;
+        }
         ctx.fillRect(x, 0, pixelRatio, height);
     }
     for (let index = 0; index < height / gridGap; index += density) {
@@ -60,7 +68,7 @@ function drawGrid(data) {
 }
 
 function drawRuler(data) {
-    const { height, currentTime, rulerColor, pixelRatio, padding, rulerAtTop, scrollable } = data;
+    const { height, currentTime, rulerColor, pixelRatio, padding, rulerAtTop, scrollable, waveAlign } = data;
     const fontSize = 11;
     const fontHeight = 15;
     const fontTop = 30;
@@ -68,9 +76,16 @@ function drawRuler(data) {
     ctx.fillStyle = rulerColor;
     let second = -1;
     for (let index = 0; index < gridNum + 10; index += 1) {
-        const x = scrollable
-            ? gridGap * index - (currentTime - parseInt(currentTime, 10)) * gridGap * 10
-            : gridGap * index;
+        let x;
+        if (scrollable) {
+            if (waveAlign === 'left') {
+                x = gridGap * index;
+            } else {
+                x = gridGap * index - (currentTime - parseInt(currentTime, 10)) * gridGap * 10;
+            }
+        } else {
+            x = gridGap * index;
+        }
         if ((index - padding) % 10 === 0) {
             second += 1;
             ctx.fillRect(x, rulerAtTop ? 0 : height - fontHeight * pixelRatio, pixelRatio, fontHeight * pixelRatio);
@@ -93,6 +108,11 @@ function drawRuler(data) {
     }
 }
 
+/**
+ * draw wave by data
+ *
+ * @param {Object} data
+ */
 function drawWave(data) {
     const {
         width,
@@ -109,6 +129,7 @@ function drawWave(data) {
         waveBorder,
         waveBorderWidth,
         waveBorderColor,
+        waveAlign,
     } = data;
 
     const middle = height / 2;
@@ -116,7 +137,17 @@ function drawWave(data) {
     const startIndex = Math.floor(beginTime * sampleRate);
     const endIndex = Math.floor(clamp((beginTime + duration) * sampleRate, startIndex, Infinity));
     const step = Math.floor((endIndex - startIndex) / waveWidth);
-    const cursorX = scrollable ? width / 2 : padding * gridGap + (currentTime - beginTime) * gridGap * 10;
+    let cursorX;
+    if (scrollable) {
+        // really is not useful, there is no padding between the wave and the canvas edge
+        if (waveAlign === 'left') {
+            cursorX = gridGap * padding;
+        } else {
+            cursorX = width / 2;
+        }
+    } else {
+        cursorX = gridGap * padding + (currentTime - beginTime) * gridGap * 10;
+    }
     let stepIndex = 0;
     let xIndex = 0;
     let min = 1;
@@ -174,10 +205,28 @@ function drawScrollbar(data) {
     ctx.fillRect(scrollbarLeft, scrollbarTop, scrollbarWidth, scrollbarHeight);
 }
 
+/**
+ * draw cursor line by currentTime
+ *
+ * if scrollable is true, and waveAlign is not left, the cursor will be drawn in the middle of the canvas
+ * if scrollable is true, and waveAlign is left, the cursor will be drawn at the left of the canvas
+ * if scrollable is false, the cursor will be drawn at the currentTime position
+ *
+ * @param {Object} data
+ */
 function drawCursor(data) {
-    const { height, width, currentTime, cursorColor, pixelRatio, padding, scrollable } = data;
+    const { height, width, currentTime, cursorColor, pixelRatio, padding, scrollable, waveAlign } = data;
     ctx.fillStyle = cursorColor;
-    const x = scrollable ? width / 2 : padding * gridGap + (currentTime - beginTime) * gridGap * 10;
+    let x;
+    if (scrollable) {
+        if (waveAlign === 'left') {
+            x = padding * gridGap;
+        } else {
+            x = width / 2;
+        }
+    } else {
+        x = padding * gridGap + (currentTime - beginTime) * gridGap * 10;
+    }
     ctx.fillRect(x, 0, pixelRatio, height);
 }
 
@@ -217,9 +266,17 @@ self.onmessage = function onmessage(event) {
         gridNum = data.duration * 10 + data.padding * 2;
         gridGap = data.width / gridNum;
         density = getDensity(data);
-        beginTime = data.scrollable
-            ? data.currentTime - data.duration / 2
-            : Math.floor(data.currentTime / data.duration) * data.duration;
+        // calculate the begin time
+        if (data.scrollable) {
+            // if waveAlign is left, the beginTime is 0, make sure the wave align left
+            if (data.waveAlign === 'left') {
+                beginTime = data.currentTime;
+            } else {
+                beginTime = data.currentTime - data.duration / 2;
+            }
+        } else {
+            beginTime = Math.floor(data.currentTime / data.duration) * data.duration;
+        }
 
         drawBackground(data);
 
