@@ -31,6 +31,7 @@ type Option = {
     waveBorder?: boolean;
     waveBorderWidth?: number;
     waveBorderColor?: string;
+    waveAlign?: 'center' | 'left';
 };
 
 type Config = {

@@ -154,6 +154,9 @@ var wf = new WFPlayer({
 
     // Waveform Size ratio
     waveSize: 1,
+
+    // Waveform cursor display position, default is center, optional values are: left , center
+    waveAlign: 'center',
 });
 ```
 

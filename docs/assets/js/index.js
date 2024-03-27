@@ -4,6 +4,7 @@ var $open = document.querySelector('.open');
 var $checkboxs = Array.from(document.querySelectorAll('.checkbox'));
 var $pickers = Array.from(document.querySelectorAll('.color-picker'));
 var $range = Array.from(document.querySelectorAll('.range'));
+var $radios = Array.from(document.querySelectorAll('.radio'));
 
 var wf = null;
 $version.innerHTML = 'Beta ' + WFPlayer.version;
@@ -106,6 +107,15 @@ $checkboxs.forEach(function ($el) {
     $el.onchange = function () {
         wf.setOptions({
             [name]: $el.checked,
+        });
+    };
+});
+
+$radios.forEach(function ($el) {
+    var name = $el.getAttribute('name');
+    $el.onchange = function () {
+        wf.setOptions({
+            [name]: $el.value,
         });
     };
 });
