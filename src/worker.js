@@ -172,7 +172,7 @@ function drawWave(data) {
                     waveX,
                     (1 + min * waveScale) * middle,
                     waveSize,
-                    Math.max(1, (max - min) * middle * waveScale)
+                    Math.max(1, (max - min) * middle * waveScale),
                 );
             }
 
@@ -182,7 +182,7 @@ function drawWave(data) {
                 waveX + (waveBorder ? waveBorderWidth / 2 : 0), // Offset the x-coordinate to accommodate the border
                 (1 + min * waveScale) * middle + (waveBorder ? waveBorderWidth / 2 : 0), // Offset the y-coordinate
                 waveSize - (waveBorder ? waveBorderWidth : 0), // Adjust the width for the border
-                Math.max(1, (max - min) * middle * waveScale) - (waveBorder ? waveBorderWidth : 0) // Adjust the height for the border
+                Math.max(1, (max - min) * middle * waveScale) - (waveBorder ? waveBorderWidth : 0), // Adjust the height for the border
             );
 
             xIndex += waveSize;
@@ -312,7 +312,7 @@ self.onmessage = function onmessage(event) {
 
         if (isWorker) {
             self.postMessage({
-                type: 'UPFATE',
+                type: 'UPDATE',
                 data: {
                     config,
                     imageBitmap: canvas.transferToImageBitmap(),
