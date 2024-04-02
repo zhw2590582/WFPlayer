@@ -56,6 +56,7 @@ export default class WFPlayer extends Emitter {
             waveBorderWidth: 1,
             waveBorderColor: 'rgba(255, 255, 255, 0.1)',
             useAudioContext: false,
+            waveAlign: 'center',
         };
     }
 
@@ -91,6 +92,7 @@ export default class WFPlayer extends Emitter {
             waveBorderWidth: 'number',
             waveBorderColor: 'string',
             useAudioContext: 'boolean',
+            waveAlign: 'string',
         };
     }
 
